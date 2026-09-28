@@ -23,11 +23,18 @@ RUN git clone https://github.com/comfyanonymous/ComfyUI.git /opt/ComfyUI \
     && cd /opt/ComfyUI && git checkout ${COMFY_REF} \
     && pip install -r requirements.txt
 
-# Google SDK for the Nano Banana node
-RUN pip install google-genai
+# Google SDK for the Nano Banana node + OpenCV for the skin-oil node
+RUN pip install google-genai opencv-python-headless
+
+# public custom nodes used by the Krea2 workflow (pinned so updates can't break it)
+RUN cd /opt/ComfyUI/custom_nodes \
+    && git clone https://github.com/rgthree/rgthree-comfy.git && git -C rgthree-comfy checkout 449c58fcdd612f7733e54c51f6758ead63fa180b \
+    && git clone https://github.com/aiorbust-jy/comfyui-skin-detailer.git && git -C comfyui-skin-detailer checkout 6942c8dd3a1e3e939149b5c2e2193607e7a39df2 \
+    && git clone https://github.com/aiorbust-jy/comfyui-realism-injector.git && git -C comfyui-realism-injector checkout 84aeb2486919a4355c1687486735da36d0204312 \
+    && git clone https://github.com/Elevenheights/ComfyUI-FameGridColorFinish.git && git -C ComfyUI-FameGridColorFinish checkout 944c14e53fffee3e9e6dbedad36ab95b0e1629f7
 
 # our nodes only - NO workflows in the image (members get the .json files from the course)
-COPY __init__.py nodes.py /opt/ComfyUI/custom_nodes/aiempire-dataset-maker/
+COPY __init__.py nodes.py photo_nodes.py /opt/ComfyUI/custom_nodes/aiempire-dataset-maker/
 COPY presets /opt/ComfyUI/custom_nodes/aiempire-dataset-maker/presets
 
 COPY docker/extra_model_paths.yaml /opt/ComfyUI/extra_model_paths.yaml

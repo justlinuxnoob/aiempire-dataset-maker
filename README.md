@@ -28,6 +28,8 @@ Format: `shot description | caption | square / portrait / tall`. Caption and siz
 - **AI Empire · Nano Banana:** makes the dataset with Nano Banana Pro / Nano Banana 2 using your own Google key (Vertex AI or AI Studio). Refused shots are skipped.
 - **AI Empire · Dataset Presets:** trigger word, preset set, extra description (what must stay the same), how many, start at, seed.
 - **AI Empire · Save Dataset:** saves images + captions, numbers them, zips the folder.
+- **AI Empire · Photo Finish:** phone-photo look in one node (levels, soft glow, lens softness, hand shake, ISO grain, JPEG).
+- **AI Empire · Save Image (no workflow inside):** saves JPEG/PNG without the workflow embedded, so images can't be dragged into ComfyUI to copy it.
 
 ## Our RunPod template (one click, nothing to install)
 The image is built automatically by GitHub Actions on every push: `ghcr.io/justlinuxnoob/aiempire-dataset-maker:latest`
@@ -42,6 +44,7 @@ RunPod → **My Templates → New Template**:
   - `REALISM` = `1` (default, downloads Z-Image Turbo for the realism pass) / `0`
   - `QWEN_PRECISION=bf16` for the full Qwen model
   - `QWEN21=1` adds the Qwen-Image 2.1 edit test workflow (~30 GB)
+  - `KREA2=1` adds the Krea2 RAW workflow: RawGirl Krea2 + Flux 2 Klein 9B realism pass + skin detailer + phone-look finish (~60 GB, 48 GB+ GPU). Set `EDIT_MODEL=none` + `REALISM=0` for a Krea2-only pod (100 GB volume is enough)
   - `VIDEO=minimax` adds MiniMax H3 video (image-to-video + reference-to-video, ~75 GB more: use a 200 GB volume, 48 GB+ GPU). Set `EDIT_MODEL=none` + `REALISM=0` for a video-only pod
   - Nano Banana: `VERTEX_SA_JSON` (whole service-account JSON, as a RunPod **secret**) or `GEMINI_API_KEY`
 

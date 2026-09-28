@@ -6,7 +6,7 @@ set -e
 
 WS=/workspace
 M=$WS/models
-mkdir -p "$M/diffusion_models" "$M/loras" "$M/text_encoders" "$M/vae" "$M/checkpoints" "$WS/output" "$WS/input"
+mkdir -p "$M/diffusion_models" "$M/loras" "$M/text_encoders" "$M/vae" "$M/checkpoints" "$M/upscale_models" "$WS/output" "$WS/input"
 
 HF=https://huggingface.co
 
@@ -71,6 +71,32 @@ if [ "${QWEN21:-0}" = "1" ]; then
   fetch "$M/text_encoders" "qwen3vl_8b_int8_convrot.safetensors" "$Q21/text_encoders/qwen3vl_8b_int8_convrot.safetensors"
   fetch "$M/text_encoders" "qwen3.5_9b_qwen_image_2.1_pe_i2i.int8_convrot.safetensors" "$Q21/text_encoders/qwen3.5_9b_qwen_image_2.1_pe_i2i.int8_convrot.safetensors"
   fetch "$M/vae" "qwen_image_2.1_vae_bf16.safetensors" "$Q21/vae/qwen_image_2.1_vae_bf16.safetensors"
+fi
+
+# KREA2 = 1 -> Krea2 RAW workflow: RawGirl Krea2 + Flux 2 Klein 9B realism pass + skin detailer (~60 GB)
+if [ "${KREA2:-0}" = "1" ]; then
+  D="$HF/dci05049"
+  fetch "$M/diffusion_models" "RawGirlKrea2_v10_int8_convrot.safetensors" "$D/krea2/resolve/main/RawGirlKrea2_v10_int8_convrot.safetensors"
+  fetch "$M/text_encoders" "qwen3vl_4b_bf16.safetensors" "$HF/Comfy-Org/Qwen3-VL/resolve/b58e627c376915e49cb6bba978416085aa31767f/text_encoders/qwen3vl_4b_bf16.safetensors"
+  fetch "$M/vae" "wan_2.1_vae.safetensors" "$D/wan-animate/resolve/main/wan_2.1_vae.safetensors"
+  fetch "$M/diffusion_models" "flux-2-klein-9b.safetensors" "$D/flux2-klein-9b/resolve/main/flux-2-klein-9b.safetensors"
+  fetch "$M/text_encoders" "qwen_3_8b_fp8mixed.safetensors" "$HF/Comfy-Org/vae-text-encorder-for-flux-klein-9b/resolve/main/split_files/text_encoders/qwen_3_8b_fp8mixed.safetensors"
+  fetch "$M/vae" "flux2-vae.safetensors" "$D/flux2-klein-9b/resolve/main/flux2-vae.safetensors"
+  fetch "$M/checkpoints" "sam3.1_multiplex_fp16.safetensors" "$HF/Comfy-Org/sam3.1/resolve/main/checkpoints/sam3.1_multiplex_fp16.safetensors"
+  fetch "$M/upscale_models" "1xSkinContrast-High-SuperUltraCompact.pth" "$D/spicy-sdxl/resolve/main/1xSkinContrast-High-SuperUltraCompact.pth"
+  fetch "$M/upscale_models" "1x-ITF-SkinDiffDetail-Lite-v1.pth" "$D/krea2/resolve/main/1x-ITF-SkinDiffDetail-Lite-v1.pth"
+  # Krea2 LoRAs
+  for f in candid_krea2_loraholic skindetails_krea2_loraholic real_3d_krea2_loraholic Krea2_TextFusion_Refusal_Reduction \
+           ass_v2_krea2_loraholic breast_size_v2_krea2_loraholic Krea2-realism-V1 RealisticSnapshotKrea2 \
+           bloomgirls-ultrarealism-krea2_4k lenovo_krea2 SummerVibesHM_krea2_epoch8 RawGirlV2_epoch_10 \
+           RawGirlV2Spicy_epoch_10 snofs_krea_v1; do
+    fetch "$M/loras" "$f.safetensors" "$D/krea2/resolve/main/$f.safetensors"
+  done
+  fetch "$M/loras" "michelle_krea_2_000003000.safetensors" "$D/krea2/resolve/main/michelle%20krea%202_000003000.safetensors"
+  # Klein LoRAs
+  for f in f2k_9B_lcs_consist_20260415 Samsung_fluxklein9b Klein_realistic_I2I HighResolution9B; do
+    fetch "$M/loras" "$f.safetensors" "$D/flux2-klein-9b/resolve/main/$f.safetensors"
+  done
 fi
 
 # VIDEO = minimax  -> MiniMax H3 image-to-video + reference-to-video (~75 GB extra, use a 200 GB volume)

@@ -6,3 +6,4 @@ aiempire:
   clip: text_encoders/
   vae: vae/
   checkpoints: checkpoints/
+  upscale_models: upscale_models/

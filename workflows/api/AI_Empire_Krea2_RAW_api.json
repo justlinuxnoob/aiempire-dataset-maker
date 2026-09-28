@@ -1,0 +1,550 @@
+{
+  "2": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "RawGirlKrea2_v10_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    },
+    "_meta": {
+      "title": "Krea2 model (RawGirl)"
+    }
+  },
+  "3": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen3vl_4b_bf16.safetensors",
+      "type": "krea2",
+      "device": "default"
+    },
+    "_meta": {
+      "title": "CLIPLoader"
+    }
+  },
+  "4": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "wan_2.1_vae.safetensors"
+    },
+    "_meta": {
+      "title": "VAELoader"
+    }
+  },
+  "5": {
+    "class_type": "Power Lora Loader (rgthree)",
+    "inputs": {
+      "PowerLoraLoaderHeaderWidget": {
+        "type": "PowerLoraLoaderHeaderWidget"
+      },
+      "lora_1": {
+        "on": true,
+        "lora": "candid_krea2_loraholic.safetensors",
+        "strength": 2.0
+      },
+      "lora_2": {
+        "on": true,
+        "lora": "skindetails_krea2_loraholic.safetensors",
+        "strength": 0.6
+      },
+      "lora_3": {
+        "on": true,
+        "lora": "real_3d_krea2_loraholic.safetensors",
+        "strength": 0.8
+      },
+      "lora_4": {
+        "on": true,
+        "lora": "Krea2_TextFusion_Refusal_Reduction.safetensors",
+        "strength": 1.0
+      },
+      "lora_5": {
+        "on": true,
+        "lora": "ass_v2_krea2_loraholic.safetensors",
+        "strength": 1.4
+      },
+      "lora_6": {
+        "on": true,
+        "lora": "breast_size_v2_krea2_loraholic.safetensors",
+        "strength": 0.8
+      },
+      "➕ Add Lora": "",
+      "model": [
+        "2",
+        0
+      ],
+      "clip": [
+        "3",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Krea2 LoRAs"
+    }
+  },
+  "6": {
+    "class_type": "ModelSamplingAuraFlow",
+    "inputs": {
+      "shift": 6.0,
+      "model": [
+        "5",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "ModelSamplingAuraFlow"
+    }
+  },
+  "7": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "candid smartphone photo of a young woman sitting by a cafe window, beige knit sweater, holding a coffee cup, natural daylight, soft smile, slightly messy hair, real skin texture, casual everyday moment",
+      "clip": [
+        "5",
+        1
+      ]
+    },
+    "_meta": {
+      "title": "Prompt"
+    }
+  },
+  "8": {
+    "class_type": "ConditioningZeroOut",
+    "inputs": {
+      "conditioning": [
+        "7",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "ConditioningZeroOut"
+    }
+  },
+  "9": {
+    "class_type": "EmptyLatentImage",
+    "inputs": {
+      "width": 1568,
+      "height": 2816,
+      "batch_size": 1
+    },
+    "_meta": {
+      "title": "Size (9:16, 4.4 MP)"
+    }
+  },
+  "10": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": 42,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "model": [
+        "6",
+        0
+      ],
+      "positive": [
+        "7",
+        0
+      ],
+      "negative": [
+        "8",
+        0
+      ],
+      "latent_image": [
+        "9",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "KSampler (Krea2)"
+    }
+  },
+  "11": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "10",
+        0
+      ],
+      "vae": [
+        "4",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "VAEDecode"
+    }
+  },
+  "12": {
+    "class_type": "PreviewImage",
+    "inputs": {
+      "images": [
+        "11",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "1 · Krea2 raw"
+    }
+  },
+  "20": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "flux-2-klein-9b.safetensors",
+      "weight_dtype": "default"
+    },
+    "_meta": {
+      "title": "Flux 2 Klein 9B"
+    }
+  },
+  "21": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen_3_8b_fp8mixed.safetensors",
+      "type": "flux2",
+      "device": "default"
+    },
+    "_meta": {
+      "title": "CLIPLoader"
+    }
+  },
+  "22": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "flux2-vae.safetensors"
+    },
+    "_meta": {
+      "title": "VAELoader"
+    }
+  },
+  "23": {
+    "class_type": "Power Lora Loader (rgthree)",
+    "inputs": {
+      "PowerLoraLoaderHeaderWidget": {
+        "type": "PowerLoraLoaderHeaderWidget"
+      },
+      "lora_1": {
+        "on": true,
+        "lora": "f2k_9B_lcs_consist_20260415.safetensors",
+        "strength": 1.0
+      },
+      "lora_2": {
+        "on": true,
+        "lora": "Samsung_fluxklein9b.safetensors",
+        "strength": 0.6
+      },
+      "lora_3": {
+        "on": true,
+        "lora": "Klein_realistic_I2I.safetensors",
+        "strength": 0.3
+      },
+      "lora_4": {
+        "on": true,
+        "lora": "HighResolution9B.safetensors",
+        "strength": 0.3
+      },
+      "➕ Add Lora": "",
+      "model": [
+        "20",
+        0
+      ],
+      "clip": [
+        "21",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Klein LoRAs"
+    }
+  },
+  "24": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "improve quality and photorealism, realistic skin texture, delete imperfections, clean skin. low dynamic range lightning, flat lightning, remove tatoos",
+      "clip": [
+        "23",
+        1
+      ]
+    },
+    "_meta": {
+      "title": "Realism prompt"
+    }
+  },
+  "25": {
+    "class_type": "VAEEncode",
+    "inputs": {
+      "pixels": [
+        "11",
+        0
+      ],
+      "vae": [
+        "22",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "VAEEncode"
+    }
+  },
+  "26": {
+    "class_type": "ReferenceLatent",
+    "inputs": {
+      "conditioning": [
+        "24",
+        0
+      ],
+      "latent": [
+        "25",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "ReferenceLatent"
+    }
+  },
+  "27": {
+    "class_type": "GetImageSize",
+    "inputs": {
+      "image": [
+        "11",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "GetImageSize"
+    }
+  },
+  "28": {
+    "class_type": "EmptyFlux2LatentImage",
+    "inputs": {
+      "width": [
+        "27",
+        0
+      ],
+      "height": [
+        "27",
+        1
+      ],
+      "batch_size": 1
+    },
+    "_meta": {
+      "title": "EmptyFlux2LatentImage"
+    }
+  },
+  "29": {
+    "class_type": "Flux2Scheduler",
+    "inputs": {
+      "steps": 2,
+      "width": [
+        "27",
+        0
+      ],
+      "height": [
+        "27",
+        1
+      ]
+    },
+    "_meta": {
+      "title": "Flux2Scheduler"
+    }
+  },
+  "30": {
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "exp_heun_2_x0"
+    },
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "31": {
+    "class_type": "RandomNoise",
+    "inputs": {
+      "noise_seed": 42
+    },
+    "_meta": {
+      "title": "RandomNoise"
+    }
+  },
+  "32": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "model": [
+        "23",
+        0
+      ],
+      "conditioning": [
+        "26",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "BasicGuider"
+    }
+  },
+  "33": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "noise": [
+        "31",
+        0
+      ],
+      "guider": [
+        "32",
+        0
+      ],
+      "sampler": [
+        "30",
+        0
+      ],
+      "sigmas": [
+        "29",
+        0
+      ],
+      "latent_image": [
+        "28",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "34": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "33",
+        0
+      ],
+      "vae": [
+        "22",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "VAEDecode"
+    }
+  },
+  "35": {
+    "class_type": "PreviewImage",
+    "inputs": {
+      "images": [
+        "34",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "2 · After Klein pass"
+    }
+  },
+  "40": {
+    "class_type": "SkinDetailer",
+    "inputs": {
+      "mode": "skin texture (stable)",
+      "texture_model": "auto (1xSkinContrast-High-SuperUltraCompact)",
+      "texture_strength": 1.0,
+      "face_identity_protect": 0.0,
+      "sam3_model": "auto (sam3.1_multiplex_fp16)",
+      "segmentation_threshold": 0.75,
+      "mask_expand": 4,
+      "mask_feather": 12.0,
+      "seed": 42,
+      "steps": 8,
+      "cfg": 1.0,
+      "denoise": 0.22,
+      "preserve_tone": 0.85,
+      "skin_prompt": "photorealistic skin with natural pore-level texture, smooth even skin tone, soft subsurface scattering, clean sharp detail",
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "processing_mode": "auto",
+      "image": [
+        "34",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Skin Detailer"
+    }
+  },
+  "41": {
+    "class_type": "FameGridColorFinish",
+    "inputs": {
+      "color_strength": 0.05,
+      "sharpen_strength": 0.0,
+      "image": [
+        "40",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Colour finish"
+    }
+  },
+  "42": {
+    "class_type": "RealismInjector",
+    "inputs": {
+      "enable_micro_shadows": false,
+      "shadow_strength": 0.3,
+      "shadow_radius": 2.0,
+      "shadow_detail_threshold": 0.015,
+      "enable_eye_moisture": false,
+      "moisture_strength": 0.7,
+      "catchlight_intensity": 0.8,
+      "tear_meniscus": 0.6,
+      "enable_skin_oil": true,
+      "oil_strength": 0.8,
+      "t_zone_gloss": 0.7,
+      "side_matte": 0.5,
+      "global_mix": 1.0,
+      "image": [
+        "41",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Skin oil"
+    }
+  },
+  "43": {
+    "class_type": "AIEmpirePhotoFinish",
+    "inputs": {
+      "exposure": -0.05,
+      "gamma": 1.05,
+      "contrast": 0.98,
+      "saturation": 1.09,
+      "vibrance": -0.04,
+      "glow": 0.075,
+      "glow_radius": 50.0,
+      "glow_threshold": 0.3,
+      "lens_softness": 0.25,
+      "hand_shake": 1.9,
+      "iso": "ISO 200",
+      "grain_size": 0.5,
+      "final_contrast": 1.1,
+      "jpeg_quality": 100,
+      "seed": 42,
+      "image": [
+        "42",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Photo Finish (phone look)"
+    }
+  },
+  "44": {
+    "class_type": "AIEmpireSaveClean",
+    "inputs": {
+      "filename_prefix": "aiempire_krea2",
+      "format": "JPEG",
+      "quality": 100,
+      "images": [
+        "43",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Save (no workflow inside)"
+    }
+  }
+}
