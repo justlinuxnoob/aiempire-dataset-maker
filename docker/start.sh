@@ -64,6 +64,16 @@ if [ "$EDIT_MODEL" = "qwen" ] || [ "$EDIT_MODEL" = "both" ]; then
     "$HF/lightx2v/Qwen-Image-Edit-2511-Lightning/resolve/main/Qwen-Image-Edit-2511-Lightning-8steps-V1.0-bf16.safetensors"
 fi
 
+# VIDEO = minimax  -> MiniMax H3 image-to-video + reference-to-video (~75 GB extra, use a 200 GB volume)
+if [ "${VIDEO:-}" = "minimax" ]; then
+  H3="$HF/Comfy-Org/MiniMax-H3/resolve/main"
+  fetch "$M/diffusion_models" "minimax_h3_fl2va_pruned_int8_convrot.safetensors" "$H3/diffusion_models/minimax_h3_fl2va_pruned_int8_convrot.safetensors"
+  fetch "$M/diffusion_models" "minimax_h3_ref2va_pruned_int8_convrot.safetensors" "$H3/diffusion_models/minimax_h3_ref2va_pruned_int8_convrot.safetensors"
+  fetch "$M/text_encoders" "qwen3vl_32b_minimax_h3_int8_convrot.safetensors" "$H3/text_encoders/qwen3vl_32b_minimax_h3_int8_convrot.safetensors"
+  fetch "$M/vae" "minimax_h3_video_vae_fp16.safetensors" "$H3/vae/minimax_h3_video_vae_fp16.safetensors"
+  fetch "$M/vae" "minimax_h3_audio_vae_fp32.safetensors" "$H3/vae/minimax_h3_audio_vae_fp32.safetensors"
+fi
+
 echo "[AI Empire] ✅ Models ready. Starting ComfyUI on port 8188..."
 cd /opt/ComfyUI
 exec python main.py --listen 0.0.0.0 --port 8188 \
