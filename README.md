@@ -41,6 +41,7 @@ RunPod → **My Templates → New Template**:
   - `EDIT_MODEL` = `firered` (default) / `qwen` / `both` / `none` (Nano Banana only)
   - `REALISM` = `1` (default, downloads Z-Image Turbo for the realism pass) / `0`
   - `QWEN_PRECISION=bf16` for the full Qwen model
+  - `QWEN21=1` adds the Qwen-Image 2.1 edit test workflow (~30 GB)
   - `VIDEO=minimax` adds MiniMax H3 video (image-to-video + reference-to-video, ~75 GB more: use a 200 GB volume, 48 GB+ GPU). Set `EDIT_MODEL=none` + `REALISM=0` for a video-only pod
   - Nano Banana: `VERTEX_SA_JSON` (whole service-account JSON, as a RunPod **secret**) or `GEMINI_API_KEY`
 

@@ -64,6 +64,15 @@ if [ "$EDIT_MODEL" = "qwen" ] || [ "$EDIT_MODEL" = "both" ]; then
     "$HF/lightx2v/Qwen-Image-Edit-2511-Lightning/resolve/main/Qwen-Image-Edit-2511-Lightning-8steps-V1.0-bf16.safetensors"
 fi
 
+# QWEN21 = 1 -> Qwen-Image 2.1 edit (test workflow), ~30 GB
+if [ "${QWEN21:-0}" = "1" ]; then
+  Q21="$HF/Comfy-Org/Qwen-Image-2.1/resolve/main"
+  fetch "$M/diffusion_models" "qwen_image_2.1_int8_convrot.safetensors" "$Q21/diffusion_models/qwen_image_2.1_int8_convrot.safetensors"
+  fetch "$M/text_encoders" "qwen3vl_8b_int8_convrot.safetensors" "$Q21/text_encoders/qwen3vl_8b_int8_convrot.safetensors"
+  fetch "$M/text_encoders" "qwen3.5_9b_qwen_image_2.1_pe_i2i.int8_convrot.safetensors" "$Q21/text_encoders/qwen3.5_9b_qwen_image_2.1_pe_i2i.int8_convrot.safetensors"
+  fetch "$M/vae" "qwen_image_2.1_vae_bf16.safetensors" "$Q21/vae/qwen_image_2.1_vae_bf16.safetensors"
+fi
+
 # VIDEO = minimax  -> MiniMax H3 image-to-video + reference-to-video (~75 GB extra, use a 200 GB volume)
 if [ "${VIDEO:-}" = "minimax" ]; then
   H3="$HF/Comfy-Org/MiniMax-H3/resolve/main"
