@@ -21,22 +21,35 @@ fetch() {
     -d "$dir" -o "$name" "$url"
 }
 
-# QWEN_PRECISION=fp8 (default, 20 GB, fits 24-32 GB GPUs) or bf16 (41 GB, for 48 GB+ GPUs)
-if [ "${QWEN_PRECISION:-fp8}" = "bf16" ]; then
-  UNET=qwen_image_edit_2511_bf16.safetensors
-else
-  UNET=qwen_image_edit_2511_fp8mixed.safetensors
-fi
+# EDIT_MODEL = firered (default, best identity) | qwen | both
+# QWEN_PRECISION = fp8 (default, 20 GB) | bf16 (41 GB)   -- only used for the Qwen model
+EDIT_MODEL="${EDIT_MODEL:-firered}"
+echo "[AI Empire] Checking models for EDIT_MODEL=$EDIT_MODEL (first boot takes a few minutes)..."
 
-echo "[AI Empire] Checking models (first boot takes a few minutes)..."
-fetch "$M/diffusion_models" "$UNET" \
-  "$HF/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/$UNET"
-fetch "$M/loras" "Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors" \
-  "$HF/lightx2v/Qwen-Image-Edit-2511-Lightning/resolve/main/Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors"
+# shared by both models
 fetch "$M/text_encoders" "qwen_2.5_vl_7b_fp8_scaled.safetensors" \
   "$HF/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors"
 fetch "$M/vae" "qwen_image_vae.safetensors" \
   "$HF/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/vae/qwen_image_vae.safetensors"
+
+if [ "$EDIT_MODEL" = "firered" ] || [ "$EDIT_MODEL" = "both" ]; then
+  fetch "$M/diffusion_models" "FireRed-Image-Edit-1.1-transformer.safetensors" \
+    "$HF/FireRedTeam/FireRed-Image-Edit-1.1-ComfyUI/resolve/main/FireRed-Image-Edit-1.1-transformer.safetensors"
+  fetch "$M/loras" "FireRed-Image-Edit-1.1-Lightning-8steps-v1.2.safetensors" \
+    "$HF/FireRedTeam/FireRed-Image-Edit-1.1-ComfyUI/resolve/main/FireRed-Image-Edit-1.1-Lightning-8steps-v1.2.safetensors"
+fi
+
+if [ "$EDIT_MODEL" = "qwen" ] || [ "$EDIT_MODEL" = "both" ]; then
+  if [ "${QWEN_PRECISION:-fp8}" = "bf16" ]; then
+    UNET=qwen_image_edit_2511_bf16.safetensors
+  else
+    UNET=qwen_image_edit_2511_fp8mixed.safetensors
+  fi
+  fetch "$M/diffusion_models" "$UNET" \
+    "$HF/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/$UNET"
+  fetch "$M/loras" "Qwen-Image-Edit-2511-Lightning-8steps-V1.0-bf16.safetensors" \
+    "$HF/lightx2v/Qwen-Image-Edit-2511-Lightning/resolve/main/Qwen-Image-Edit-2511-Lightning-8steps-V1.0-bf16.safetensors"
+fi
 
 echo "[AI Empire] ✅ Models ready. Starting ComfyUI on port 8188..."
 cd /opt/ComfyUI

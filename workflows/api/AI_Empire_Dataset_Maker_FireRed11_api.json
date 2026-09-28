@@ -11,7 +11,7 @@
   "2": {
     "class_type": "UNETLoader",
     "inputs": {
-      "unet_name": "qwen_image_edit_2511_fp8mixed.safetensors",
+      "unet_name": "FireRed-Image-Edit-1.1-transformer.safetensors",
       "weight_dtype": "default"
     },
     "_meta": {
@@ -21,7 +21,7 @@
   "3": {
     "class_type": "LoraLoaderModelOnly",
     "inputs": {
-      "lora_name": "Qwen-Image-Edit-2511-Lightning-8steps-V1.0-bf16.safetensors",
+      "lora_name": "FireRed-Image-Edit-1.1-Lightning-8steps-v1.2.safetensors",
       "strength_model": 1.0,
       "model": [
         "2",
@@ -150,32 +150,6 @@
       "title": "Negative (leave empty)"
     }
   },
-  "12": {
-    "class_type": "FluxKontextMultiReferenceLatentMethod",
-    "inputs": {
-      "reference_latents_method": "index_timestep_zero",
-      "conditioning": [
-        "10",
-        0
-      ]
-    },
-    "_meta": {
-      "title": "FluxKontextMultiReferenceLatentMethod"
-    }
-  },
-  "13": {
-    "class_type": "FluxKontextMultiReferenceLatentMethod",
-    "inputs": {
-      "reference_latents_method": "index_timestep_zero",
-      "conditioning": [
-        "11",
-        0
-      ]
-    },
-    "_meta": {
-      "title": "FluxKontextMultiReferenceLatentMethod"
-    }
-  },
   "14": {
     "class_type": "EmptySD3LatentImage",
     "inputs": {
@@ -210,11 +184,11 @@
         0
       ],
       "positive": [
-        "12",
+        "10",
         0
       ],
       "negative": [
-        "13",
+        "11",
         0
       ],
       "latent_image": [

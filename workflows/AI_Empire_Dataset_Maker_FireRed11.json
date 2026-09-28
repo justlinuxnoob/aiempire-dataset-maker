@@ -1,8 +1,8 @@
 {
-  "id": "5e0c2f64-7a1b-4c8e-9d3f-a1e3e4e5e6e7",
+  "id": "5e0c2f64-7a1b-4c8e-9d3f-f1e3d11a0001",
   "revision": 0,
   "last_node_id": 18,
-  "last_link_id": 24,
+  "last_link_id": 22,
   "nodes": [
     {
       "id": 1,
@@ -72,14 +72,14 @@
         "Node name for S&R": "UNETLoader",
         "models": [
           {
-            "name": "qwen_image_edit_2511_fp8mixed.safetensors",
-            "url": "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_2511_fp8mixed.safetensors",
+            "name": "FireRed-Image-Edit-1.1-transformer.safetensors",
+            "url": "https://huggingface.co/FireRedTeam/FireRed-Image-Edit-1.1-ComfyUI/resolve/main/FireRed-Image-Edit-1.1-transformer.safetensors",
             "directory": "diffusion_models"
           }
         ]
       },
       "widgets_values": [
-        "qwen_image_edit_2511_fp8mixed.safetensors",
+        "FireRed-Image-Edit-1.1-transformer.safetensors",
         "default"
       ]
     },
@@ -117,14 +117,14 @@
         "Node name for S&R": "LoraLoaderModelOnly",
         "models": [
           {
-            "name": "Qwen-Image-Edit-2511-Lightning-8steps-V1.0-bf16.safetensors",
-            "url": "https://huggingface.co/lightx2v/Qwen-Image-Edit-2511-Lightning/resolve/main/Qwen-Image-Edit-2511-Lightning-8steps-V1.0-bf16.safetensors",
+            "name": "FireRed-Image-Edit-1.1-Lightning-8steps-v1.2.safetensors",
+            "url": "https://huggingface.co/FireRedTeam/FireRed-Image-Edit-1.1-ComfyUI/resolve/main/FireRed-Image-Edit-1.1-Lightning-8steps-v1.2.safetensors",
             "directory": "loras"
           }
         ]
       },
       "widgets_values": [
-        "Qwen-Image-Edit-2511-Lightning-8steps-V1.0-bf16.safetensors",
+        "FireRed-Image-Edit-1.1-Lightning-8steps-v1.2.safetensors",
         1.0
       ],
       "title": "Lightning 8-step LoRA"
@@ -266,7 +266,7 @@
           "links": [
             6,
             9,
-            22
+            20
           ]
         }
       ],
@@ -312,7 +312,7 @@
           "name": "captions",
           "type": "STRING",
           "links": [
-            24
+            22
           ],
           "shape": 6
         },
@@ -336,7 +336,7 @@
           "name": "seeds",
           "type": "INT",
           "links": [
-            20
+            18
           ],
           "shape": 6
         },
@@ -528,80 +528,6 @@
       "title": "Negative (leave empty)"
     },
     {
-      "id": 12,
-      "type": "FluxKontextMultiReferenceLatentMethod",
-      "pos": [
-        1220,
-        0
-      ],
-      "size": [
-        300,
-        58
-      ],
-      "flags": {},
-      "order": 11,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "conditioning",
-          "type": "CONDITIONING",
-          "link": 15
-        }
-      ],
-      "outputs": [
-        {
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
-          "links": [
-            17
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "FluxKontextMultiReferenceLatentMethod"
-      },
-      "widgets_values": [
-        "index_timestep_zero"
-      ]
-    },
-    {
-      "id": 13,
-      "type": "FluxKontextMultiReferenceLatentMethod",
-      "pos": [
-        1220,
-        220
-      ],
-      "size": [
-        300,
-        58
-      ],
-      "flags": {},
-      "order": 12,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "conditioning",
-          "type": "CONDITIONING",
-          "link": 16
-        }
-      ],
-      "outputs": [
-        {
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
-          "links": [
-            18
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "FluxKontextMultiReferenceLatentMethod"
-      },
-      "widgets_values": [
-        "index_timestep_zero"
-      ]
-    },
-    {
       "id": 14,
       "type": "EmptySD3LatentImage",
       "pos": [
@@ -613,7 +539,7 @@
         106
       ],
       "flags": {},
-      "order": 13,
+      "order": 11,
       "mode": 0,
       "inputs": [
         {
@@ -638,7 +564,7 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            19
+            17
           ]
         }
       ],
@@ -663,7 +589,7 @@
         262
       ],
       "flags": {},
-      "order": 14,
+      "order": 12,
       "mode": 0,
       "inputs": [
         {
@@ -674,22 +600,22 @@
         {
           "name": "positive",
           "type": "CONDITIONING",
-          "link": 17
+          "link": 15
         },
         {
           "name": "negative",
           "type": "CONDITIONING",
-          "link": 18
+          "link": 16
         },
         {
           "name": "latent_image",
           "type": "LATENT",
-          "link": 19
+          "link": 17
         },
         {
           "name": "seed",
           "type": "INT",
-          "link": 20,
+          "link": 18,
           "widget": {
             "name": "seed"
           }
@@ -700,7 +626,7 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            21
+            19
           ]
         }
       ],
@@ -729,18 +655,18 @@
         46
       ],
       "flags": {},
-      "order": 15,
+      "order": 13,
       "mode": 0,
       "inputs": [
         {
           "name": "samples",
           "type": "LATENT",
-          "link": 21
+          "link": 19
         },
         {
           "name": "vae",
           "type": "VAE",
-          "link": 22
+          "link": 20
         }
       ],
       "outputs": [
@@ -748,7 +674,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            23
+            21
           ]
         }
       ],
@@ -769,18 +695,18 @@
         620
       ],
       "flags": {},
-      "order": 16,
+      "order": 14,
       "mode": 0,
       "inputs": [
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 23
+          "link": 21
         },
         {
           "name": "captions",
           "type": "STRING",
-          "link": 24
+          "link": 22
         }
       ],
       "outputs": [],
@@ -807,7 +733,7 @@
         560
       ],
       "flags": {},
-      "order": 17,
+      "order": 15,
       "mode": 0,
       "inputs": [],
       "outputs": [],
@@ -815,7 +741,7 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "## AI Empire · Dataset Maker (Qwen Image Edit 2511)\n\n**How to use**\n1. Load your influencer's face in **Your face** (clear, front-facing, even light).\n2. In **Dataset Presets**: set the trigger word (e.g. `zvx woman`) and describe what must stay the same in *extra_description* (e.g. `with long straight dark brown hair, brown eyes`).\n3. First run: **how_many = 3**. If they look like her, set it to 40.\n4. Press **Run**. Images + matching .txt captions are saved to `output/datasets/<name>/`, plus a `.zip`.\n\n**Settings**\n- Model: **Qwen Image Edit 2511** (Apache 2.0). The default file is fp8mixed (20 GB, fits RTX 4090/5090).\n- 8 steps, CFG 1, euler / simple (Lightning LoRA). Max quality: bypass the LoRA (Ctrl+B) and use 40 steps, CFG 4.\n\n**Models**\n- diffusion_models: [qwen_image_edit_2511_fp8mixed.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_2511_fp8mixed.safetensors)\n- loras: [Qwen-Image-Edit-2511-Lightning-8steps-V1.0-bf16.safetensors](https://huggingface.co/lightx2v/Qwen-Image-Edit-2511-Lightning/resolve/main/Qwen-Image-Edit-2511-Lightning-8steps-V1.0-bf16.safetensors)\n- text_encoders: [qwen_2.5_vl_7b_fp8_scaled.safetensors](https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors)\n- vae: [qwen_image_vae.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/vae/qwen_image_vae.safetensors)"
+        "## AI Empire · Dataset Maker (FireRed Image Edit 1.1)\n\n**How to use**\n1. Load your influencer's face in **Your face** (clear, front-facing, even light).\n2. In **Dataset Presets**: set the trigger word (e.g. `zvx woman`) and describe what must stay the same in *extra_description* (e.g. `with long straight dark brown hair, brown eyes`).\n3. First run: **how_many = 3**. If they look like her, set it to 40.\n4. Press **Run**. Images + matching .txt captions are saved to `output/datasets/<name>/`, plus a `.zip`.\n\n**Settings**\n- Model: **FireRed Image Edit 1.1** (Apache 2.0), built for identity consistency. The file is 41 GB (bf16).\n- 80 GB GPU (A100/H100): leave UNet weight_dtype = default. 48 GB GPU (A6000/A40/L40S): set weight_dtype = **fp8_e4m3fn**.\n- 8 steps, CFG 1, euler / simple (Lightning LoRA). Max quality: bypass the LoRA (Ctrl+B) and use 40 steps, CFG 4.\n\n**Models**\n- diffusion_models: [FireRed-Image-Edit-1.1-transformer.safetensors](https://huggingface.co/FireRedTeam/FireRed-Image-Edit-1.1-ComfyUI/resolve/main/FireRed-Image-Edit-1.1-transformer.safetensors)\n- loras: [FireRed-Image-Edit-1.1-Lightning-8steps-v1.2.safetensors](https://huggingface.co/FireRedTeam/FireRed-Image-Edit-1.1-ComfyUI/resolve/main/FireRed-Image-Edit-1.1-Lightning-8steps-v1.2.safetensors)\n- text_encoders: [qwen_2.5_vl_7b_fp8_scaled.safetensors](https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors)\n- vae: [qwen_image_vae.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/vae/qwen_image_vae.safetensors)"
       ],
       "title": "READ ME"
     }
@@ -937,36 +863,20 @@
       15,
       10,
       0,
-      12,
-      0,
+      15,
+      1,
       "CONDITIONING"
     ],
     [
       16,
       11,
       0,
-      13,
-      0,
-      "CONDITIONING"
-    ],
-    [
-      17,
-      12,
-      0,
-      15,
-      1,
-      "CONDITIONING"
-    ],
-    [
-      18,
-      13,
-      0,
       15,
       2,
       "CONDITIONING"
     ],
     [
-      19,
+      17,
       14,
       0,
       15,
@@ -974,7 +884,7 @@
       "LATENT"
     ],
     [
-      20,
+      18,
       9,
       4,
       15,
@@ -982,7 +892,7 @@
       "INT"
     ],
     [
-      21,
+      19,
       15,
       0,
       16,
@@ -990,7 +900,7 @@
       "LATENT"
     ],
     [
-      22,
+      20,
       7,
       0,
       16,
@@ -998,7 +908,7 @@
       "VAE"
     ],
     [
-      23,
+      21,
       16,
       0,
       17,
@@ -1006,7 +916,7 @@
       "IMAGE"
     ],
     [
-      24,
+      22,
       9,
       1,
       17,
