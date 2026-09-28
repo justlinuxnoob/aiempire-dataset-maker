@@ -25,6 +25,7 @@ standing on a bridge at night, black coat | full body, bridge, night, black coat
 Format: `shot description | caption | square / portrait / tall`. Caption and size are optional.
 
 ## Nodes
+- **AI Empire · Nano Banana:** makes the dataset with Nano Banana Pro / Nano Banana 2 using your own Google key (Vertex AI or AI Studio). Refused shots are skipped.
 - **AI Empire · Dataset Presets:** trigger word, preset set, extra description (what must stay the same), how many, start at, seed.
 - **AI Empire · Save Dataset:** saves images + captions, numbers them, zips the folder.
 
@@ -34,9 +35,13 @@ The image is built automatically by GitHub Actions on every push: `ghcr.io/justl
 RunPod → **My Templates → New Template**:
 - **Container image:** `ghcr.io/justlinuxnoob/aiempire-dataset-maker:latest`
 - **Container disk:** 30 GB
-- **Volume disk:** 100 GB, mounted at `/workspace` (models download here on first boot: ~52 GB for FireRed, ~30 GB for Qwen)
+- **Volume disk:** 100 GB, mounted at `/workspace` (first boot downloads ~72 GB for FireRed + realism pass)
 - **Expose HTTP ports:** `8188`
-- **Env (optional):** `EDIT_MODEL` = `firered` (default) / `qwen` / `both`; `QWEN_PRECISION=bf16` for the full Qwen model
+- **Env (optional):**
+  - `EDIT_MODEL` = `firered` (default) / `qwen` / `both` / `none` (Nano Banana only)
+  - `REALISM` = `1` (default, downloads Z-Image Turbo for the realism pass) / `0`
+  - `QWEN_PRECISION=bf16` for the full Qwen model
+  - Nano Banana: `VERTEX_SA_JSON` (whole service-account JSON, as a RunPod **secret**) or `GEMINI_API_KEY`
 
 On boot the pod downloads the models (first time only), then starts ComfyUI. Open **Connect → HTTP 8188**, then **Workflows → AI_Empire_Dataset_Maker_FireRed11**.
 Download the finished zip at `http://<pod-url>/view?filename=<name>.zip&subfolder=datasets&type=output`.

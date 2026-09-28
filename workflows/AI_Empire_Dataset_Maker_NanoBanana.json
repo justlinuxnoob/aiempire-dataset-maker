@@ -1,0 +1,454 @@
+{
+  "id": "5e0c2f64-7a1b-4c8e-9d3f-0a0ba0a0a0b1",
+  "revision": 0,
+  "last_node_id": 30,
+  "last_link_id": 9,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [
+        380,
+        0
+      ],
+      "size": [
+        320,
+        360
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "your_face.png",
+        "image"
+      ],
+      "title": "Your face",
+      "color": "#1f3320",
+      "bgcolor": "#162416"
+    },
+    {
+      "id": 19,
+      "type": "LoadImage",
+      "pos": [
+        380,
+        420
+      ],
+      "size": [
+        320,
+        360
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            6
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "your_body.png",
+        "image"
+      ],
+      "title": "Body reference (optional, Ctrl+B to turn on)",
+      "color": "#2e2240",
+      "bgcolor": "#1f172b"
+    },
+    {
+      "id": 9,
+      "type": "AIEmpireDatasetPresets",
+      "pos": [
+        740,
+        0
+      ],
+      "size": [
+        400,
+        400
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "prompts",
+          "type": "STRING",
+          "links": [
+            2
+          ],
+          "shape": 6
+        },
+        {
+          "name": "captions",
+          "type": "STRING",
+          "links": [
+            3
+          ],
+          "shape": 6
+        },
+        {
+          "name": "widths",
+          "type": "INT",
+          "links": [
+            4
+          ],
+          "shape": 6
+        },
+        {
+          "name": "heights",
+          "type": "INT",
+          "links": [
+            5
+          ],
+          "shape": 6
+        },
+        {
+          "name": "seeds",
+          "type": "INT",
+          "links": [],
+          "shape": 6
+        },
+        {
+          "name": "count",
+          "type": "INT",
+          "links": []
+        },
+        {
+          "name": "realism_prompts",
+          "type": "STRING",
+          "links": [],
+          "shape": 6
+        },
+        {
+          "name": "dataset_name",
+          "type": "STRING",
+          "links": [
+            9
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AIEmpireDatasetPresets"
+      },
+      "widgets_values": [
+        "zvx woman",
+        "core40",
+        "",
+        3,
+        1,
+        42,
+        "fixed",
+        "",
+        false,
+        "my_influencer"
+      ],
+      "title": "Dataset Presets",
+      "color": "#3d2a14",
+      "bgcolor": "#2a1d0e"
+    },
+    {
+      "id": 18,
+      "type": "MarkdownNote",
+      "pos": [
+        0,
+        0
+      ],
+      "size": [
+        360,
+        620
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "MarkdownNote"
+      },
+      "widgets_values": [
+        "## AI Empire · Dataset Maker (Nano Banana Pro)\n\n**How to use**\n1. Load her face in **Your face** (clear, front-facing, even light).\n2. Optional: load a full-body photo of her in **Body reference**, select that box and press **Ctrl+B** to switch it on (it starts purple = off), then tick **use_body_reference** in Dataset Presets.\n3. **Dataset Presets**: trigger word (e.g. `zvx woman`), *extra_description* (e.g. `with long straight dark brown hair, brown eyes`), *dataset_name*.\n4. First run: **how_many = 3**. If they look like her, set 40 and run again.\n5. **Nano Banana box**: choose *Vertex AI* (Google $300 free credits) or *AI Studio API key*.\n\n**Your Google key (set it on the RunPod template, not in the workflow)**\n- Vertex AI: env `VERTEX_SA_JSON` = the whole service-account JSON (use a RunPod *secret*). Project is read from it.\n- AI Studio: env `GEMINI_API_KEY` = your key. Or paste it in *api_key* (then don't share this workflow!).\n- Model: `gemini-3-pro-image` (Nano Banana Pro) or `gemini-3.1-flash-image` (Nano Banana 2).\n- Refused shots (Google's filter) are skipped automatically. Saved as `<name>_nanobanana`.\n- No GPU needed: this runs on Google. Use the cheapest pod."
+      ],
+      "title": "READ ME"
+    },
+    {
+      "id": 30,
+      "type": "AIEmpireNanoBanana",
+      "pos": [
+        1180,
+        0
+      ],
+      "size": [
+        400,
+        330
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "face",
+          "type": "IMAGE",
+          "link": 1
+        },
+        {
+          "name": "prompts",
+          "type": "STRING",
+          "link": 2
+        },
+        {
+          "name": "captions",
+          "type": "STRING",
+          "link": 3
+        },
+        {
+          "name": "widths",
+          "type": "INT",
+          "link": 4
+        },
+        {
+          "name": "heights",
+          "type": "INT",
+          "link": 5
+        },
+        {
+          "name": "body",
+          "type": "IMAGE",
+          "link": 6,
+          "shape": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            7
+          ],
+          "shape": 6
+        },
+        {
+          "name": "captions",
+          "type": "STRING",
+          "links": [
+            8
+          ],
+          "shape": 6
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AIEmpireNanoBanana"
+      },
+      "widgets_values": [
+        "Vertex AI",
+        "gemini-3-pro-image",
+        "2K",
+        "",
+        "",
+        "global"
+      ],
+      "title": "Nano Banana (your Google key)",
+      "color": "#3d2a14",
+      "bgcolor": "#2a1d0e"
+    },
+    {
+      "id": 17,
+      "type": "AIEmpireSaveDataset",
+      "pos": [
+        1620,
+        0
+      ],
+      "size": [
+        560,
+        640
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 7
+        },
+        {
+          "name": "captions",
+          "type": "STRING",
+          "link": 8
+        },
+        {
+          "name": "dataset_name",
+          "type": "STRING",
+          "link": 9,
+          "widget": {
+            "name": "dataset_name"
+          }
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "AIEmpireSaveDataset"
+      },
+      "widgets_values": [
+        "my_influencer",
+        true,
+        "_nanobanana"
+      ],
+      "title": "Save Dataset (Nano Banana)",
+      "color": "#1f3320",
+      "bgcolor": "#162416"
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      30,
+      0,
+      "IMAGE"
+    ],
+    [
+      2,
+      9,
+      0,
+      30,
+      1,
+      "STRING"
+    ],
+    [
+      3,
+      9,
+      1,
+      30,
+      2,
+      "STRING"
+    ],
+    [
+      4,
+      9,
+      2,
+      30,
+      3,
+      "INT"
+    ],
+    [
+      5,
+      9,
+      3,
+      30,
+      4,
+      "INT"
+    ],
+    [
+      6,
+      19,
+      0,
+      30,
+      5,
+      "IMAGE"
+    ],
+    [
+      7,
+      30,
+      0,
+      17,
+      0,
+      "IMAGE"
+    ],
+    [
+      8,
+      30,
+      1,
+      17,
+      1,
+      "STRING"
+    ],
+    [
+      9,
+      9,
+      7,
+      17,
+      2,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "1 · Your face + presets",
+      "bounding": [
+        370,
+        -60,
+        780,
+        860
+      ],
+      "color": "#b06634",
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "2 · Nano Banana",
+      "bounding": [
+        1170,
+        -60,
+        420,
+        420
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "3 · Save dataset",
+      "bounding": [
+        1610,
+        -60,
+        580,
+        720
+      ],
+      "color": "#6a8f4e",
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.55,
+      "offset": [
+        60,
+        120
+      ]
+    }
+  },
+  "version": 0.4
+}

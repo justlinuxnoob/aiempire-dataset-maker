@@ -23,6 +23,9 @@ RUN git clone https://github.com/comfyanonymous/ComfyUI.git /opt/ComfyUI \
     && cd /opt/ComfyUI && git checkout ${COMFY_REF} \
     && pip install -r requirements.txt
 
+# Google SDK for the Nano Banana node
+RUN pip install google-genai
+
 # our nodes + workflow (shows up in the Workflows sidebar)
 COPY __init__.py nodes.py README.md /opt/ComfyUI/custom_nodes/aiempire-dataset-maker/
 COPY presets /opt/ComfyUI/custom_nodes/aiempire-dataset-maker/presets

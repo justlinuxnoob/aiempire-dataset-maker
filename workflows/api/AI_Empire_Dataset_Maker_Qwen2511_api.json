@@ -8,6 +8,23 @@
       "title": "Your face"
     }
   },
+  "9": {
+    "class_type": "AIEmpireDatasetPresets",
+    "inputs": {
+      "trigger_word": "zvx woman",
+      "preset_set": "core40",
+      "extra_description": "",
+      "how_many": 3,
+      "start_at": 1,
+      "seed": 42,
+      "custom_presets": "",
+      "use_body_reference": false,
+      "dataset_name": "my_influencer"
+    },
+    "_meta": {
+      "title": "Dataset Presets"
+    }
+  },
   "2": {
     "class_type": "UNETLoader",
     "inputs": {
@@ -15,7 +32,7 @@
       "weight_dtype": "default"
     },
     "_meta": {
-      "title": "UNETLoader"
+      "title": "Edit model"
     }
   },
   "3": {
@@ -76,21 +93,6 @@
     },
     "_meta": {
       "title": "VAELoader"
-    }
-  },
-  "9": {
-    "class_type": "AIEmpireDatasetPresets",
-    "inputs": {
-      "trigger_word": "zvx woman",
-      "preset_set": "core40",
-      "extra_description": "",
-      "how_many": 3,
-      "start_at": 1,
-      "seed": 42,
-      "custom_presets": ""
-    },
-    "_meta": {
-      "title": "Dataset Presets"
     }
   },
   "8": {
@@ -223,7 +225,7 @@
       ]
     },
     "_meta": {
-      "title": "KSampler"
+      "title": "KSampler (edit)"
     }
   },
   "16": {
@@ -242,11 +244,151 @@
       "title": "VAEDecode"
     }
   },
+  "20": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "z_image_turbo_bf16.safetensors",
+      "weight_dtype": "default"
+    },
+    "_meta": {
+      "title": "Z-Image Turbo"
+    }
+  },
+  "21": {
+    "class_type": "ModelSamplingAuraFlow",
+    "inputs": {
+      "shift": 3,
+      "model": [
+        "20",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "ModelSamplingAuraFlow"
+    }
+  },
+  "22": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen_3_4b.safetensors",
+      "type": "lumina2",
+      "device": "default"
+    },
+    "_meta": {
+      "title": "CLIPLoader"
+    }
+  },
+  "23": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    },
+    "_meta": {
+      "title": "VAELoader"
+    }
+  },
+  "24": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": [
+        "9",
+        6
+      ],
+      "clip": [
+        "22",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Realism prompt (from presets)"
+    }
+  },
+  "25": {
+    "class_type": "ConditioningZeroOut",
+    "inputs": {
+      "conditioning": [
+        "24",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "ConditioningZeroOut"
+    }
+  },
+  "26": {
+    "class_type": "VAEEncode",
+    "inputs": {
+      "pixels": [
+        "16",
+        0
+      ],
+      "vae": [
+        "23",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "VAEEncode"
+    }
+  },
+  "27": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": [
+        "9",
+        4
+      ],
+      "steps": 8,
+      "cfg": 1,
+      "sampler_name": "dpmpp_2m_sde",
+      "scheduler": "beta",
+      "denoise": 0.3,
+      "model": [
+        "21",
+        0
+      ],
+      "positive": [
+        "24",
+        0
+      ],
+      "negative": [
+        "25",
+        0
+      ],
+      "latent_image": [
+        "26",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "KSampler (realism, denoise 0.30)"
+    }
+  },
+  "28": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "27",
+        0
+      ],
+      "vae": [
+        "23",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "VAEDecode"
+    }
+  },
   "17": {
     "class_type": "AIEmpireSaveDataset",
     "inputs": {
-      "dataset_name": "my_influencer",
-      "make_zip": true,
+      "dataset_name": [
+        "9",
+        7
+      ],
+      "make_zip": false,
+      "suffix": "_raw",
       "images": [
         "16",
         0
@@ -257,7 +399,29 @@
       ]
     },
     "_meta": {
-      "title": "Save Dataset (images + captions)"
+      "title": "Save RAW (edit model only)"
+    }
+  },
+  "29": {
+    "class_type": "AIEmpireSaveDataset",
+    "inputs": {
+      "dataset_name": [
+        "9",
+        7
+      ],
+      "make_zip": true,
+      "suffix": "",
+      "images": [
+        "28",
+        0
+      ],
+      "captions": [
+        "9",
+        1
+      ]
+    },
+    "_meta": {
+      "title": "Save FINAL (after realism pass) ← train on this"
     }
   }
 }

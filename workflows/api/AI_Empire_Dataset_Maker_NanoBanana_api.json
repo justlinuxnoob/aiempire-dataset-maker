@@ -1,0 +1,84 @@
+{
+  "1": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "your_face.png"
+    },
+    "_meta": {
+      "title": "Your face"
+    }
+  },
+  "9": {
+    "class_type": "AIEmpireDatasetPresets",
+    "inputs": {
+      "trigger_word": "zvx woman",
+      "preset_set": "core40",
+      "extra_description": "",
+      "how_many": 3,
+      "start_at": 1,
+      "seed": 42,
+      "custom_presets": "",
+      "use_body_reference": false,
+      "dataset_name": "my_influencer"
+    },
+    "_meta": {
+      "title": "Dataset Presets"
+    }
+  },
+  "30": {
+    "class_type": "AIEmpireNanoBanana",
+    "inputs": {
+      "auth": "Vertex AI",
+      "model": "gemini-3-pro-image",
+      "resolution": "2K",
+      "api_key": "",
+      "vertex_project": "",
+      "vertex_location": "global",
+      "face": [
+        "1",
+        0
+      ],
+      "prompts": [
+        "9",
+        0
+      ],
+      "captions": [
+        "9",
+        1
+      ],
+      "widths": [
+        "9",
+        2
+      ],
+      "heights": [
+        "9",
+        3
+      ]
+    },
+    "_meta": {
+      "title": "Nano Banana (your Google key)"
+    }
+  },
+  "17": {
+    "class_type": "AIEmpireSaveDataset",
+    "inputs": {
+      "dataset_name": [
+        "9",
+        7
+      ],
+      "make_zip": true,
+      "suffix": "_nanobanana",
+      "images": [
+        "30",
+        0
+      ],
+      "captions": [
+        "30",
+        1
+      ]
+    },
+    "_meta": {
+      "title": "Save Dataset (Nano Banana)"
+    }
+  }
+}

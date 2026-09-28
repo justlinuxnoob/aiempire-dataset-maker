@@ -21,16 +21,29 @@ fetch() {
     -d "$dir" -o "$name" "$url"
 }
 
-# EDIT_MODEL = firered (default, best identity) | qwen | both
+# EDIT_MODEL = firered (default, best identity) | qwen | both | none (Nano Banana only, no big downloads)
+# REALISM = 1 (default: download Z-Image Turbo for the realism pass) | 0
 # QWEN_PRECISION = fp8 (default, 20 GB) | bf16 (41 GB)   -- only used for the Qwen model
 EDIT_MODEL="${EDIT_MODEL:-firered}"
 echo "[AI Empire] Checking models for EDIT_MODEL=$EDIT_MODEL (first boot takes a few minutes)..."
 
-# shared by both models
-fetch "$M/text_encoders" "qwen_2.5_vl_7b_fp8_scaled.safetensors" \
-  "$HF/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors"
-fetch "$M/vae" "qwen_image_vae.safetensors" \
-  "$HF/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/vae/qwen_image_vae.safetensors"
+if [ "$EDIT_MODEL" != "none" ]; then
+  # shared by FireRed and Qwen
+  fetch "$M/text_encoders" "qwen_2.5_vl_7b_fp8_scaled.safetensors" \
+    "$HF/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors"
+  fetch "$M/vae" "qwen_image_vae.safetensors" \
+    "$HF/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/vae/qwen_image_vae.safetensors"
+fi
+
+if [ "${REALISM:-1}" = "1" ]; then
+  # Z-Image Turbo for the realism pass
+  fetch "$M/diffusion_models" "z_image_turbo_bf16.safetensors" \
+    "$HF/Comfy-Org/z_image_turbo/resolve/main/split_files/diffusion_models/z_image_turbo_bf16.safetensors"
+  fetch "$M/text_encoders" "qwen_3_4b.safetensors" \
+    "$HF/Comfy-Org/z_image_turbo/resolve/main/split_files/text_encoders/qwen_3_4b.safetensors"
+  fetch "$M/vae" "ae.safetensors" \
+    "$HF/Comfy-Org/z_image_turbo/resolve/main/split_files/vae/ae.safetensors"
+fi
 
 if [ "$EDIT_MODEL" = "firered" ] || [ "$EDIT_MODEL" = "both" ]; then
   fetch "$M/diffusion_models" "FireRed-Image-Edit-1.1-transformer.safetensors" \
