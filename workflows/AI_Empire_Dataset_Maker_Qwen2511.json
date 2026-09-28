@@ -1,0 +1,1078 @@
+{
+  "id": "5e0c2f64-7a1b-4c8e-9d3f-a1e3e4e5e6e7",
+  "revision": 0,
+  "last_node_id": 18,
+  "last_link_id": 24,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [
+        0,
+        0
+      ],
+      "size": [
+        320,
+        360
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            4
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "your_face.png",
+        "image"
+      ],
+      "title": "Your face",
+      "color": "#1f3320",
+      "bgcolor": "#162416"
+    },
+    {
+      "id": 2,
+      "type": "UNETLoader",
+      "pos": [
+        0,
+        420
+      ],
+      "size": [
+        320,
+        82
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            1
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UNETLoader",
+        "models": [
+          {
+            "name": "qwen_image_edit_2511_bf16.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_2511_bf16.safetensors",
+            "directory": "diffusion_models"
+          }
+        ]
+      },
+      "widgets_values": [
+        "qwen_image_edit_2511_bf16.safetensors",
+        "fp8_e4m3fn"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "LoraLoaderModelOnly",
+      "pos": [
+        0,
+        540
+      ],
+      "size": [
+        320,
+        82
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            2
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoraLoaderModelOnly",
+        "models": [
+          {
+            "name": "Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors",
+            "url": "https://huggingface.co/lightx2v/Qwen-Image-Edit-2511-Lightning/resolve/main/Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors",
+            "directory": "loras"
+          }
+        ]
+      },
+      "widgets_values": [
+        "Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors",
+        1.0
+      ],
+      "title": "Lightning 4-step LoRA"
+    },
+    {
+      "id": 4,
+      "type": "ModelSamplingAuraFlow",
+      "pos": [
+        0,
+        660
+      ],
+      "size": [
+        320,
+        58
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            3
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ModelSamplingAuraFlow"
+      },
+      "widgets_values": [
+        3.1
+      ]
+    },
+    {
+      "id": 5,
+      "type": "CFGNorm",
+      "pos": [
+        0,
+        760
+      ],
+      "size": [
+        320,
+        58
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            16
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CFGNorm"
+      },
+      "widgets_values": [
+        1
+      ]
+    },
+    {
+      "id": 6,
+      "type": "CLIPLoader",
+      "pos": [
+        0,
+        860
+      ],
+      "size": [
+        320,
+        106
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            5,
+            9
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPLoader",
+        "models": [
+          {
+            "name": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors",
+            "directory": "text_encoders"
+          }
+        ]
+      },
+      "widgets_values": [
+        "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+        "qwen_image",
+        "default"
+      ]
+    },
+    {
+      "id": 7,
+      "type": "VAELoader",
+      "pos": [
+        0,
+        1000
+      ],
+      "size": [
+        320,
+        58
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            6,
+            10,
+            22
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader",
+        "models": [
+          {
+            "name": "qwen_image_vae.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/vae/qwen_image_vae.safetensors",
+            "directory": "vae"
+          }
+        ]
+      },
+      "widgets_values": [
+        "qwen_image_vae.safetensors"
+      ]
+    },
+    {
+      "id": 9,
+      "type": "AIEmpireDatasetPresets",
+      "pos": [
+        380,
+        0
+      ],
+      "size": [
+        400,
+        330
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "prompts",
+          "type": "STRING",
+          "links": [
+            8
+          ],
+          "shape": 6
+        },
+        {
+          "name": "captions",
+          "type": "STRING",
+          "links": [
+            24
+          ],
+          "shape": 6
+        },
+        {
+          "name": "widths",
+          "type": "INT",
+          "links": [
+            14
+          ],
+          "shape": 6
+        },
+        {
+          "name": "heights",
+          "type": "INT",
+          "links": [
+            15
+          ],
+          "shape": 6
+        },
+        {
+          "name": "seeds",
+          "type": "INT",
+          "links": [
+            20
+          ],
+          "shape": 6
+        },
+        {
+          "name": "count",
+          "type": "INT",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AIEmpireDatasetPresets"
+      },
+      "widgets_values": [
+        "ohwx woman",
+        "core40",
+        "",
+        40,
+        1,
+        42,
+        "fixed",
+        ""
+      ],
+      "title": "Dataset Presets",
+      "color": "#3d2a14",
+      "bgcolor": "#2a1d0e"
+    },
+    {
+      "id": 8,
+      "type": "FluxKontextImageScale",
+      "pos": [
+        380,
+        380
+      ],
+      "size": [
+        260,
+        30
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            7,
+            11
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FluxKontextImageScale"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 10,
+      "type": "TextEncodeQwenImageEditPlus",
+      "pos": [
+        820,
+        0
+      ],
+      "size": [
+        360,
+        160
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 5
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 6
+        },
+        {
+          "name": "image1",
+          "type": "IMAGE",
+          "link": 7
+        },
+        {
+          "name": "image2",
+          "type": "IMAGE",
+          "link": null,
+          "shape": 7
+        },
+        {
+          "name": "image3",
+          "type": "IMAGE",
+          "link": null,
+          "shape": 7
+        },
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "link": 8,
+          "widget": {
+            "name": "prompt"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            12
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "TextEncodeQwenImageEditPlus"
+      },
+      "widgets_values": [
+        ""
+      ],
+      "title": "Prompt (from presets)"
+    },
+    {
+      "id": 11,
+      "type": "TextEncodeQwenImageEditPlus",
+      "pos": [
+        820,
+        220
+      ],
+      "size": [
+        360,
+        160
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 9
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 10
+        },
+        {
+          "name": "image1",
+          "type": "IMAGE",
+          "link": 11
+        },
+        {
+          "name": "image2",
+          "type": "IMAGE",
+          "link": null,
+          "shape": 7
+        },
+        {
+          "name": "image3",
+          "type": "IMAGE",
+          "link": null,
+          "shape": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            13
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "TextEncodeQwenImageEditPlus"
+      },
+      "widgets_values": [
+        ""
+      ],
+      "title": "Negative (leave empty)"
+    },
+    {
+      "id": 12,
+      "type": "FluxKontextMultiReferenceLatentMethod",
+      "pos": [
+        1220,
+        0
+      ],
+      "size": [
+        300,
+        58
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            17
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FluxKontextMultiReferenceLatentMethod"
+      },
+      "widgets_values": [
+        "index_timestep_zero"
+      ]
+    },
+    {
+      "id": 13,
+      "type": "FluxKontextMultiReferenceLatentMethod",
+      "pos": [
+        1220,
+        220
+      ],
+      "size": [
+        300,
+        58
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 13
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            18
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FluxKontextMultiReferenceLatentMethod"
+      },
+      "widgets_values": [
+        "index_timestep_zero"
+      ]
+    },
+    {
+      "id": 14,
+      "type": "EmptySD3LatentImage",
+      "pos": [
+        1220,
+        420
+      ],
+      "size": [
+        300,
+        106
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "width",
+          "type": "INT",
+          "link": 14,
+          "widget": {
+            "name": "width"
+          }
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "link": 15,
+          "widget": {
+            "name": "height"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            19
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "EmptySD3LatentImage"
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        1
+      ]
+    },
+    {
+      "id": 15,
+      "type": "KSampler",
+      "pos": [
+        1560,
+        0
+      ],
+      "size": [
+        320,
+        262
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 16
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 17
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 18
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 19
+        },
+        {
+          "name": "seed",
+          "type": "INT",
+          "link": 20,
+          "widget": {
+            "name": "seed"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            21
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        42,
+        "fixed",
+        4,
+        1,
+        "euler",
+        "simple",
+        1
+      ]
+    },
+    {
+      "id": 16,
+      "type": "VAEDecode",
+      "pos": [
+        1560,
+        320
+      ],
+      "size": [
+        220,
+        46
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 21
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 22
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            23
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 17,
+      "type": "AIEmpireSaveDataset",
+      "pos": [
+        1920,
+        0
+      ],
+      "size": [
+        520,
+        620
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 23
+        },
+        {
+          "name": "captions",
+          "type": "STRING",
+          "link": 24
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "AIEmpireSaveDataset"
+      },
+      "widgets_values": [
+        "my_influencer",
+        true
+      ],
+      "title": "Save Dataset (images + captions)",
+      "color": "#1f3320",
+      "bgcolor": "#162416"
+    },
+    {
+      "id": 18,
+      "type": "MarkdownNote",
+      "pos": [
+        380,
+        480
+      ],
+      "size": [
+        400,
+        560
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "MarkdownNote"
+      },
+      "widgets_values": [
+        "## AI Empire · Dataset Maker (Qwen Image Edit 2511)\n\n**How to use**\n1. Load your influencer's face in **Your face** (clear, front-facing, even light).\n2. In **Dataset Presets**: set the trigger word, and write what must stay the same in *extra_description* (e.g. `with long blonde hair and green eyes, curvy body`).\n3. First run: set **how_many = 3** to check the face. If it looks like her, set it back to 40.\n4. Press **Run**. Images + matching .txt captions are saved to `output/datasets/<name>/`, plus a `.zip` next to it.\n\n**Settings that matter**\n- 4 steps · CFG 1 · euler / simple (Lightning LoRA). Without the LoRA: 20-40 steps, CFG 4.\n- 24-32 GB GPU: keep UNet weight_dtype = fp8_e4m3fn. 48 GB+: set it to default for best quality.\n\n**Models (download into ComfyUI/models/...)**\n- diffusion_models: [qwen_image_edit_2511_bf16](https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_2511_bf16.safetensors) (or the fp8mixed file from the same folder)\n- loras: [Qwen-Image-Edit-2511-Lightning-4steps bf16](https://huggingface.co/lightx2v/Qwen-Image-Edit-2511-Lightning/resolve/main/Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors) (fp32 version works too)\n- text_encoders: [qwen_2.5_vl_7b_fp8_scaled](https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors)\n- vae: [qwen_image_vae](https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/vae/qwen_image_vae.safetensors)\n"
+      ],
+      "title": "READ ME"
+    }
+  ],
+  "links": [
+    [
+      1,
+      2,
+      0,
+      3,
+      0,
+      "MODEL"
+    ],
+    [
+      2,
+      3,
+      0,
+      4,
+      0,
+      "MODEL"
+    ],
+    [
+      3,
+      4,
+      0,
+      5,
+      0,
+      "MODEL"
+    ],
+    [
+      4,
+      1,
+      0,
+      8,
+      0,
+      "IMAGE"
+    ],
+    [
+      5,
+      6,
+      0,
+      10,
+      0,
+      "CLIP"
+    ],
+    [
+      6,
+      7,
+      0,
+      10,
+      1,
+      "VAE"
+    ],
+    [
+      7,
+      8,
+      0,
+      10,
+      2,
+      "IMAGE"
+    ],
+    [
+      8,
+      9,
+      0,
+      10,
+      5,
+      "STRING"
+    ],
+    [
+      9,
+      6,
+      0,
+      11,
+      0,
+      "CLIP"
+    ],
+    [
+      10,
+      7,
+      0,
+      11,
+      1,
+      "VAE"
+    ],
+    [
+      11,
+      8,
+      0,
+      11,
+      2,
+      "IMAGE"
+    ],
+    [
+      12,
+      10,
+      0,
+      12,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      13,
+      11,
+      0,
+      13,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      14,
+      9,
+      2,
+      14,
+      0,
+      "INT"
+    ],
+    [
+      15,
+      9,
+      3,
+      14,
+      1,
+      "INT"
+    ],
+    [
+      16,
+      5,
+      0,
+      15,
+      0,
+      "MODEL"
+    ],
+    [
+      17,
+      12,
+      0,
+      15,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      18,
+      13,
+      0,
+      15,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      19,
+      14,
+      0,
+      15,
+      3,
+      "LATENT"
+    ],
+    [
+      20,
+      9,
+      4,
+      15,
+      4,
+      "INT"
+    ],
+    [
+      21,
+      15,
+      0,
+      16,
+      0,
+      "LATENT"
+    ],
+    [
+      22,
+      7,
+      0,
+      16,
+      1,
+      "VAE"
+    ],
+    [
+      23,
+      16,
+      0,
+      17,
+      0,
+      "IMAGE"
+    ],
+    [
+      24,
+      9,
+      1,
+      17,
+      1,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "1 · Models",
+      "bounding": [
+        -20,
+        -60,
+        360,
+        1140
+      ],
+      "color": "#444",
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "2 · Your face + presets",
+      "bounding": [
+        360,
+        -60,
+        440,
+        1120
+      ],
+      "color": "#b06634",
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "3 · Generate",
+      "bounding": [
+        800,
+        -60,
+        1100,
+        620
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 4,
+      "title": "4 · Save dataset",
+      "bounding": [
+        1900,
+        -60,
+        560,
+        700
+      ],
+      "color": "#6a8f4e",
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.6,
+      "offset": [
+        80,
+        120
+      ]
+    }
+  },
+  "version": 0.4
+}
