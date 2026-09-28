@@ -27,3 +27,16 @@ Format: `shot description | caption | square / portrait / tall`. Caption and siz
 ## Nodes
 - **AI Empire · Dataset Presets:** trigger word, preset set, extra description (what must stay the same), how many, start at, seed.
 - **AI Empire · Save Dataset:** saves images + captions, numbers them, zips the folder.
+
+## Our RunPod template (one click, nothing to install)
+The image is built automatically by GitHub Actions on every push: `ghcr.io/justlinuxnoob/aiempire-dataset-maker:latest`
+
+RunPod → **My Templates → New Template**:
+- **Container image:** `ghcr.io/justlinuxnoob/aiempire-dataset-maker:latest`
+- **Container disk:** 30 GB
+- **Volume disk:** 60 GB, mounted at `/workspace` (models ≈ 30 GB download here on first boot)
+- **Expose HTTP ports:** `8188`
+- **Env (optional):** `QWEN_PRECISION=bf16` on 48 GB+ GPUs (default `fp8`)
+
+On boot the pod downloads the models (first time only), then starts ComfyUI. Open **Connect → HTTP 8188**, then **Workflows → AI_Empire_Dataset_Maker_Qwen2511**.
+Download the finished zip at `http://<pod-url>/view?filename=<name>.zip&subfolder=datasets&type=output`.

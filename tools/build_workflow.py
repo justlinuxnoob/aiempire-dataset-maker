@@ -8,7 +8,7 @@ import os
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 MODELS = {
-    "unet": ("qwen_image_edit_2511_bf16.safetensors", "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_2511_bf16.safetensors", "diffusion_models"),
+    "unet": ("qwen_image_edit_2511_fp8mixed.safetensors", "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_2511_fp8mixed.safetensors", "diffusion_models"),
     "lora": ("Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors", "https://huggingface.co/lightx2v/Qwen-Image-Edit-2511-Lightning/resolve/main/Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors", "loras"),
     "clip": ("qwen_2.5_vl_7b_fp8_scaled.safetensors", "https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors", "text_encoders"),
     "vae": ("qwen_image_vae.safetensors", "https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/vae/qwen_image_vae.safetensors", "vae"),
@@ -24,10 +24,11 @@ NOTE = """## AI Empire · Dataset Maker (Qwen Image Edit 2511)
 
 **Settings that matter**
 - 4 steps · CFG 1 · euler / simple (Lightning LoRA). Without the LoRA: 20-40 steps, CFG 4.
-- 24-32 GB GPU: keep UNet weight_dtype = fp8_e4m3fn. 48 GB+: set it to default for best quality.
+- Default model file is **fp8mixed** (20 GB, fits RTX 4090/5090). On a 48 GB+ GPU you can use the **bf16** file (41 GB) for best quality.
+- Using the bf16 file on a 24-32 GB GPU? Set UNet weight_dtype = fp8_e4m3fn.
 
 **Models (download into ComfyUI/models/...)**
-- diffusion_models: [qwen_image_edit_2511_bf16](https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_2511_bf16.safetensors) (or the fp8mixed file from the same folder)
+- diffusion_models: [qwen_image_edit_2511_fp8mixed](https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_2511_fp8mixed.safetensors) (or the bf16 file from the same folder)
 - loras: [Qwen-Image-Edit-2511-Lightning-4steps bf16](https://huggingface.co/lightx2v/Qwen-Image-Edit-2511-Lightning/resolve/main/Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors) (fp32 version works too)
 - text_encoders: [qwen_2.5_vl_7b_fp8_scaled](https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors)
 - vae: [qwen_image_vae](https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/vae/qwen_image_vae.safetensors)
@@ -88,7 +89,7 @@ GREEN = ("#1f3320", "#162416")
 
 # ---- loaders (left column)
 add(1, "LoadImage", [0, 0], [320, 360], ["your_face.png", "image"], [("IMAGE", "IMAGE"), ("MASK", "MASK")], title="Your face", color=GREEN)
-add(2, "UNETLoader", [0, 420], [320, 82], [MODELS["unet"][0], "fp8_e4m3fn"], [("MODEL", "MODEL")], props={"models": model_prop("unet")})
+add(2, "UNETLoader", [0, 420], [320, 82], [MODELS["unet"][0], "default"], [("MODEL", "MODEL")], props={"models": model_prop("unet")})
 add(3, "LoraLoaderModelOnly", [0, 540], [320, 82], [MODELS["lora"][0], 1.0], [("MODEL", "MODEL")], title="Lightning 4-step LoRA", props={"models": model_prop("lora")})
 add(4, "ModelSamplingAuraFlow", [0, 660], [320, 58], [3.1], [("MODEL", "MODEL")])
 add(5, "CFGNorm", [0, 760], [320, 58], [1], [("MODEL", "MODEL")])

@@ -72,15 +72,15 @@
         "Node name for S&R": "UNETLoader",
         "models": [
           {
-            "name": "qwen_image_edit_2511_bf16.safetensors",
-            "url": "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_2511_bf16.safetensors",
+            "name": "qwen_image_edit_2511_fp8mixed.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_2511_fp8mixed.safetensors",
             "directory": "diffusion_models"
           }
         ]
       },
       "widgets_values": [
-        "qwen_image_edit_2511_bf16.safetensors",
-        "fp8_e4m3fn"
+        "qwen_image_edit_2511_fp8mixed.safetensors",
+        "default"
       ]
     },
     {
@@ -815,7 +815,7 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "## AI Empire · Dataset Maker (Qwen Image Edit 2511)\n\n**How to use**\n1. Load your influencer's face in **Your face** (clear, front-facing, even light).\n2. In **Dataset Presets**: set the trigger word, and write what must stay the same in *extra_description* (e.g. `with long blonde hair and green eyes, curvy body`).\n3. First run: set **how_many = 3** to check the face. If it looks like her, set it back to 40.\n4. Press **Run**. Images + matching .txt captions are saved to `output/datasets/<name>/`, plus a `.zip` next to it.\n\n**Settings that matter**\n- 4 steps · CFG 1 · euler / simple (Lightning LoRA). Without the LoRA: 20-40 steps, CFG 4.\n- 24-32 GB GPU: keep UNet weight_dtype = fp8_e4m3fn. 48 GB+: set it to default for best quality.\n\n**Models (download into ComfyUI/models/...)**\n- diffusion_models: [qwen_image_edit_2511_bf16](https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_2511_bf16.safetensors) (or the fp8mixed file from the same folder)\n- loras: [Qwen-Image-Edit-2511-Lightning-4steps bf16](https://huggingface.co/lightx2v/Qwen-Image-Edit-2511-Lightning/resolve/main/Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors) (fp32 version works too)\n- text_encoders: [qwen_2.5_vl_7b_fp8_scaled](https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors)\n- vae: [qwen_image_vae](https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/vae/qwen_image_vae.safetensors)\n"
+        "## AI Empire · Dataset Maker (Qwen Image Edit 2511)\n\n**How to use**\n1. Load your influencer's face in **Your face** (clear, front-facing, even light).\n2. In **Dataset Presets**: set the trigger word, and write what must stay the same in *extra_description* (e.g. `with long blonde hair and green eyes, curvy body`).\n3. First run: set **how_many = 3** to check the face. If it looks like her, set it back to 40.\n4. Press **Run**. Images + matching .txt captions are saved to `output/datasets/<name>/`, plus a `.zip` next to it.\n\n**Settings that matter**\n- 4 steps · CFG 1 · euler / simple (Lightning LoRA). Without the LoRA: 20-40 steps, CFG 4.\n- Default model file is **fp8mixed** (20 GB, fits RTX 4090/5090). On a 48 GB+ GPU you can use the **bf16** file (41 GB) for best quality.\n- Using the bf16 file on a 24-32 GB GPU? Set UNet weight_dtype = fp8_e4m3fn.\n\n**Models (download into ComfyUI/models/...)**\n- diffusion_models: [qwen_image_edit_2511_fp8mixed](https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_2511_fp8mixed.safetensors) (or the bf16 file from the same folder)\n- loras: [Qwen-Image-Edit-2511-Lightning-4steps bf16](https://huggingface.co/lightx2v/Qwen-Image-Edit-2511-Lightning/resolve/main/Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors) (fp32 version works too)\n- text_encoders: [qwen_2.5_vl_7b_fp8_scaled](https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors)\n- vae: [qwen_image_vae](https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/vae/qwen_image_vae.safetensors)\n"
       ],
       "title": "READ ME"
     }
