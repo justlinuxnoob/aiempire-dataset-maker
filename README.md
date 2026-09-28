@@ -45,5 +45,5 @@ RunPod → **My Templates → New Template**:
   - `VIDEO=minimax` adds MiniMax H3 video (image-to-video + reference-to-video, ~75 GB more: use a 200 GB volume, 48 GB+ GPU). Set `EDIT_MODEL=none` + `REALISM=0` for a video-only pod
   - Nano Banana: `VERTEX_SA_JSON` (whole service-account JSON, as a RunPod **secret**) or `GEMINI_API_KEY`
 
-On boot the pod downloads the models (first time only), then starts ComfyUI. Open **Connect → HTTP 8188**, then **Workflows → AI_Empire_Dataset_Maker_FireRed11**.
+On boot the pod downloads the models (first time only), then starts ComfyUI. Open **Connect → HTTP 8188** and drag in the workflow `.json` (workflows are NOT inside the image; they're delivered separately).
 Download the finished zip at `http://<pod-url>/view?filename=<name>.zip&subfolder=datasets&type=output`.
