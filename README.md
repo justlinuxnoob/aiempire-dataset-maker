@@ -21,6 +21,12 @@ Runs 100% open-source on your own GPU. No API keys, no paid services.
 3. `how_many = 3` to test, `0` = all. Finished images are skipped on re-runs (`skip_done`), so after a crash just press Run again.
 4. Output: `datasets/<name>/<name>_<template>.png` + `.txt` + `<name>.zip`, same size/shape as each template (encoder *resolution* 1536 ≈ 2.3 MP).
 
+## Body-type presets (athletic, curvy …)
+`workflows/AI_Empire_Dataset_Maker_Qwen21_BodyPresets.json`: turns your base photos into a preset where every photo has the same body. Face, hair, pose, outfit, place and light stay.
+1. **Body Preset Maker** box → upload your base photos (e.g. set `base`), set *output_set* (`athletic`) and *body_target*.
+2. *instructions*, one line per photo: `1-35 | keep` (copied unchanged), `swap_40 | her hips are wide, make them narrower` (extra help for one photo).
+3. The result lands in `input/templates/athletic/` (captions copied too) and shows up in the Template Presets dropdown.
+
 ## GPU
 - FireRed (41 GB model): 80 GB GPU (A100 / H100) as is; on 48 GB (A6000, A40, L40S) set UNet `weight_dtype = fp8_e4m3fn`.
 - Qwen fp8mixed (20 GB model): runs on 24–48 GB GPUs as is.
@@ -35,6 +41,7 @@ Format: `shot description | caption | square / portrait / tall`. Caption and siz
 ## Nodes
 - **AI Empire · Nano Banana:** makes the dataset with Nano Banana Pro / Nano Banana 2 using your own Google key (Vertex AI or AI Studio). Refused shots are skipped.
 - **AI Empire · Template Presets:** loops over a folder of your own template photos (upload button on the node), with resume.
+- **AI Empire · Body Preset Maker / Save Template Set:** makes a body-type preset from your base photos.
 - **AI Empire · Dataset Presets:** trigger word, preset set, extra description (what must stay the same), how many, start at, seed.
 - **AI Empire · Save Dataset:** saves images + captions, numbers them, zips the folder.
 - **AI Empire · Photo Finish:** phone-photo look in one node (levels, soft glow, lens softness, hand shake, ISO grain, JPEG).

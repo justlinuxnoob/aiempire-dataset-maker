@@ -3,7 +3,8 @@
 import { app } from "../../scripts/app.js";
 import { api } from "../../scripts/api.js";
 
-const NODE = "AIEmpireTemplatePresets";
+// node type -> name of its template-set dropdown
+const NODES = { AIEmpireTemplatePresets: "template_set", AIEmpireBodyPresetMaker: "source_set" };
 const PLACEHOLDER = "upload templates first";
 const OK_EXT = /\.(png|jpe?g|webp|bmp|txt|zip)$/i;
 
@@ -20,13 +21,14 @@ async function uploadOne(file, subfolder) {
 app.registerExtension({
   name: "aiempire.templatePresets",
   async beforeRegisterNodeDef(nodeType, nodeData) {
-    if (nodeData.name !== NODE) return;
+    const SET_WIDGET = NODES[nodeData.name];
+    if (!SET_WIDGET) return;
 
     const onNodeCreated = nodeType.prototype.onNodeCreated;
     nodeType.prototype.onNodeCreated = function () {
       const r = onNodeCreated ? onNodeCreated.apply(this, arguments) : undefined;
       const node = this;
-      const setWidget = () => node.widgets.find((w) => w.name === "template_set");
+      const setWidget = () => node.widgets.find((w) => w.name === SET_WIDGET);
 
       const input = document.createElement("input");
       input.type = "file";

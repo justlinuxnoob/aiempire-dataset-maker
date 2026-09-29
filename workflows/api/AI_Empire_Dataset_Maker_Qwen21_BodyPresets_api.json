@@ -1,0 +1,161 @@
+{
+  "50": {
+    "class_type": "AIEmpireBodyPresetMaker",
+    "inputs": {
+      "source_set": "my_templates",
+      "output_set": "athletic",
+      "body_target": "an athletic, fit body: toned flat stomach with light ab definition, slim waist, toned arms and shoulders, firm toned legs and glutes, natural healthy proportions",
+      "instructions": "# one line per photo (optional)\n# 1-35 | keep\n# swap_40 | her hips are wide, make them narrower\n",
+      "how_many": 3,
+      "start_at": 1,
+      "seed": 42,
+      "skip_done": true
+    },
+    "_meta": {
+      "title": "Body Preset Maker (upload base photos here)"
+    }
+  },
+  "2": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "qwen_image_2.1_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    },
+    "_meta": {
+      "title": "Edit model"
+    }
+  },
+  "5": {
+    "class_type": "QwenImage21Cache",
+    "inputs": {
+      "device": "auto",
+      "dtype": "default",
+      "model": [
+        "2",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "QwenImage21Cache"
+    }
+  },
+  "6": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen3vl_8b_int8_convrot.safetensors",
+      "type": "qwen_image",
+      "device": "default"
+    },
+    "_meta": {
+      "title": "CLIPLoader"
+    }
+  },
+  "7": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "qwen_image_2.1_vae_bf16.safetensors"
+    },
+    "_meta": {
+      "title": "VAELoader"
+    }
+  },
+  "10": {
+    "class_type": "TextEncodeQwenImage21",
+    "inputs": {
+      "prompt": [
+        "50",
+        1
+      ],
+      "negative_prompt": "",
+      "resolution": 1536,
+      "clip": [
+        "6",
+        0
+      ],
+      "vae": [
+        "7",
+        0
+      ],
+      "images.image_1": [
+        "50",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Qwen 2.1 encoder (image 1 = base photo)"
+    }
+  },
+  "15": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": [
+        "50",
+        2
+      ],
+      "steps": 25,
+      "cfg": 1,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1,
+      "model": [
+        "5",
+        0
+      ],
+      "positive": [
+        "10",
+        0
+      ],
+      "negative": [
+        "10",
+        1
+      ],
+      "latent_image": [
+        "10",
+        2
+      ]
+    },
+    "_meta": {
+      "title": "KSampler (edit)"
+    }
+  },
+  "16": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "15",
+        0
+      ],
+      "vae": [
+        "7",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "VAEDecode"
+    }
+  },
+  "51": {
+    "class_type": "AIEmpireSaveTemplateSet",
+    "inputs": {
+      "output_set": [
+        "50",
+        4
+      ],
+      "source_set": [
+        "50",
+        5
+      ],
+      "images": [
+        "16",
+        0
+      ],
+      "file_names": [
+        "50",
+        3
+      ]
+    },
+    "_meta": {
+      "title": "Save preset → input/templates/<output_set>"
+    }
+  }
+}

@@ -288,6 +288,180 @@ class AIEmpireTemplatePresets:
         return (imgs, prompts, captions, seeds, len(imgs), name, stems)
 
 
+# ----------------------------------------------------------------- body presets
+
+ATHLETIC = ("an athletic, fit body: toned flat stomach with light ab definition, slim waist, "
+            "toned arms and shoulders, firm toned legs and glutes, natural healthy proportions")
+
+BODY_PROMPT = (
+    "Change only her body shape in image 1 to {target}.{extra} "
+    "Keep her face, hair, skin tone, pose, hands, outfit, background, camera angle, framing and lighting exactly the same. "
+    "The clothes fit her new body naturally. Photorealistic smartphone photo, natural skin texture."
+)
+
+
+def _parse_instructions(text, files):
+    """Lines like  'swap_01 | keep',  '1-35 | keep',  '7 | her hips are wide, make them narrower'.
+    Left side: file name (with or without extension), a number, or a range (numbers = position in the set)."""
+    by_file = {}
+    stems = {os.path.splitext(f)[0].lower(): f for f in files}
+    names = {f.lower(): f for f in files}
+    for raw in (text or "").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#") or "|" not in line:
+            continue
+        key, what = (x.strip() for x in line.split("|", 1))
+        k = key.lower()
+        targets = []
+        m = re.fullmatch(r"(\d+)\s*-\s*(\d+)", k)
+        if m:
+            a, b = int(m.group(1)), int(m.group(2))
+            targets = files[max(a, 1) - 1:b]
+        elif k.isdigit():
+            targets = files[int(k) - 1:int(k)] if int(k) >= 1 else []
+        elif k in names:
+            targets = [names[k]]
+        elif k in stems:
+            targets = [stems[k]]
+        else:
+            print(f"[AI Empire] body instructions: no file matches '{key}' - line ignored")
+        for f in targets:
+            by_file[f] = what
+    return by_file
+
+
+class AIEmpireBodyPresetMaker:
+    """Makes a body-type preset: every photo in a template set gets the same body type,
+    everything else stays. 'keep' photos are copied unchanged. Output = a new template set."""
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        sets = _template_sets() or ["upload templates first"]
+        return {
+            "required": {
+                "source_set": (sets, {"tooltip": "Your base photos (input/templates/<set>). Use the Upload button to add them."}),
+                "output_set": ("STRING", {"default": "athletic", "tooltip": "Name of the new preset folder, e.g. athletic, curvy, skinny."}),
+                "body_target": ("STRING", {"default": ATHLETIC, "multiline": True, "tooltip": "The body type every photo gets."}),
+                "instructions": ("STRING", {"default": "# one line per photo (optional)\n# 1-35 | keep\n# swap_40 | her hips are wide, make them narrower\n", "multiline": True,
+                                            "tooltip": "keep = copy unchanged. Anything else is added to the edit for that photo. Photos not listed get the normal edit."}),
+                "how_many": ("INT", {"default": 3, "min": 0, "max": 1000, "tooltip": "3 for a quick test. 0 = every photo."}),
+                "start_at": ("INT", {"default": 1, "min": 1, "max": 1000}),
+                "seed": ("INT", {"default": 42, "min": 0, "max": 0xFFFFFFFFFFFFFFFF, "control_after_generate": True}),
+            },
+            "optional": {
+                "skip_done": ("BOOLEAN", {"default": True, "tooltip": "Skip photos already in the output set (resume after a crash). Turn off to redo them."}),
+            },
+        }
+
+    RETURN_TYPES = ("IMAGE", "STRING", "INT", "STRING", "STRING", "STRING")
+    RETURN_NAMES = ("images", "prompts", "seeds", "file_names", "output_set", "source_set")
+    OUTPUT_IS_LIST = (True, True, True, True, False, False)
+    FUNCTION = "build"
+    CATEGORY = "AI Empire"
+
+    @classmethod
+    def IS_CHANGED(cls, source_set, output_set="athletic", **kw):
+        state = []
+        for folder in (os.path.join(_templates_dir(), source_set), os.path.join(_templates_dir(), _safe_name(output_set))):
+            if os.path.isdir(folder):
+                state += [f"{f}:{os.path.getmtime(os.path.join(folder, f))}" for f in sorted(os.listdir(folder))]
+        return "|".join(state)
+
+    def build(self, source_set, output_set, body_target, instructions, how_many, start_at, seed, skip_done=True):
+        import shutil
+        src = os.path.join(_templates_dir(), source_set)
+        if not os.path.isdir(src):
+            raise ValueError("No base photos yet: click 'Upload template photos' on this box.")
+        out_name = _safe_name(output_set)
+        if out_name == source_set:
+            raise ValueError("output_set must be a different folder than source_set.")
+        dst = os.path.join(_templates_dir(), out_name)
+        os.makedirs(dst, exist_ok=True)
+        _unzip_uploads(src)
+        files = sorted((f for f in os.listdir(src) if f.lower().endswith(IMAGE_EXTS) and not f.startswith(".")), key=_natural_key)
+        if not files:
+            raise ValueError(f"input/templates/{source_set} has no images.")
+        chosen = files[start_at - 1:] if how_many == 0 else files[start_at - 1:start_at - 1 + how_many]
+        if not chosen:
+            raise ValueError(f"'start_at' is past the end: this set has {len(files)} photos.")
+
+        per_file = _parse_instructions(instructions, files)
+        done_stems = {os.path.splitext(f)[0] for f in os.listdir(dst) if f.lower().endswith(IMAGE_EXTS)}
+        target = body_target.strip().rstrip(".")
+
+        imgs, prompts, seeds, stems, kept, skipped = [], [], [], [], 0, 0
+        for f in chosen:
+            stem = os.path.splitext(f)[0]
+            if skip_done and stem in done_stems:
+                skipped += 1
+                continue
+            what = per_file.get(f, "").strip()
+            cap = os.path.join(src, stem + ".txt")
+            if what.lower() == "keep":
+                shutil.copy2(os.path.join(src, f), os.path.join(dst, f))
+                if os.path.exists(cap):
+                    shutil.copy2(cap, os.path.join(dst, stem + ".txt"))
+                kept += 1
+                continue
+            extra = f" {what[0].upper()}{what[1:].rstrip('.')}." if what else ""
+            imgs.append(_pil_to_tensor(_load_template(os.path.join(src, f))))
+            prompts.append(BODY_PROMPT.format(target=target, extra=extra))
+            seeds.append((seed + files.index(f)) % 0xFFFFFFFFFFFFFFFF)
+            stems.append(stem)
+
+        print(f"[AI Empire] Body preset '{out_name}': {len(imgs)} to edit, {kept} kept as they are, {skipped} already done")
+        if not imgs:
+            raise ValueError(f"Nothing left to edit: {kept} photos copied unchanged, {skipped} already done. "
+                             f"Preset is in input/templates/{out_name}.")
+        return (imgs, prompts, seeds, stems, out_name, source_set)
+
+
+class AIEmpireSaveTemplateSet:
+    """Saves edited photos into input/templates/<output_set>/ with their original names
+    (+ copies the caption .txt), so the result shows up as a new preset in Template Presets."""
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "images": ("IMAGE",),
+                "file_names": ("STRING", {"forceInput": True}),
+                "output_set": ("STRING", {"default": "athletic"}),
+                "source_set": ("STRING", {"default": ""}),
+            },
+        }
+
+    INPUT_IS_LIST = True
+    RETURN_TYPES = ()
+    OUTPUT_NODE = True
+    FUNCTION = "save"
+    CATEGORY = "AI Empire"
+
+    def save(self, images, file_names, output_set, source_set):
+        import shutil
+        out_name = _safe_name(_first(output_set))
+        src = os.path.join(_templates_dir(), os.path.basename(_first(source_set) or ""))
+        dst = os.path.join(_templates_dir(), out_name)
+        os.makedirs(dst, exist_ok=True)
+        ui, n = [], 0
+        for idx, batch in enumerate(images):
+            stem = os.path.basename(file_names[idx] if idx < len(file_names) else f"img_{idx + 1:03d}")
+            for b, img in enumerate(batch):
+                base = stem + (f"_{b + 1}" if b else "")
+                for old in os.listdir(dst):  # replace an older version with another extension
+                    if os.path.splitext(old)[0] == base and old.lower().endswith(IMAGE_EXTS):
+                        os.remove(os.path.join(dst, old))
+                arr = np.clip(255.0 * img.cpu().numpy(), 0, 255).astype(np.uint8)
+                Image.fromarray(arr).save(os.path.join(dst, base + ".png"), compress_level=4)
+                ui.append({"filename": base + ".png", "subfolder": f"{TEMPLATE_ROOT}/{out_name}", "type": "input"})
+                n += 1
+            cap = os.path.join(src, stem + ".txt")
+            if os.path.exists(cap):
+                shutil.copy2(cap, os.path.join(dst, stem + ".txt"))
+        print(f"[AI Empire] Saved {n} photos to input/templates/{out_name}")
+        return {"ui": {"images": ui}}
+
+
 # ----------------------------------------------------------------- Nano Banana
 
 ASPECTS = {"1:1": 1.0, "4:5": 0.8, "3:4": 0.75, "2:3": 2 / 3, "9:16": 9 / 16, "5:4": 1.25, "4:3": 4 / 3, "3:2": 1.5, "16:9": 16 / 9}
@@ -514,6 +688,8 @@ class AIEmpireSaveDataset:
 NODE_CLASS_MAPPINGS = {
     "AIEmpireDatasetPresets": AIEmpireDatasetPresets,
     "AIEmpireTemplatePresets": AIEmpireTemplatePresets,
+    "AIEmpireBodyPresetMaker": AIEmpireBodyPresetMaker,
+    "AIEmpireSaveTemplateSet": AIEmpireSaveTemplateSet,
     "AIEmpireNanoBanana": AIEmpireNanoBanana,
     "AIEmpireSaveDataset": AIEmpireSaveDataset,
 }
@@ -521,6 +697,8 @@ NODE_CLASS_MAPPINGS = {
 NODE_DISPLAY_NAME_MAPPINGS = {
     "AIEmpireDatasetPresets": "AI Empire · Dataset Presets",
     "AIEmpireTemplatePresets": "AI Empire · Template Presets (your photos)",
+    "AIEmpireBodyPresetMaker": "AI Empire · Body Preset Maker",
+    "AIEmpireSaveTemplateSet": "AI Empire · Save Template Set (new preset)",
     "AIEmpireNanoBanana": "AI Empire · Nano Banana (your Google key)",
     "AIEmpireSaveDataset": "AI Empire · Save Dataset (images + captions)",
 }
