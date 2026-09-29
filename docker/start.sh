@@ -21,13 +21,14 @@ fetch() {
     -d "$dir" -o "$name" "$url"
 }
 
-# EDIT_MODEL = firered (default, best identity) | qwen | both | none (Nano Banana only, no big downloads)
+# No env vars needed: by default the pod sets up the Qwen-Image 2.1 dataset maker + Z-Image realism pass.
+# EDIT_MODEL = qwen21 (default) | firered | qwen (2511) | both (firered + qwen 2511) | none (Nano Banana only)
 # REALISM = 1 (default: download Z-Image Turbo for the realism pass) | 0
 # QWEN_PRECISION = fp8 (default, 20 GB) | bf16 (41 GB)   -- only used for the Qwen model
-EDIT_MODEL="${EDIT_MODEL:-firered}"
+EDIT_MODEL="${EDIT_MODEL:-qwen21}"
 echo "[AI Empire] Checking models for EDIT_MODEL=$EDIT_MODEL (first boot takes a few minutes)..."
 
-if [ "$EDIT_MODEL" != "none" ]; then
+if [ "$EDIT_MODEL" != "none" ] && [ "$EDIT_MODEL" != "qwen21" ]; then
   # shared by FireRed and Qwen
   fetch "$M/text_encoders" "qwen_2.5_vl_7b_fp8_scaled.safetensors" \
     "$HF/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors"
@@ -65,7 +66,7 @@ if [ "$EDIT_MODEL" = "qwen" ] || [ "$EDIT_MODEL" = "both" ]; then
 fi
 
 # QWEN21 = 1 -> Qwen-Image 2.1 edit (test workflow), ~30 GB
-if [ "${QWEN21:-0}" = "1" ]; then
+if [ "${QWEN21:-0}" = "1" ] || [ "$EDIT_MODEL" = "qwen21" ]; then
   Q21="$HF/Comfy-Org/Qwen-Image-2.1/resolve/main"
   fetch "$M/diffusion_models" "qwen_image_2.1_int8_convrot.safetensors" "$Q21/diffusion_models/qwen_image_2.1_int8_convrot.safetensors"
   fetch "$M/text_encoders" "qwen3vl_8b_int8_convrot.safetensors" "$Q21/text_encoders/qwen3vl_8b_int8_convrot.safetensors"

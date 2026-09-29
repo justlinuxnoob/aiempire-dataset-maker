@@ -38,10 +38,10 @@ The image is built automatically by GitHub Actions on every push: `ghcr.io/justl
 RunPod → **My Templates → New Template**:
 - **Container image:** `ghcr.io/justlinuxnoob/aiempire-dataset-maker:latest`
 - **Container disk:** 30 GB
-- **Volume disk:** 100 GB, mounted at `/workspace` (first boot downloads ~72 GB for FireRed + realism pass)
+- **Volume disk:** 100 GB, mounted at `/workspace` (first boot downloads ~50 GB: Qwen-Image 2.1 + realism pass)
 - **Expose HTTP ports:** `8188`
-- **Env (optional):**
-  - `EDIT_MODEL` = `firered` (default) / `qwen` / `both` / `none` (Nano Banana only)
+- **Env: none needed.** With no env vars the pod sets up the Qwen-Image 2.1 dataset maker + realism pass. Optional extras:
+  - `EDIT_MODEL` = `qwen21` (default) / `firered` / `qwen` (2511) / `both` / `none` (Nano Banana only)
   - `REALISM` = `1` (default, downloads Z-Image Turbo for the realism pass) / `0`
   - `QWEN_PRECISION=bf16` for the full Qwen model
   - `QWEN21=1` adds the Qwen-Image 2.1 edit test workflow (~30 GB)
