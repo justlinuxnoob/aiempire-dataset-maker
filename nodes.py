@@ -2,6 +2,8 @@
 
   * AIEmpireDatasetPresets - turns a preset list (or your own lines) into lists
     of prompts, captions, sizes and seeds. Nodes after it run once per preset.
+  * AIEmpireTemplatePresets - same idea, but every photo in input/templates/<set>/
+    is one shot: her face goes into that photo's pose, outfit, place and light.
   * AIEmpireNanoBanana     - makes the dataset with Google Nano Banana Pro /
     Nano Banana 2, using YOUR OWN Google key (AI Studio key or Vertex AI).
   * AIEmpireSaveDataset    - saves every image with a matching .txt caption
@@ -130,6 +132,160 @@ class AIEmpireDatasetPresets:
             heights.append(h)
             seeds.append((seed + i) % 0xFFFFFFFFFFFFFFFF)
         return (prompts, captions, widths, heights, seeds, len(chosen), realism, dataset_name.strip() or "my_influencer")
+
+
+# ----------------------------------------------------------------- template photos
+
+TEMPLATE_ROOT = "templates"  # inside ComfyUI's input folder: input/templates/<set>/
+IMAGE_EXTS = (".png", ".jpg", ".jpeg", ".webp", ".bmp")
+
+# Qwen-Image 2.1 labels its reference images <image1>, <image2>, ... in order.
+# image 1 = the template (the output keeps its size and composition), image 2 = her face, image 3 = body (optional)
+TEMPLATE_PROMPT = (
+    "Replace the woman in image 1 with the woman from image 2{extra}. "
+    "Take her face, face shape, eyes and eye colour, eyebrows, nose, lips, skin tone, "
+    "hair colour and hairstyle from image 2. "
+    "Keep everything else from image 1 exactly the same: {keep}the pose, the hands, the outfit, "
+    "the background, the camera angle, the framing and the lighting. "
+    "{body}"
+    "Photorealistic smartphone photo, natural skin texture with visible pores, sharp focus on her face."
+)
+TEMPLATE_BODY_REF = "Her body shape, figure and proportions are exactly the same as the woman in image 3. "
+
+
+def _templates_dir():
+    return os.path.join(folder_paths.get_input_directory(), TEMPLATE_ROOT)
+
+
+def _template_sets():
+    root = _templates_dir()
+    if not os.path.isdir(root):
+        return []
+    return sorted(d for d in os.listdir(root) if os.path.isdir(os.path.join(root, d)) and not d.startswith("."))
+
+
+def _natural_key(s):
+    return [int(t) if t.isdigit() else t.lower() for t in re.split(r"(\d+)", s)]
+
+
+def _unzip_uploads(folder):
+    """A .zip uploaded into the set folder is unpacked once (images only, no sub-folders)."""
+    for z in [f for f in os.listdir(folder) if f.lower().endswith(".zip")]:
+        zpath = os.path.join(folder, z)
+        try:
+            with zipfile.ZipFile(zpath) as zf:
+                for member in zf.namelist():
+                    base = os.path.basename(member)
+                    if not base or base.startswith(".") or "__MACOSX" in member:
+                        continue
+                    if not base.lower().endswith(IMAGE_EXTS + (".txt",)):
+                        continue
+                    with zf.open(member) as src, open(os.path.join(folder, base), "wb") as dst:
+                        dst.write(src.read())
+            os.remove(zpath)
+            print(f"[AI Empire] unpacked {z}")
+        except zipfile.BadZipFile:
+            print(f"[AI Empire] {z} is not a valid zip - skipped")
+
+
+def _load_template(path, max_side=2048):
+    from PIL import ImageOps
+    img = ImageOps.exif_transpose(Image.open(path)).convert("RGB")
+    w, h = img.size
+    if max(w, h) > max_side:
+        k = max_side / max(w, h)
+        img = img.resize((int(w * k), int(h * k)), Image.LANCZOS)
+    return img
+
+
+class AIEmpireTemplatePresets:
+    """Every photo in input/templates/<set>/ becomes one dataset image:
+    same pose, outfit, place and light as the photo, her face from 'Your face'."""
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        sets = _template_sets() or ["upload templates first"]
+        return {
+            "required": {
+                "template_set": (sets, {"tooltip": "Folder in input/templates/. Use the Upload button on this box to add photos."}),
+                "trigger_word": ("STRING", {"default": "zvx woman", "tooltip": "Starts every caption. Use the same one when training."}),
+                "extra_description": ("STRING", {"default": "", "tooltip": "What must stay the same, e.g. 'with long straight blonde hair, blue eyes'. Not written into captions."}),
+                "how_many": ("INT", {"default": 3, "min": 0, "max": 1000, "tooltip": "3 for a quick test. 0 = every photo in the set."}),
+                "start_at": ("INT", {"default": 1, "min": 1, "max": 1000}),
+                "seed": ("INT", {"default": 42, "min": 0, "max": 0xFFFFFFFFFFFFFFFF, "control_after_generate": True}),
+            },
+            "optional": {
+                "use_body_reference": ("BOOLEAN", {"default": False, "tooltip": "Turn on when you also load a full-body photo of her (Body reference box). Off = body comes from each template."}),
+                "dataset_name": ("STRING", {"default": "my_influencer"}),
+                "skip_done": ("BOOLEAN", {"default": True, "tooltip": "Skip templates that already have a saved image in this dataset (resume after a crash)."}),
+            },
+        }
+
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING", "INT", "INT", "STRING", "STRING")
+    RETURN_NAMES = ("templates", "prompts", "captions", "seeds", "count", "dataset_name", "file_names")
+    OUTPUT_IS_LIST = (True, True, True, True, False, False, True)
+    FUNCTION = "build"
+    CATEGORY = "AI Empire"
+
+    @classmethod
+    def IS_CHANGED(cls, template_set, dataset_name="my_influencer", **kw):
+        # re-read when templates are added/changed, or when finished images appear (so skip_done works on re-runs)
+        state = []
+        for folder in (os.path.join(_templates_dir(), template_set),
+                       os.path.join(folder_paths.get_output_directory(), "datasets", _safe_name(dataset_name))):
+            if os.path.isdir(folder):
+                state += [f"{f}:{os.path.getmtime(os.path.join(folder, f))}" for f in sorted(os.listdir(folder))]
+        return "|".join(state)
+
+    def build(self, template_set, trigger_word, extra_description, how_many, start_at, seed,
+              use_body_reference=False, dataset_name="my_influencer", skip_done=True):
+        folder = os.path.join(_templates_dir(), template_set)
+        if not os.path.isdir(folder):
+            raise ValueError("No template photos yet: click 'Upload template photos' on the Template Presets box.")
+        _unzip_uploads(folder)
+        files = sorted((f for f in os.listdir(folder) if f.lower().endswith(IMAGE_EXTS) and not f.startswith(".")), key=_natural_key)
+        if not files:
+            raise ValueError(f"input/templates/{template_set} has no images (.png .jpg .jpeg .webp).")
+
+        chosen = files[start_at - 1:] if how_many == 0 else files[start_at - 1:start_at - 1 + how_many]
+        if not chosen:
+            raise ValueError(f"'start_at' is past the end: this set has {len(files)} photos.")
+
+        name = _safe_name(dataset_name)
+        out_folder = os.path.join(folder_paths.get_output_directory(), "datasets", name)
+        extra = extra_description.strip().rstrip(".")
+        if extra and not extra.startswith(","):
+            extra = " " + extra
+        prompt = TEMPLATE_PROMPT.format(
+            extra=extra,
+            keep="" if use_body_reference else "her body shape, ",
+            body=TEMPLATE_BODY_REF if use_body_reference else "",
+        )
+        trigger = trigger_word.strip()
+
+        imgs, prompts, captions, seeds, stems, skipped = [], [], [], [], [], 0
+        for f in chosen:
+            stem = _safe_name(os.path.splitext(f)[0]).strip("_") or "img"
+            if skip_done and os.path.exists(os.path.join(out_folder, f"{name}_{stem}.png")):
+                skipped += 1
+                continue
+            img = _load_template(os.path.join(folder, f))
+            imgs.append(_pil_to_tensor(img))
+            prompts.append(prompt)
+            cap_file = os.path.join(folder, os.path.splitext(f)[0] + ".txt")
+            cap = ""
+            if os.path.exists(cap_file):
+                with open(cap_file, "r", encoding="utf-8") as cf:
+                    cap = cf.read().strip()
+            captions.append(", ".join(x for x in (trigger, cap) if x) or trigger)
+            seeds.append((seed + files.index(f)) % 0xFFFFFFFFFFFFFFFF)
+            stems.append(stem)
+
+        print(f"[AI Empire] Templates '{template_set}': {len(imgs)} to make, {skipped} already done")
+        if not imgs:
+            raise ValueError(f"All {skipped} templates are already done in datasets/{name}. "
+                             "Turn off 'skip_done' or change 'dataset_name' to make them again.")
+        return (imgs, prompts, captions, seeds, len(imgs), name, stems)
 
 
 # ----------------------------------------------------------------- Nano Banana
@@ -301,6 +457,7 @@ class AIEmpireSaveDataset:
             },
             "optional": {
                 "suffix": ("STRING", {"default": "", "tooltip": "Added to the folder name, e.g. _raw"}),
+                "file_names": ("STRING", {"forceInput": True, "tooltip": "From Template Presets: each image is named after its template, so re-runs skip finished ones."}),
             },
         }
 
@@ -310,7 +467,7 @@ class AIEmpireSaveDataset:
     FUNCTION = "save"
     CATEGORY = "AI Empire"
 
-    def save(self, images, captions, dataset_name, make_zip, suffix=None):
+    def save(self, images, captions, dataset_name, make_zip, suffix=None, file_names=None):
         sfx = (_first(suffix) if suffix else "") or ""
         name = _safe_name(_first(dataset_name) + sfx)
         do_zip = bool(_first(make_zip))
@@ -326,9 +483,14 @@ class AIEmpireSaveDataset:
         ui_images, n = [], 0
         for idx, batch in enumerate(images):
             caption = captions[idx] if idx < len(captions) else captions[-1]
-            for img in batch:
+            stem = _safe_name(file_names[idx]).strip("_") if file_names and idx < len(file_names) else None
+            for b, img in enumerate(batch):
                 arr = np.clip(255.0 * img.cpu().numpy(), 0, 255).astype(np.uint8)
-                base = f"{name}_{counter:03d}"
+                if stem:
+                    base = f"{name}_{stem}" + (f"_{b + 1}" if b else "")
+                else:
+                    base = f"{name}_{counter:03d}"
+                    counter += 1
                 meta = PngInfo()
                 meta.add_text("ai_generated", "true")
                 meta.add_text("caption", caption)
@@ -336,7 +498,6 @@ class AIEmpireSaveDataset:
                 with open(os.path.join(folder, base + ".txt"), "w", encoding="utf-8") as f:
                     f.write(caption)
                 ui_images.append({"filename": base + ".png", "subfolder": subfolder, "type": "output"})
-                counter += 1
                 n += 1
 
         if do_zip:
@@ -352,12 +513,14 @@ class AIEmpireSaveDataset:
 
 NODE_CLASS_MAPPINGS = {
     "AIEmpireDatasetPresets": AIEmpireDatasetPresets,
+    "AIEmpireTemplatePresets": AIEmpireTemplatePresets,
     "AIEmpireNanoBanana": AIEmpireNanoBanana,
     "AIEmpireSaveDataset": AIEmpireSaveDataset,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "AIEmpireDatasetPresets": "AI Empire · Dataset Presets",
+    "AIEmpireTemplatePresets": "AI Empire · Template Presets (your photos)",
     "AIEmpireNanoBanana": "AI Empire · Nano Banana (your Google key)",
     "AIEmpireSaveDataset": "AI Empire · Save Dataset (images + captions)",
 }

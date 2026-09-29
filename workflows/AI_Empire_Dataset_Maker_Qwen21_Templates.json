@@ -1,0 +1,810 @@
+{
+  "id": "5e0c2f64-7a1b-4c8e-9d3f-7e3a1a7e0002",
+  "revision": 0,
+  "last_node_id": 40,
+  "last_link_id": 18,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [
+        380,
+        0
+      ],
+      "size": [
+        320,
+        360
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            5
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "your_face.png",
+        "image"
+      ],
+      "title": "Your face",
+      "color": "#1f3320",
+      "bgcolor": "#162416"
+    },
+    {
+      "id": 19,
+      "type": "LoadImage",
+      "pos": [
+        380,
+        420
+      ],
+      "size": [
+        320,
+        360
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            6
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "your_body.png",
+        "image"
+      ],
+      "title": "Body reference (optional, Ctrl+B to turn on)",
+      "color": "#2e2240",
+      "bgcolor": "#1f172b"
+    },
+    {
+      "id": 18,
+      "type": "MarkdownNote",
+      "pos": [
+        740,
+        520
+      ],
+      "size": [
+        420,
+        760
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "MarkdownNote"
+      },
+      "widgets_values": [
+        "## AI Empire · Dataset Maker (Qwen-Image 2.1 · your template photos)\n\nEvery photo you upload = 1 dataset image: **same pose, outfit, place and light as the photo, her face from *Your face*.** 50 photos in = 50 dataset images out.\n\n**How to use**\n1. Load her face in **Your face** (clear, front-facing, even light).\n2. On **Template Presets** click **📁 Upload template photos**, select all your photos at once (or one `.zip`), then type a set name (e.g. `athletic`). They go to `input/templates/<set>/`.\n3. Pick the set in *template_set*. Fill *trigger_word* and *extra_description* (e.g. `with long straight blonde hair, blue eyes`): hair and eye colour here, or she keeps the template's hair.\n4. First run: **how_many = 3**. If they look like her, set **how_many = 0** (= all photos) and run again. Finished ones are skipped (*skip_done*), so a crash just means press Run again.\n5. Optional: Ctrl+B the **Body reference** box, load a full-body photo of her and tick *use_body_reference*. Off = her body comes from each template.\n\n**Template tips**\n- One woman per photo, face visible. A covered or turned-away face gives a bad image.\n- Captions: put `swap_01.txt` next to `swap_01.jpg` (e.g. `mirror selfie, black top, bathroom`) and it's added after the trigger word. No .txt = trigger word only.\n- One folder per body type (`athletic`, `curvy` …) = your body presets.\n\n**What gets saved**: `output/datasets/<name>/<name>_<template>.png` + `.txt`, and `<name>.zip`.\nDownload: `http://<pod-url>/view?filename=<name>.zip&subfolder=datasets&type=output`\n\n**Settings**\n- Qwen-Image 2.1, 25 steps, CFG 1, euler / simple.\n- Output = same shape and composition as each template. Size = *resolution* in the encoder: 1536 ≈ 2.3 MP (native 2K). 1024 = faster, 2048 = max detail.\n\n**Models**\n- diffusion_models: [qwen_image_2.1_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/diffusion_models/qwen_image_2.1_int8_convrot.safetensors)\n- text_encoders: [qwen3vl_8b_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/text_encoders/qwen3vl_8b_int8_convrot.safetensors)\n- vae: [qwen_image_2.1_vae_bf16.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/vae/qwen_image_2.1_vae_bf16.safetensors)"
+      ],
+      "title": "READ ME"
+    },
+    {
+      "id": 40,
+      "type": "AIEmpireTemplatePresets",
+      "pos": [
+        740,
+        0
+      ],
+      "size": [
+        420,
+        470
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "templates",
+          "type": "IMAGE",
+          "links": [
+            4
+          ],
+          "shape": 6
+        },
+        {
+          "name": "prompts",
+          "type": "STRING",
+          "links": [
+            7
+          ],
+          "shape": 6
+        },
+        {
+          "name": "captions",
+          "type": "STRING",
+          "links": [
+            16
+          ],
+          "shape": 6
+        },
+        {
+          "name": "seeds",
+          "type": "INT",
+          "links": [
+            12
+          ],
+          "shape": 6
+        },
+        {
+          "name": "count",
+          "type": "INT",
+          "links": []
+        },
+        {
+          "name": "dataset_name",
+          "type": "STRING",
+          "links": [
+            17
+          ]
+        },
+        {
+          "name": "file_names",
+          "type": "STRING",
+          "links": [
+            18
+          ],
+          "shape": 6
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AIEmpireTemplatePresets"
+      },
+      "widgets_values": [
+        "my_templates",
+        "zvx woman",
+        "",
+        3,
+        1,
+        42,
+        "fixed",
+        false,
+        "my_influencer",
+        true
+      ],
+      "title": "Template Presets (upload your photos here)",
+      "color": "#3d2a14",
+      "bgcolor": "#2a1d0e"
+    },
+    {
+      "id": 2,
+      "type": "UNETLoader",
+      "pos": [
+        0,
+        0
+      ],
+      "size": [
+        340,
+        82
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            1
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UNETLoader",
+        "models": [
+          {
+            "name": "qwen_image_2.1_int8_convrot.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/diffusion_models/qwen_image_2.1_int8_convrot.safetensors",
+            "directory": "diffusion_models"
+          }
+        ]
+      },
+      "widgets_values": [
+        "qwen_image_2.1_int8_convrot.safetensors",
+        "default"
+      ],
+      "title": "Edit model"
+    },
+    {
+      "id": 5,
+      "type": "QwenImage21Cache",
+      "pos": [
+        0,
+        120
+      ],
+      "size": [
+        340,
+        82
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            8
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "QwenImage21Cache"
+      },
+      "widgets_values": [
+        "auto",
+        "default"
+      ]
+    },
+    {
+      "id": 6,
+      "type": "CLIPLoader",
+      "pos": [
+        0,
+        440
+      ],
+      "size": [
+        340,
+        106
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            2
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPLoader",
+        "models": [
+          {
+            "name": "qwen3vl_8b_int8_convrot.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/text_encoders/qwen3vl_8b_int8_convrot.safetensors",
+            "directory": "text_encoders"
+          }
+        ]
+      },
+      "widgets_values": [
+        "qwen3vl_8b_int8_convrot.safetensors",
+        "qwen_image",
+        "default"
+      ]
+    },
+    {
+      "id": 7,
+      "type": "VAELoader",
+      "pos": [
+        0,
+        580
+      ],
+      "size": [
+        340,
+        58
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            3,
+            14
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader",
+        "models": [
+          {
+            "name": "qwen_image_2.1_vae_bf16.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/vae/qwen_image_2.1_vae_bf16.safetensors",
+            "directory": "vae"
+          }
+        ]
+      },
+      "widgets_values": [
+        "qwen_image_2.1_vae_bf16.safetensors"
+      ]
+    },
+    {
+      "id": 10,
+      "type": "TextEncodeQwenImage21",
+      "pos": [
+        1200,
+        0
+      ],
+      "size": [
+        360,
+        220
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 2
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 3,
+          "shape": 7
+        },
+        {
+          "name": "images.image_1",
+          "type": "IMAGE",
+          "link": 4,
+          "shape": 7
+        },
+        {
+          "name": "images.image_2",
+          "type": "IMAGE",
+          "link": 5,
+          "shape": 7
+        },
+        {
+          "name": "images.image_3",
+          "type": "IMAGE",
+          "link": 6,
+          "shape": 7
+        },
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "link": 7,
+          "widget": {
+            "name": "prompt"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "links": [
+            9
+          ]
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "links": [
+            10
+          ]
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "links": [
+            11
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "TextEncodeQwenImage21"
+      },
+      "widgets_values": [
+        "",
+        "",
+        1536
+      ],
+      "title": "Qwen 2.1 encoder (1 = template, 2 = face, 3 = body)"
+    },
+    {
+      "id": 15,
+      "type": "KSampler",
+      "pos": [
+        1940,
+        0
+      ],
+      "size": [
+        320,
+        262
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 8
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 9
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 10
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 11
+        },
+        {
+          "name": "seed",
+          "type": "INT",
+          "link": 12,
+          "widget": {
+            "name": "seed"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            13
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        42,
+        "fixed",
+        25,
+        1,
+        "euler",
+        "simple",
+        1
+      ],
+      "title": "KSampler (edit)"
+    },
+    {
+      "id": 16,
+      "type": "VAEDecode",
+      "pos": [
+        1940,
+        320
+      ],
+      "size": [
+        220,
+        46
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 13
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 14
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            15
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 17,
+      "type": "AIEmpireSaveDataset",
+      "pos": [
+        2300,
+        0
+      ],
+      "size": [
+        520,
+        620
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 15
+        },
+        {
+          "name": "captions",
+          "type": "STRING",
+          "link": 16
+        },
+        {
+          "name": "dataset_name",
+          "type": "STRING",
+          "link": 17,
+          "widget": {
+            "name": "dataset_name"
+          }
+        },
+        {
+          "name": "file_names",
+          "type": "STRING",
+          "link": 18,
+          "shape": 7
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "AIEmpireSaveDataset"
+      },
+      "widgets_values": [
+        "my_influencer",
+        true,
+        ""
+      ],
+      "title": "Save Dataset ← train on this",
+      "color": "#1f3320",
+      "bgcolor": "#162416"
+    }
+  ],
+  "links": [
+    [
+      1,
+      2,
+      0,
+      5,
+      0,
+      "MODEL"
+    ],
+    [
+      2,
+      6,
+      0,
+      10,
+      0,
+      "CLIP"
+    ],
+    [
+      3,
+      7,
+      0,
+      10,
+      1,
+      "VAE"
+    ],
+    [
+      4,
+      40,
+      0,
+      10,
+      2,
+      "IMAGE"
+    ],
+    [
+      5,
+      1,
+      0,
+      10,
+      3,
+      "IMAGE"
+    ],
+    [
+      6,
+      19,
+      0,
+      10,
+      4,
+      "IMAGE"
+    ],
+    [
+      7,
+      40,
+      1,
+      10,
+      5,
+      "STRING"
+    ],
+    [
+      8,
+      5,
+      0,
+      15,
+      0,
+      "MODEL"
+    ],
+    [
+      9,
+      10,
+      0,
+      15,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      10,
+      10,
+      1,
+      15,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      11,
+      10,
+      2,
+      15,
+      3,
+      "LATENT"
+    ],
+    [
+      12,
+      40,
+      3,
+      15,
+      4,
+      "INT"
+    ],
+    [
+      13,
+      15,
+      0,
+      16,
+      0,
+      "LATENT"
+    ],
+    [
+      14,
+      7,
+      0,
+      16,
+      1,
+      "VAE"
+    ],
+    [
+      15,
+      16,
+      0,
+      17,
+      0,
+      "IMAGE"
+    ],
+    [
+      16,
+      40,
+      2,
+      17,
+      1,
+      "STRING"
+    ],
+    [
+      17,
+      40,
+      5,
+      17,
+      2,
+      "STRING"
+    ],
+    [
+      18,
+      40,
+      6,
+      17,
+      3,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "1 · Models",
+      "bounding": [
+        -20,
+        -60,
+        380,
+        720
+      ],
+      "color": "#444",
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "2 · Your face + template photos",
+      "bounding": [
+        370,
+        -60,
+        810,
+        1360
+      ],
+      "color": "#b06634",
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "3 · Edit model",
+      "bounding": [
+        1190,
+        -60,
+        1090,
+        620
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 4,
+      "title": "4 · Save dataset",
+      "bounding": [
+        2290,
+        -60,
+        540,
+        700
+      ],
+      "color": "#6a8f4e",
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.55,
+      "offset": [
+        60,
+        120
+      ]
+    }
+  },
+  "version": 0.4
+}

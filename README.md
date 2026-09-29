@@ -14,6 +14,13 @@ Runs 100% open-source on your own GPU. No API keys, no paid services.
 2. Drag `workflows/AI_Empire_Dataset_Maker_FireRed11.json` (or `_Qwen2511.json`) into ComfyUI.
 3. Download any missing models it lists (links are in the READ ME note inside the workflow).
 
+## Your own template photos (Qwen-Image 2.1)
+`workflows/AI_Empire_Dataset_Maker_Qwen21_Templates.json`: upload ~50 photos, get ~50 dataset images. Each one keeps the photo's pose, outfit, place and light, with her face from **Your face**.
+1. **Template Presets** box → **📁 Upload template photos** → select all photos (or one `.zip`) → name the set (e.g. `athletic`). Saved to `input/templates/<set>/`, so one folder per body type = your body presets.
+2. Optional caption per photo: `swap_01.txt` next to `swap_01.jpg`, added after the trigger word.
+3. `how_many = 3` to test, `0` = all. Finished images are skipped on re-runs (`skip_done`), so after a crash just press Run again.
+4. Output: `datasets/<name>/<name>_<template>.png` + `.txt` + `<name>.zip`, same size/shape as each template (encoder *resolution* 1536 ≈ 2.3 MP).
+
 ## GPU
 - FireRed (41 GB model): 80 GB GPU (A100 / H100) as is; on 48 GB (A6000, A40, L40S) set UNet `weight_dtype = fp8_e4m3fn`.
 - Qwen fp8mixed (20 GB model): runs on 24–48 GB GPUs as is.
@@ -27,6 +34,7 @@ Format: `shot description | caption | square / portrait / tall`. Caption and siz
 
 ## Nodes
 - **AI Empire · Nano Banana:** makes the dataset with Nano Banana Pro / Nano Banana 2 using your own Google key (Vertex AI or AI Studio). Refused shots are skipped.
+- **AI Empire · Template Presets:** loops over a folder of your own template photos (upload button on the node), with resume.
 - **AI Empire · Dataset Presets:** trigger word, preset set, extra description (what must stay the same), how many, start at, seed.
 - **AI Empire · Save Dataset:** saves images + captions, numbers them, zips the folder.
 - **AI Empire · Photo Finish:** phone-photo look in one node (levels, soft glow, lens softness, hand shake, ISO grain, JPEG).

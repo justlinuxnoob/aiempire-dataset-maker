@@ -36,6 +36,7 @@ RUN cd /opt/ComfyUI/custom_nodes \
 # our nodes only - NO workflows in the image (members get the .json files from the course)
 COPY __init__.py nodes.py photo_nodes.py /opt/ComfyUI/custom_nodes/aiempire-dataset-maker/
 COPY presets /opt/ComfyUI/custom_nodes/aiempire-dataset-maker/presets
+COPY js /opt/ComfyUI/custom_nodes/aiempire-dataset-maker/js
 
 COPY docker/extra_model_paths.yaml /opt/ComfyUI/extra_model_paths.yaml
 COPY docker/start.sh /start.sh

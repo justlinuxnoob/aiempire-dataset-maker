@@ -1,0 +1,177 @@
+{
+  "1": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "your_face.png"
+    },
+    "_meta": {
+      "title": "Your face"
+    }
+  },
+  "40": {
+    "class_type": "AIEmpireTemplatePresets",
+    "inputs": {
+      "template_set": "my_templates",
+      "trigger_word": "zvx woman",
+      "extra_description": "",
+      "how_many": 3,
+      "start_at": 1,
+      "seed": 42,
+      "use_body_reference": false,
+      "dataset_name": "my_influencer",
+      "skip_done": true
+    },
+    "_meta": {
+      "title": "Template Presets (upload your photos here)"
+    }
+  },
+  "2": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "qwen_image_2.1_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    },
+    "_meta": {
+      "title": "Edit model"
+    }
+  },
+  "5": {
+    "class_type": "QwenImage21Cache",
+    "inputs": {
+      "device": "auto",
+      "dtype": "default",
+      "model": [
+        "2",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "QwenImage21Cache"
+    }
+  },
+  "6": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen3vl_8b_int8_convrot.safetensors",
+      "type": "qwen_image",
+      "device": "default"
+    },
+    "_meta": {
+      "title": "CLIPLoader"
+    }
+  },
+  "7": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "qwen_image_2.1_vae_bf16.safetensors"
+    },
+    "_meta": {
+      "title": "VAELoader"
+    }
+  },
+  "10": {
+    "class_type": "TextEncodeQwenImage21",
+    "inputs": {
+      "prompt": [
+        "40",
+        1
+      ],
+      "negative_prompt": "",
+      "resolution": 1536,
+      "clip": [
+        "6",
+        0
+      ],
+      "vae": [
+        "7",
+        0
+      ],
+      "images.image_1": [
+        "40",
+        0
+      ],
+      "images.image_2": [
+        "1",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Qwen 2.1 encoder (1 = template, 2 = face, 3 = body)"
+    }
+  },
+  "15": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": [
+        "40",
+        3
+      ],
+      "steps": 25,
+      "cfg": 1,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1,
+      "model": [
+        "5",
+        0
+      ],
+      "positive": [
+        "10",
+        0
+      ],
+      "negative": [
+        "10",
+        1
+      ],
+      "latent_image": [
+        "10",
+        2
+      ]
+    },
+    "_meta": {
+      "title": "KSampler (edit)"
+    }
+  },
+  "16": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "15",
+        0
+      ],
+      "vae": [
+        "7",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "VAEDecode"
+    }
+  },
+  "17": {
+    "class_type": "AIEmpireSaveDataset",
+    "inputs": {
+      "dataset_name": [
+        "40",
+        5
+      ],
+      "make_zip": true,
+      "suffix": "",
+      "images": [
+        "16",
+        0
+      ],
+      "captions": [
+        "40",
+        2
+      ],
+      "file_names": [
+        "40",
+        6
+      ]
+    },
+    "_meta": {
+      "title": "Save Dataset ← train on this"
+    }
+  }
+}

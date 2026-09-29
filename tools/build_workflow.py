@@ -3,6 +3,7 @@
   workflows/AI_Empire_Dataset_Maker_FireRed11.json    <- FireRed Image Edit 1.1 (open-source, default)
   workflows/AI_Empire_Dataset_Maker_Qwen2511.json     <- Qwen Image Edit 2511 (open-source)
   workflows/AI_Empire_Dataset_Maker_NanoBanana.json   <- Nano Banana Pro with your own Google key
+  workflows/AI_Empire_Dataset_Maker_Qwen21_Templates.json <- Qwen-Image 2.1 over a folder of your own template photos
   workflows/api/*_api.json                            <- API format (serverless later)
 
 Edit-model workflows: face (+ optional body photo) -> edit model -> saved as <name>_raw
@@ -61,6 +62,14 @@ CONFIGS = {
             "*resolution* in the Qwen 2.1 encoder = how big her face photo is fed in (1536 default).",
         ],
     },
+    "Qwen21_Templates": {
+        "kind": "templates",
+        "title": "Qwen-Image 2.1 · your template photos",
+        "unet": ("qwen_image_2.1_int8_convrot.safetensors", f"{HF}/Comfy-Org/Qwen-Image-2.1/resolve/main/diffusion_models/qwen_image_2.1_int8_convrot.safetensors", "diffusion_models"),
+        "clip": ("qwen3vl_8b_int8_convrot.safetensors", f"{HF}/Comfy-Org/Qwen-Image-2.1/resolve/main/text_encoders/qwen3vl_8b_int8_convrot.safetensors", "text_encoders"),
+        "vae": ("qwen_image_2.1_vae_bf16.safetensors", f"{HF}/Comfy-Org/Qwen-Image-2.1/resolve/main/vae/qwen_image_2.1_vae_bf16.safetensors", "vae"),
+        "steps": 25,
+    },
 }
 
 WIDGETS = {
@@ -69,6 +78,8 @@ WIDGETS = {
     "CFGNorm": ["strength"], "CLIPLoader": ["clip_name", "type", "device"], "VAELoader": ["vae_name"],
     "AIEmpireDatasetPresets": ["trigger_word", "preset_set", "extra_description", "how_many", "start_at", "seed", None,
                                "custom_presets", "use_body_reference", "dataset_name", "size_scale"],
+    "AIEmpireTemplatePresets": ["template_set", "trigger_word", "extra_description", "how_many", "start_at", "seed", None,
+                                "use_body_reference", "dataset_name", "skip_done"],
     "AIEmpireNanoBanana": ["auth", "model", "resolution", "api_key", "vertex_project", "vertex_location"],
     "FluxKontextImageScale": [], "TextEncodeQwenImageEditPlus": ["prompt"],
     "FluxKontextMultiReferenceLatentMethod": ["reference_latents_method"],
@@ -133,9 +144,72 @@ def build(key, cfg):
     add(1, "LoadImage", [380, 0], [320, 360], ["your_face.png", "image"], [("IMAGE", "IMAGE"), ("MASK", "MASK")], title="Your face", color=GREEN)
     add(19, "LoadImage", [380, 420], [320, 360], ["your_body.png", "image"], [("IMAGE", "IMAGE"), ("MASK", "MASK")],
         title="Body reference (optional, Ctrl+B to turn on)", color=PURPLE, mode=4)
-    add(9, "AIEmpireDatasetPresets", [740, 0], [400, 400], PRESET_W, PRESET_OUT, title="Dataset Presets", color=ORANGE)
+    if cfg["kind"] != "templates":
+        add(9, "AIEmpireDatasetPresets", [740, 0], [400, 400], PRESET_W, PRESET_OUT, title="Dataset Presets", color=ORANGE)
 
-    if cfg["kind"] == "nanobanana":
+    if cfg["kind"] == "templates":
+        note = "\n".join([
+            f"## AI Empire · Dataset Maker ({cfg['title']})", "",
+            "Every photo you upload = 1 dataset image: **same pose, outfit, place and light as the photo, her face from *Your face*.** 50 photos in = 50 dataset images out.", "",
+            "**How to use**",
+            "1. Load her face in **Your face** (clear, front-facing, even light).",
+            "2. On **Template Presets** click **📁 Upload template photos**, select all your photos at once (or one `.zip`), then type a set name (e.g. `athletic`). They go to `input/templates/<set>/`.",
+            "3. Pick the set in *template_set*. Fill *trigger_word* and *extra_description* (e.g. `with long straight blonde hair, blue eyes`): hair and eye colour here, or she keeps the template's hair.",
+            "4. First run: **how_many = 3**. If they look like her, set **how_many = 0** (= all photos) and run again. Finished ones are skipped (*skip_done*), so a crash just means press Run again.",
+            "5. Optional: Ctrl+B the **Body reference** box, load a full-body photo of her and tick *use_body_reference*. Off = her body comes from each template.", "",
+            "**Template tips**",
+            "- One woman per photo, face visible. A covered or turned-away face gives a bad image.",
+            "- Captions: put `swap_01.txt` next to `swap_01.jpg` (e.g. `mirror selfie, black top, bathroom`) and it's added after the trigger word. No .txt = trigger word only.",
+            "- One folder per body type (`athletic`, `curvy` …) = your body presets.", "",
+            "**What gets saved**: `output/datasets/<name>/<name>_<template>.png` + `.txt`, and `<name>.zip`.",
+            "Download: `http://<pod-url>/view?filename=<name>.zip&subfolder=datasets&type=output`", "",
+            "**Settings**",
+            "- Qwen-Image 2.1, 25 steps, CFG 1, euler / simple.",
+            "- Output = same shape and composition as each template. Size = *resolution* in the encoder: 1536 ≈ 2.3 MP (native 2K). 1024 = faster, 2048 = max detail.", "",
+            "**Models**",
+            *[f"- {m[2]}: [{m[0]}]({m[1]})" for m in (cfg["unet"], cfg["clip"], cfg["vae"])]])
+        add(18, "MarkdownNote", [740, 520], [420, 760], [note], [], title="READ ME")
+        add(40, "AIEmpireTemplatePresets", [740, 0], [420, 470],
+            ["my_templates", "zvx woman", "", 3, 1, 42, "fixed", False, "my_influencer", True],
+            [("templates", "IMAGE", True), ("prompts", "STRING", True), ("captions", "STRING", True),
+             ("seeds", "INT", True), ("count", "INT"), ("dataset_name", "STRING"), ("file_names", "STRING", True)],
+            title="Template Presets (upload your photos here)", color=ORANGE)
+        add(2, "UNETLoader", [0, 0], [340, 82], [cfg["unet"][0], "default"], [("MODEL", "MODEL")], title="Edit model", props=mp(cfg["unet"]))
+        add(5, "QwenImage21Cache", [0, 120], [340, 82], ["auto", "default"], [("MODEL", "MODEL")])
+        add(6, "CLIPLoader", [0, 440], [340, 106], [cfg["clip"][0], "qwen_image", "default"], [("CLIP", "CLIP")], props=mp(cfg["clip"]))
+        add(7, "VAELoader", [0, 580], [340, 58], [cfg["vae"][0]], [("VAE", "VAE")], props=mp(cfg["vae"]))
+        add(10, "TextEncodeQwenImage21", [1200, 0], [360, 220], ["", "", 1536],
+            [("positive", "CONDITIONING"), ("negative", "CONDITIONING"), ("latent", "LATENT")],
+            title="Qwen 2.1 encoder (1 = template, 2 = face, 3 = body)")
+        add(15, "KSampler", [1940, 0], [320, 262], [42, "fixed", cfg["steps"], 1, "euler", "simple", 1], [("LATENT", "LATENT")], title="KSampler (edit)")
+        add(16, "VAEDecode", [1940, 320], [220, 46], [], [("IMAGE", "IMAGE")])
+        add(17, "AIEmpireSaveDataset", [2300, 0], [520, 620], ["my_influencer", True, ""], [], title="Save Dataset ← train on this", color=GREEN)
+
+        link(2, 0, 5, "model", "MODEL")
+        link(6, 0, 10, "clip", "CLIP")
+        link(7, 0, 10, "vae", "VAE", optional=True)
+        link(40, 0, 10, "images.image_1", "IMAGE", optional=True)
+        link(1, 0, 10, "images.image_2", "IMAGE", optional=True)
+        link(19, 0, 10, "images.image_3", "IMAGE", optional=True)
+        link(40, 1, 10, "prompt", "STRING", widget=True)
+        link(5, 0, 15, "model", "MODEL")
+        link(10, 0, 15, "positive", "CONDITIONING")
+        link(10, 1, 15, "negative", "CONDITIONING")
+        link(10, 2, 15, "latent_image", "LATENT")
+        link(40, 3, 15, "seed", "INT", widget=True)
+        link(15, 0, 16, "samples", "LATENT")
+        link(7, 0, 16, "vae", "VAE")
+        link(16, 0, 17, "images", "IMAGE")
+        link(40, 2, 17, "captions", "STRING")
+        link(40, 5, 17, "dataset_name", "STRING", widget=True)
+        link(40, 6, 17, "file_names", "STRING", optional=True)
+        groups = [
+            {"id": 1, "title": "1 · Models", "bounding": [-20, -60, 380, 720], "color": "#444", "flags": {}},
+            {"id": 2, "title": "2 · Your face + template photos", "bounding": [370, -60, 810, 1360], "color": "#b06634", "flags": {}},
+            {"id": 3, "title": "3 · Edit model", "bounding": [1190, -60, 1090, 620], "color": "#3f789e", "flags": {}},
+            {"id": 4, "title": "4 · Save dataset", "bounding": [2290, -60, 540, 700], "color": "#6a8f4e", "flags": {}},
+        ]
+    elif cfg["kind"] == "nanobanana":
         note = "\n".join([f"## AI Empire · Dataset Maker ({cfg['title']})", "", *HOW_TO,
                           "5. **Nano Banana box**: choose *Vertex AI* (Google $300 free credits) or *AI Studio API key*.",
                           "",
@@ -295,7 +369,7 @@ def build(key, cfg):
         assert node(l[3])["inputs"][l[4]]["link"] == l[0], l
 
     ids = {"FireRed11": "5e0c2f64-7a1b-4c8e-9d3f-f1e3d11a0001", "Qwen2511": "5e0c2f64-7a1b-4c8e-9d3f-a1e3e4e5e6e7", "Qwen21": "5e0c2f64-7a1b-4c8e-9d3f-21e21e210001",
-           "NanoBanana": "5e0c2f64-7a1b-4c8e-9d3f-0a0ba0a0a0b1"}
+           "NanoBanana": "5e0c2f64-7a1b-4c8e-9d3f-0a0ba0a0a0b1", "Qwen21_Templates": "5e0c2f64-7a1b-4c8e-9d3f-7e3a1a7e0002"}
     workflow = {"id": ids[key], "revision": 0, "last_node_id": max(n["id"] for n in nodes), "last_link_id": lid[0],
                 "nodes": nodes, "links": links, "groups": groups, "config": {},
                 "extra": {"ds": {"scale": 0.55, "offset": [60, 120]}}, "version": 0.4}
