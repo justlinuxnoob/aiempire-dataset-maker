@@ -697,7 +697,11 @@ class AIEmpireSaveDataset:
                         z.write(os.path.join(folder, f), arcname=os.path.join(name, f))
 
         print(f"[AI Empire] Saved {n} images + captions to {folder}")
-        return {"ui": {"images": ui_images}}
+        # show the WHOLE dataset in the box (newest first), not just this run's image
+        pngs = sorted((f for f in os.listdir(folder) if f.lower().endswith(".png")),
+                      key=lambda f: os.path.getmtime(os.path.join(folder, f)), reverse=True)
+        gallery = [{"filename": f, "subfolder": subfolder, "type": "output"} for f in pngs[:100]]
+        return {"ui": {"images": gallery or ui_images}}
 
 
 NODE_CLASS_MAPPINGS = {
