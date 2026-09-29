@@ -115,7 +115,7 @@ WIDGETS = {
     "EmptySD3LatentImage": ["width", "height", "batch_size"],
     "KSampler": ["seed", None, "steps", "cfg", "sampler_name", "scheduler", "denoise"],
     "VAEDecode": [], "VAEEncode": [], "CLIPTextEncode": ["text"], "ConditioningZeroOut": [],
-    "AIEmpireSaveDataset": ["dataset_name", "make_zip", "suffix"],
+    "AIEmpireSaveDataset": ["dataset_name", "make_zip", "suffix", "auto_continue"],
     "QwenImage21Cache": ["device", "dtype"],
     "TextEncodeQwenImage21": ["prompt", "negative_prompt", "resolution"],
     "EmptyLatentImage": ["width", "height", "batch_size"],
@@ -186,8 +186,8 @@ def build(key, cfg):
             "1. Load her face in **Your face** (clear, front-facing, even light).",
             "2. On **Template Presets** click **📁 Upload template photos**, select all your photos at once (or one `.zip`), then type a set name (e.g. `athletic`). They go to `input/templates/<set>/`.",
             "3. Pick the set in *template_set*. Fill *trigger_word* and *extra_description* (e.g. `with long straight blonde hair, blue eyes`): hair and eye colour here, or she keeps the template's hair.",
-            "4. **one_per_run is ON**: every Run makes ONE image (the next one not done) and saves it right away. Set *how_many* to the range (e.g. 35) and the **Run count** (the number next to the Run button) to the same number → press Run once, it works through them one by one. First test: Run count 3.",
-            "   A crash / cancel loses nothing: press Run again and it continues. To redo a bad one, delete it from `output/datasets/<name>/`.",
+            "4. Set *how_many* (e.g. 3 to test, 35 for the set) → press **Run ONCE** (Run count 1). It makes one image, saves it right away, then queues the next by itself until all are done (*auto_continue* on Save Dataset). **X / Cancel** stops it.",
+            "   Already-made images are skipped, so a crash or cancel loses nothing: press Run again and it continues. To redo a bad one, delete it from `output/datasets/<name>/`. New test = new *dataset_name*.",
             "5. Optional: Ctrl+B the **Body reference** box, load a full-body photo of her and tick *use_body_reference*. Off = her body comes from each template.", "",
             "**Template tips**",
             "- One woman per photo, face visible. A covered or turned-away face gives a bad image.",
@@ -207,7 +207,8 @@ def build(key, cfg):
         add(40, "AIEmpireTemplatePresets", [740, 0], [420, 700],
             ["my_templates", "zvx woman", "", 3, 1, 42, "fixed", False, "my_influencer", True, True, BFS_PROMPT],
             [("templates", "IMAGE", True), ("prompts", "STRING", True), ("captions", "STRING", True),
-             ("seeds", "INT", True), ("count", "INT"), ("dataset_name", "STRING"), ("file_names", "STRING", True)],
+             ("seeds", "INT", True), ("count", "INT"), ("dataset_name", "STRING"), ("file_names", "STRING", True),
+             ("remaining", "INT")],
             title="Template Presets (upload your photos here)", color=ORANGE)
         add(2, "UNETLoader", [0, 0], [340, 82], [cfg["unet"][0], "default"], [("MODEL", "MODEL")], title="Edit model", props=mp(cfg["unet"]))
         add(3, "LoraLoaderModelOnly", [0, 240], [340, 82], [BFS_LORA[0], 1.0], [("MODEL", "MODEL")],
@@ -220,7 +221,7 @@ def build(key, cfg):
             title="Qwen 2.1 encoder (1 = template, 2 = face, 3 = body)")
         add(15, "KSampler", [1940, 0], [320, 262], [42, "fixed", cfg["steps"], 1, "euler", "simple", 1], [("LATENT", "LATENT")], title="KSampler (edit)")
         add(16, "VAEDecode", [1940, 320], [220, 46], [], [("IMAGE", "IMAGE")])
-        add(17, "AIEmpireSaveDataset", [2300, 0], [520, 620], ["my_influencer", True, ""], [], title="Save Dataset ← train on this", color=GREEN)
+        add(17, "AIEmpireSaveDataset", [2300, 0], [520, 620], ["my_influencer", True, "", True], [], title="Save Dataset ← train on this", color=GREEN)
 
         link(2, 0, 3, "model", "MODEL")
         link(3, 0, 5, "model", "MODEL")
@@ -241,6 +242,7 @@ def build(key, cfg):
         link(40, 2, 17, "captions", "STRING")
         link(40, 5, 17, "dataset_name", "STRING", widget=True)
         link(40, 6, 17, "file_names", "STRING", optional=True)
+        link(40, 7, 17, "remaining", "INT", optional=True)
         groups = [
             {"id": 1, "title": "1 · Models", "bounding": [-20, -60, 380, 720], "color": "#444", "flags": {}},
             {"id": 2, "title": "2 · Your face + template photos", "bounding": [370, -60, 810, 1600], "color": "#b06634", "flags": {}},

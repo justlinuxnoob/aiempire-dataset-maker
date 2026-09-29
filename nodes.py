@@ -226,9 +226,9 @@ class AIEmpireTemplatePresets:
             },
         }
 
-    RETURN_TYPES = ("IMAGE", "STRING", "STRING", "INT", "INT", "STRING", "STRING")
-    RETURN_NAMES = ("templates", "prompts", "captions", "seeds", "count", "dataset_name", "file_names")
-    OUTPUT_IS_LIST = (True, True, True, True, False, False, True)
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING", "INT", "INT", "STRING", "STRING", "INT")
+    RETURN_NAMES = ("templates", "prompts", "captions", "seeds", "count", "dataset_name", "file_names", "remaining")
+    OUTPUT_IS_LIST = (True, True, True, True, False, False, True, False)
     FUNCTION = "build"
     CATEGORY = "AI Empire"
 
@@ -294,7 +294,8 @@ class AIEmpireTemplatePresets:
         if not imgs:
             raise ValueError(f"✅ All done: every template in this range is already in datasets/{name}. "
                              "To redo one, delete its image there. To redo all, change 'dataset_name'.")
-        return (imgs, prompts, captions, seeds, len(imgs), name, stems)
+        remaining = max(left - len(imgs), 0) if one_per_run else 0  # still to do after this run
+        return (imgs, prompts, captions, seeds, len(imgs), name, stems, remaining)
 
 
 # ----------------------------------------------------------------- body presets
@@ -634,6 +635,29 @@ def _safe_name(name):
     return name[:64]
 
 
+def _queue_again(prompt, extra_pnginfo):
+    """Puts the same workflow back in the queue (like pressing Run again)."""
+    import threading
+    import urllib.request
+
+    def go():
+        try:
+            import server
+            inst = server.PromptServer.instance
+            port = getattr(inst, "port", None) or 8188
+            # ComfyUI stamps "is_changed" into the running prompt; re-sending that stamp would make
+            # the next run a 100% cache hit (nothing happens), so send a clean copy
+            clean = {nid: {k: v for k, v in node.items() if k != "is_changed"} for nid, node in prompt.items()}
+            body = {"prompt": clean, "extra_data": {"extra_pnginfo": extra_pnginfo} if extra_pnginfo else {}}
+            req = urllib.request.Request(f"http://127.0.0.1:{port}/prompt", json.dumps(body).encode(),
+                                         {"Content-Type": "application/json"})
+            urllib.request.urlopen(req, timeout=30).read()
+        except Exception as e:
+            print(f"[AI Empire] could not queue the next one automatically ({e}). Press Run again.")
+
+    threading.Timer(0.5, go).start()
+
+
 class AIEmpireSaveDataset:
     @classmethod
     def INPUT_TYPES(cls):
@@ -647,7 +671,10 @@ class AIEmpireSaveDataset:
             "optional": {
                 "suffix": ("STRING", {"default": "", "tooltip": "Added to the folder name, e.g. _raw"}),
                 "file_names": ("STRING", {"forceInput": True, "tooltip": "From Template Presets: each image is named after its template, so re-runs skip finished ones."}),
+                "remaining": ("INT", {"forceInput": True, "tooltip": "From Template Presets: how many are still to do."}),
+                "auto_continue": ("BOOLEAN", {"default": True, "tooltip": "ON = after saving, it queues the next one by itself until all are done. Press Run once. Cancel (X) stops it."}),
             },
+            "hidden": {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
         }
 
     INPUT_IS_LIST = True
@@ -656,7 +683,8 @@ class AIEmpireSaveDataset:
     FUNCTION = "save"
     CATEGORY = "AI Empire"
 
-    def save(self, images, captions, dataset_name, make_zip, suffix=None, file_names=None):
+    def save(self, images, captions, dataset_name, make_zip, suffix=None, file_names=None,
+             remaining=None, auto_continue=None, prompt=None, extra_pnginfo=None):
         sfx = (_first(suffix) if suffix else "") or ""
         name = _safe_name(_first(dataset_name) + sfx)
         do_zip = bool(_first(make_zip))
@@ -701,6 +729,12 @@ class AIEmpireSaveDataset:
         pngs = sorted((f for f in os.listdir(folder) if f.lower().endswith(".png")),
                       key=lambda f: os.path.getmtime(os.path.join(folder, f)), reverse=True)
         gallery = [{"filename": f, "subfolder": subfolder, "type": "output"} for f in pngs[:100]]
+        left = _first(remaining) if remaining else 0
+        if left and _first(auto_continue) is not False and prompt and _first(prompt):
+            _queue_again(_first(prompt), _first(extra_pnginfo) if extra_pnginfo else None)
+            print(f"[AI Empire] {left} still to do - queued the next one (press X / Cancel to stop)")
+        elif remaining:
+            print("[AI Empire] ✅ All templates in this range are done.")
         return {"ui": {"images": gallery or ui_images}}
 
 
