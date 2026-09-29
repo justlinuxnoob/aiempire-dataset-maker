@@ -2,7 +2,7 @@
   "id": "5e0c2f64-7a1b-4c8e-9d3f-7e3a1a7e0002",
   "revision": 0,
   "last_node_id": 40,
-  "last_link_id": 18,
+  "last_link_id": 19,
   "nodes": [
     {
       "id": 1,
@@ -16,7 +16,7 @@
         360
       ],
       "flags": {},
-      "order": 4,
+      "order": 5,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -24,7 +24,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            5
+            6
           ]
         },
         {
@@ -56,7 +56,7 @@
         360
       ],
       "flags": {},
-      "order": 5,
+      "order": 6,
       "mode": 4,
       "inputs": [],
       "outputs": [
@@ -64,7 +64,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            6
+            7
           ]
         },
         {
@@ -96,7 +96,7 @@
         760
       ],
       "flags": {},
-      "order": 7,
+      "order": 8,
       "mode": 0,
       "inputs": [],
       "outputs": [],
@@ -104,7 +104,7 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "## AI Empire · Dataset Maker (Qwen-Image 2.1 · your template photos)\n\nEvery photo you upload = 1 dataset image: **same pose, outfit, place and light as the photo, her face from *Your face*.** 50 photos in = 50 dataset images out.\n\n**How to use**\n1. Load her face in **Your face** (clear, front-facing, even light).\n2. On **Template Presets** click **📁 Upload template photos**, select all your photos at once (or one `.zip`), then type a set name (e.g. `athletic`). They go to `input/templates/<set>/`.\n3. Pick the set in *template_set*. Fill *trigger_word* and *extra_description* (e.g. `with long straight blonde hair, blue eyes`): hair and eye colour here, or she keeps the template's hair.\n4. **one_per_run is ON**: every Run makes ONE image (the next one not done) and saves it right away. Set *how_many* to the range (e.g. 35) and the **Run count** (the number next to the Run button) to the same number → press Run once, it works through them one by one. First test: Run count 3.\n   A crash / cancel loses nothing: press Run again and it continues. To redo a bad one, delete it from `output/datasets/<name>/`.\n5. Optional: Ctrl+B the **Body reference** box, load a full-body photo of her and tick *use_body_reference*. Off = her body comes from each template.\n\n**Template tips**\n- One woman per photo, face visible. A covered or turned-away face gives a bad image.\n- Captions: put `swap_01.txt` next to `swap_01.jpg` (e.g. `mirror selfie, black top, bathroom`) and it's added after the trigger word. No .txt = trigger word only.\n- One folder per body type (`athletic`, `curvy` …) = your body presets.\n\n**What gets saved**: `output/datasets/<name>/<name>_<template>.png` + `.txt`, and `<name>.zip`.\nDownload: `http://<pod-url>/view?filename=<name>.zip&subfolder=datasets&type=output`\n\n**Settings**\n- *prompt* on Template Presets = the instruction for every photo (editable, `{extra}` = extra_description).\n- Qwen-Image 2.1, 25 steps, CFG 1, euler / simple.\n- Output = same shape and composition as each template. Size = *resolution* in the encoder: 1536 ≈ 2.3 MP (native 2K). 1024 = faster, 2048 = max detail.\n\n**Models**\n- diffusion_models: [qwen_image_2.1_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/diffusion_models/qwen_image_2.1_int8_convrot.safetensors)\n- text_encoders: [qwen3vl_8b_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/text_encoders/qwen3vl_8b_int8_convrot.safetensors)\n- vae: [qwen_image_2.1_vae_bf16.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/vae/qwen_image_2.1_vae_bf16.safetensors)"
+        "## AI Empire · Dataset Maker (Qwen-Image 2.1 · your template photos)\n\nEvery photo you upload = 1 dataset image: **same pose, outfit, place and light as the photo, her face from *Your face*.** 50 photos in = 50 dataset images out.\n\n**How to use**\n1. Load her face in **Your face** (clear, front-facing, even light).\n2. On **Template Presets** click **📁 Upload template photos**, select all your photos at once (or one `.zip`), then type a set name (e.g. `athletic`). They go to `input/templates/<set>/`.\n3. Pick the set in *template_set*. Fill *trigger_word* and *extra_description* (e.g. `with long straight blonde hair, blue eyes`): hair and eye colour here, or she keeps the template's hair.\n4. **one_per_run is ON**: every Run makes ONE image (the next one not done) and saves it right away. Set *how_many* to the range (e.g. 35) and the **Run count** (the number next to the Run button) to the same number → press Run once, it works through them one by one. First test: Run count 3.\n   A crash / cancel loses nothing: press Run again and it continues. To redo a bad one, delete it from `output/datasets/<name>/`.\n5. Optional: Ctrl+B the **Body reference** box, load a full-body photo of her and tick *use_body_reference*. Off = her body comes from each template.\n\n**Template tips**\n- One woman per photo, face visible. A covered or turned-away face gives a bad image.\n- Captions: put `swap_01.txt` next to `swap_01.jpg` (e.g. `mirror selfie, black top, bathroom`) and it's added after the trigger word. No .txt = trigger word only.\n- One folder per body type (`athletic`, `curvy` …) = your body presets.\n\n**What gets saved**: `output/datasets/<name>/<name>_<template>.png` + `.txt`, and `<name>.zip`.\nDownload: `http://<pod-url>/view?filename=<name>.zip&subfolder=datasets&type=output`\n\n**Settings**\n- *prompt* on Template Presets = the instruction for every photo (editable, `{extra}` = extra_description).\n- **BFS Head Swap v1.1 LoRA** (MIT, by Alissonerdx) = trained for exactly this job. The *prompt* is the one it was trained with, keep the `head_swap:` start. If faces look overdone, try LoRA strength 0.8.\n- Qwen-Image 2.1, 25 steps, CFG 1, euler / simple.\n- Output = same shape and composition as each template. Size = *resolution* in the encoder: 1536 ≈ 2.3 MP (native 2K). 2048 = max detail (slower).\n- Works best when her face is big enough in the template. Tiny faces in far-away full-body shots come out weaker.\n\n**Models**\n- diffusion_models: [qwen_image_2.1_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/diffusion_models/qwen_image_2.1_int8_convrot.safetensors)\n- loras: [bfs_head_v1.1_qwen_2.1.safetensors](https://huggingface.co/Alissonerdx/BFS-Best-Face-Swap/resolve/main/bfs_head_v1.1_qwen_2.1.safetensors)\n- text_encoders: [qwen3vl_8b_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/text_encoders/qwen3vl_8b_int8_convrot.safetensors)\n- vae: [qwen_image_2.1_vae_bf16.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/vae/qwen_image_2.1_vae_bf16.safetensors)"
       ],
       "title": "READ ME"
     },
@@ -120,7 +120,7 @@
         700
       ],
       "flags": {},
-      "order": 6,
+      "order": 7,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -128,7 +128,7 @@
           "name": "templates",
           "type": "IMAGE",
           "links": [
-            4
+            5
           ],
           "shape": 6
         },
@@ -136,7 +136,7 @@
           "name": "prompts",
           "type": "STRING",
           "links": [
-            7
+            8
           ],
           "shape": 6
         },
@@ -144,7 +144,7 @@
           "name": "captions",
           "type": "STRING",
           "links": [
-            16
+            17
           ],
           "shape": 6
         },
@@ -152,7 +152,7 @@
           "name": "seeds",
           "type": "INT",
           "links": [
-            12
+            13
           ],
           "shape": 6
         },
@@ -165,14 +165,14 @@
           "name": "dataset_name",
           "type": "STRING",
           "links": [
-            17
+            18
           ]
         },
         {
           "name": "file_names",
           "type": "STRING",
           "links": [
-            18
+            19
           ],
           "shape": 6
         }
@@ -192,7 +192,7 @@
         "my_influencer",
         true,
         true,
-        "Image 1 is the photo to edit. Image 2 only shows who the woman is.\nTurn the woman in image 1 into the woman from image 2{extra}: same face shape, eyes and eye colour, eyebrows, nose, lips, skin tone, hair colour and hairstyle.\nDo not paste or copy the face photo from image 2. Redraw her face naturally inside image 1: her head angle, face direction, gaze, facial expression and the light and shadows on her face all follow image 1.\nKeep everything else from image 1 exactly the same: the pose, the hands, the outfit, the background, the camera angle, the framing and the lighting.\nPhotorealistic smartphone photo, natural skin texture with visible pores."
+        "head_swap: start with <image1> as the base image, keeping its lighting, environment, and background. remove the head from <image1> completely and replace it with the head from <image2>{extra}, strictly preserving the hair, eye color, nose structure from <image2>. copy the direction of the eye, head rotation, micro expressions from <image1>, high quality, sharp details, 4k"
       ],
       "title": "Template Presets (upload your photos here)",
       "color": "#3d2a14",
@@ -239,6 +239,52 @@
       "title": "Edit model"
     },
     {
+      "id": 3,
+      "type": "LoraLoaderModelOnly",
+      "pos": [
+        0,
+        240
+      ],
+      "size": [
+        340,
+        82
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            2
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoraLoaderModelOnly",
+        "models": [
+          {
+            "name": "bfs_head_v1.1_qwen_2.1.safetensors",
+            "url": "https://huggingface.co/Alissonerdx/BFS-Best-Face-Swap/resolve/main/bfs_head_v1.1_qwen_2.1.safetensors",
+            "directory": "loras"
+          }
+        ]
+      },
+      "widgets_values": [
+        "bfs_head_v1.1_qwen_2.1.safetensors",
+        1.0
+      ],
+      "title": "BFS Head Swap LoRA (strength 1.0)"
+    },
+    {
       "id": 5,
       "type": "QwenImage21Cache",
       "pos": [
@@ -256,7 +302,7 @@
         {
           "name": "model",
           "type": "MODEL",
-          "link": 1
+          "link": 2
         }
       ],
       "outputs": [
@@ -264,7 +310,7 @@
           "name": "MODEL",
           "type": "MODEL",
           "links": [
-            8
+            9
           ]
         }
       ],
@@ -288,7 +334,7 @@
         106
       ],
       "flags": {},
-      "order": 2,
+      "order": 3,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -296,7 +342,7 @@
           "name": "CLIP",
           "type": "CLIP",
           "links": [
-            2
+            3
           ]
         }
       ],
@@ -328,7 +374,7 @@
         58
       ],
       "flags": {},
-      "order": 3,
+      "order": 4,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -336,8 +382,8 @@
           "name": "VAE",
           "type": "VAE",
           "links": [
-            3,
-            14
+            4,
+            15
           ]
         }
       ],
@@ -367,42 +413,42 @@
         220
       ],
       "flags": {},
-      "order": 8,
+      "order": 9,
       "mode": 0,
       "inputs": [
         {
           "name": "clip",
           "type": "CLIP",
-          "link": 2
+          "link": 3
         },
         {
           "name": "vae",
           "type": "VAE",
-          "link": 3,
+          "link": 4,
           "shape": 7
         },
         {
           "name": "images.image_1",
           "type": "IMAGE",
-          "link": 4,
+          "link": 5,
           "shape": 7
         },
         {
           "name": "images.image_2",
           "type": "IMAGE",
-          "link": 5,
+          "link": 6,
           "shape": 7
         },
         {
           "name": "images.image_3",
           "type": "IMAGE",
-          "link": 6,
+          "link": 7,
           "shape": 7
         },
         {
           "name": "prompt",
           "type": "STRING",
-          "link": 7,
+          "link": 8,
           "widget": {
             "name": "prompt"
           }
@@ -413,21 +459,21 @@
           "name": "positive",
           "type": "CONDITIONING",
           "links": [
-            9
+            10
           ]
         },
         {
           "name": "negative",
           "type": "CONDITIONING",
           "links": [
-            10
+            11
           ]
         },
         {
           "name": "latent",
           "type": "LATENT",
           "links": [
-            11
+            12
           ]
         }
       ],
@@ -453,33 +499,33 @@
         262
       ],
       "flags": {},
-      "order": 9,
+      "order": 10,
       "mode": 0,
       "inputs": [
         {
           "name": "model",
           "type": "MODEL",
-          "link": 8
+          "link": 9
         },
         {
           "name": "positive",
           "type": "CONDITIONING",
-          "link": 9
+          "link": 10
         },
         {
           "name": "negative",
           "type": "CONDITIONING",
-          "link": 10
+          "link": 11
         },
         {
           "name": "latent_image",
           "type": "LATENT",
-          "link": 11
+          "link": 12
         },
         {
           "name": "seed",
           "type": "INT",
-          "link": 12,
+          "link": 13,
           "widget": {
             "name": "seed"
           }
@@ -490,7 +536,7 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            13
+            14
           ]
         }
       ],
@@ -520,18 +566,18 @@
         46
       ],
       "flags": {},
-      "order": 10,
+      "order": 11,
       "mode": 0,
       "inputs": [
         {
           "name": "samples",
           "type": "LATENT",
-          "link": 13
+          "link": 14
         },
         {
           "name": "vae",
           "type": "VAE",
-          "link": 14
+          "link": 15
         }
       ],
       "outputs": [
@@ -539,7 +585,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            15
+            16
           ]
         }
       ],
@@ -560,23 +606,23 @@
         620
       ],
       "flags": {},
-      "order": 11,
+      "order": 12,
       "mode": 0,
       "inputs": [
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 15
+          "link": 16
         },
         {
           "name": "captions",
           "type": "STRING",
-          "link": 16
+          "link": 17
         },
         {
           "name": "dataset_name",
           "type": "STRING",
-          "link": 17,
+          "link": 18,
           "widget": {
             "name": "dataset_name"
           }
@@ -584,7 +630,7 @@
         {
           "name": "file_names",
           "type": "STRING",
-          "link": 18,
+          "link": 19,
           "shape": 7
         }
       ],
@@ -607,12 +653,20 @@
       1,
       2,
       0,
-      5,
+      3,
       0,
       "MODEL"
     ],
     [
       2,
+      3,
+      0,
+      5,
+      0,
+      "MODEL"
+    ],
+    [
+      3,
       6,
       0,
       10,
@@ -620,7 +674,7 @@
       "CLIP"
     ],
     [
-      3,
+      4,
       7,
       0,
       10,
@@ -628,7 +682,7 @@
       "VAE"
     ],
     [
-      4,
+      5,
       40,
       0,
       10,
@@ -636,7 +690,7 @@
       "IMAGE"
     ],
     [
-      5,
+      6,
       1,
       0,
       10,
@@ -644,7 +698,7 @@
       "IMAGE"
     ],
     [
-      6,
+      7,
       19,
       0,
       10,
@@ -652,7 +706,7 @@
       "IMAGE"
     ],
     [
-      7,
+      8,
       40,
       1,
       10,
@@ -660,7 +714,7 @@
       "STRING"
     ],
     [
-      8,
+      9,
       5,
       0,
       15,
@@ -668,7 +722,7 @@
       "MODEL"
     ],
     [
-      9,
+      10,
       10,
       0,
       15,
@@ -676,7 +730,7 @@
       "CONDITIONING"
     ],
     [
-      10,
+      11,
       10,
       1,
       15,
@@ -684,7 +738,7 @@
       "CONDITIONING"
     ],
     [
-      11,
+      12,
       10,
       2,
       15,
@@ -692,7 +746,7 @@
       "LATENT"
     ],
     [
-      12,
+      13,
       40,
       3,
       15,
@@ -700,7 +754,7 @@
       "INT"
     ],
     [
-      13,
+      14,
       15,
       0,
       16,
@@ -708,7 +762,7 @@
       "LATENT"
     ],
     [
-      14,
+      15,
       7,
       0,
       16,
@@ -716,7 +770,7 @@
       "VAE"
     ],
     [
-      15,
+      16,
       16,
       0,
       17,
@@ -724,7 +778,7 @@
       "IMAGE"
     ],
     [
-      16,
+      17,
       40,
       2,
       17,
@@ -732,7 +786,7 @@
       "STRING"
     ],
     [
-      17,
+      18,
       40,
       5,
       17,
@@ -740,7 +794,7 @@
       "STRING"
     ],
     [
-      18,
+      19,
       40,
       6,
       17,

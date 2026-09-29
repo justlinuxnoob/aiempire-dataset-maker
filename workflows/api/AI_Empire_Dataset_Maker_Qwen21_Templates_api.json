@@ -21,7 +21,7 @@
       "dataset_name": "my_influencer",
       "skip_done": true,
       "one_per_run": true,
-      "prompt": "Image 1 is the photo to edit. Image 2 only shows who the woman is.\nTurn the woman in image 1 into the woman from image 2{extra}: same face shape, eyes and eye colour, eyebrows, nose, lips, skin tone, hair colour and hairstyle.\nDo not paste or copy the face photo from image 2. Redraw her face naturally inside image 1: her head angle, face direction, gaze, facial expression and the light and shadows on her face all follow image 1.\nKeep everything else from image 1 exactly the same: the pose, the hands, the outfit, the background, the camera angle, the framing and the lighting.\nPhotorealistic smartphone photo, natural skin texture with visible pores."
+      "prompt": "head_swap: start with <image1> as the base image, keeping its lighting, environment, and background. remove the head from <image1> completely and replace it with the head from <image2>{extra}, strictly preserving the hair, eye color, nose structure from <image2>. copy the direction of the eye, head rotation, micro expressions from <image1>, high quality, sharp details, 4k"
     },
     "_meta": {
       "title": "Template Presets (upload your photos here)"
@@ -37,13 +37,27 @@
       "title": "Edit model"
     }
   },
+  "3": {
+    "class_type": "LoraLoaderModelOnly",
+    "inputs": {
+      "lora_name": "bfs_head_v1.1_qwen_2.1.safetensors",
+      "strength_model": 1.0,
+      "model": [
+        "2",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "BFS Head Swap LoRA (strength 1.0)"
+    }
+  },
   "5": {
     "class_type": "QwenImage21Cache",
     "inputs": {
       "device": "auto",
       "dtype": "default",
       "model": [
-        "2",
+        "3",
         0
       ]
     },

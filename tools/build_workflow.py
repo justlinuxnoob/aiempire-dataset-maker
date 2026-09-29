@@ -35,6 +35,14 @@ M = {
     "z_vae": ("ae.safetensors", f"{HF}/Comfy-Org/z_image_turbo/resolve/main/split_files/vae/ae.safetensors", "vae"),
 }
 
+# BFS Head Swap v1.1 for Qwen-Image 2.1 (MIT) by Alissonerdx: a LoRA trained exactly for "put this head into that photo".
+BFS_LORA = ("bfs_head_v1.1_qwen_2.1.safetensors", f"{HF}/Alissonerdx/BFS-Best-Face-Swap/resolve/main/bfs_head_v1.1_qwen_2.1.safetensors", "loras")
+# the prompt BFS was trained with (verbatim), + {extra} for hair/eyes
+BFS_PROMPT = ("head_swap: start with <image1> as the base image, keeping its lighting, environment, and background. "
+              "remove the head from <image1> completely and replace it with the head from <image2>{extra}, strictly preserving "
+              "the hair, eye color, nose structure from <image2>. copy the direction of the eye, head rotation, micro expressions "
+              "from <image1>, high quality, sharp details, 4k")
+
 CONFIGS = {
     "FireRed11": {
         "kind": "edit",
@@ -189,17 +197,21 @@ def build(key, cfg):
             "Download: `http://<pod-url>/view?filename=<name>.zip&subfolder=datasets&type=output`", "",
             "**Settings**",
             "- *prompt* on Template Presets = the instruction for every photo (editable, `{extra}` = extra_description).",
+            "- **BFS Head Swap v1.1 LoRA** (MIT, by Alissonerdx) = trained for exactly this job. The *prompt* is the one it was trained with, keep the `head_swap:` start. If faces look overdone, try LoRA strength 0.8.",
             "- Qwen-Image 2.1, 25 steps, CFG 1, euler / simple.",
-            "- Output = same shape and composition as each template. Size = *resolution* in the encoder: 1536 ≈ 2.3 MP (native 2K). 1024 = faster, 2048 = max detail.", "",
+            "- Output = same shape and composition as each template. Size = *resolution* in the encoder: 1536 ≈ 2.3 MP (native 2K). 2048 = max detail (slower).",
+            "- Works best when her face is big enough in the template. Tiny faces in far-away full-body shots come out weaker.", "",
             "**Models**",
-            *[f"- {m[2]}: [{m[0]}]({m[1]})" for m in (cfg["unet"], cfg["clip"], cfg["vae"])]])
+            *[f"- {m[2]}: [{m[0]}]({m[1]})" for m in (cfg["unet"], BFS_LORA, cfg["clip"], cfg["vae"])]])
         add(18, "MarkdownNote", [740, 760], [420, 760], [note], [], title="READ ME")
         add(40, "AIEmpireTemplatePresets", [740, 0], [420, 700],
-            ["my_templates", "zvx woman", "", 3, 1, 42, "fixed", False, "my_influencer", True, True, _node_const("TEMPLATE_PROMPT")],
+            ["my_templates", "zvx woman", "", 3, 1, 42, "fixed", False, "my_influencer", True, True, BFS_PROMPT],
             [("templates", "IMAGE", True), ("prompts", "STRING", True), ("captions", "STRING", True),
              ("seeds", "INT", True), ("count", "INT"), ("dataset_name", "STRING"), ("file_names", "STRING", True)],
             title="Template Presets (upload your photos here)", color=ORANGE)
         add(2, "UNETLoader", [0, 0], [340, 82], [cfg["unet"][0], "default"], [("MODEL", "MODEL")], title="Edit model", props=mp(cfg["unet"]))
+        add(3, "LoraLoaderModelOnly", [0, 240], [340, 82], [BFS_LORA[0], 1.0], [("MODEL", "MODEL")],
+            title="BFS Head Swap LoRA (strength 1.0)", props=mp(BFS_LORA))
         add(5, "QwenImage21Cache", [0, 120], [340, 82], ["auto", "default"], [("MODEL", "MODEL")])
         add(6, "CLIPLoader", [0, 440], [340, 106], [cfg["clip"][0], "qwen_image", "default"], [("CLIP", "CLIP")], props=mp(cfg["clip"]))
         add(7, "VAELoader", [0, 580], [340, 58], [cfg["vae"][0]], [("VAE", "VAE")], props=mp(cfg["vae"]))
@@ -210,7 +222,8 @@ def build(key, cfg):
         add(16, "VAEDecode", [1940, 320], [220, 46], [], [("IMAGE", "IMAGE")])
         add(17, "AIEmpireSaveDataset", [2300, 0], [520, 620], ["my_influencer", True, ""], [], title="Save Dataset ← train on this", color=GREEN)
 
-        link(2, 0, 5, "model", "MODEL")
+        link(2, 0, 3, "model", "MODEL")
+        link(3, 0, 5, "model", "MODEL")
         link(6, 0, 10, "clip", "CLIP")
         link(7, 0, 10, "vae", "VAE", optional=True)
         link(40, 0, 10, "images.image_1", "IMAGE", optional=True)

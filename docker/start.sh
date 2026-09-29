@@ -83,6 +83,8 @@ if [ "${QWEN21:-0}" = "1" ] || [ "$EDIT_MODEL" = "qwen21" ]; then
   fetch "$M/diffusion_models" "qwen_image_2.1_int8_convrot.safetensors" "$Q21/diffusion_models/qwen_image_2.1_int8_convrot.safetensors"
   fetch "$M/text_encoders" "qwen3vl_8b_int8_convrot.safetensors" "$Q21/text_encoders/qwen3vl_8b_int8_convrot.safetensors"
   fetch "$M/vae" "qwen_image_2.1_vae_bf16.safetensors" "$Q21/vae/qwen_image_2.1_vae_bf16.safetensors"
+  # BFS Head Swap v1.1 LoRA (MIT) - used by the Qwen 2.1 template workflow
+  fetch "$M/loras" "bfs_head_v1.1_qwen_2.1.safetensors" "$HF/Alissonerdx/BFS-Best-Face-Swap/resolve/main/bfs_head_v1.1_qwen_2.1.safetensors"
   # prompt-enhancer encoder: only the Qwen 2.1 TEST workflow uses it, the dataset workflows don't (saves ~10 GB)
   if [ "${QWEN21:-0}" = "1" ]; then
     fetch "$M/text_encoders" "qwen3.5_9b_qwen_image_2.1_pe_i2i.int8_convrot.safetensors" "$Q21/text_encoders/qwen3.5_9b_qwen_image_2.1_pe_i2i.int8_convrot.safetensors"
