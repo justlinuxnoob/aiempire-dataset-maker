@@ -26,6 +26,9 @@ RUN git clone https://github.com/comfyanonymous/ComfyUI.git /opt/ComfyUI \
 # Google SDK for the Nano Banana node + OpenCV for the skin-oil node
 RUN pip install google-genai opencv-python-headless
 
+# JupyterLab on port 8888: file browser (drag photos in, download datasets) + terminal
+RUN pip install jupyterlab
+
 # public custom nodes used by the Krea2 workflow (pinned so updates can't break it)
 RUN cd /opt/ComfyUI/custom_nodes \
     && git clone https://github.com/rgthree/rgthree-comfy.git && git -C rgthree-comfy checkout 449c58fcdd612f7733e54c51f6758ead63fa180b \

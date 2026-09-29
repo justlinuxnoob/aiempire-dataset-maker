@@ -10,6 +10,16 @@ mkdir -p "$M/diffusion_models" "$M/loras" "$M/text_encoders" "$M/vae" "$M/checkp
 
 HF=https://huggingface.co
 
+# JupyterLab on port 8888 (starts first, so you can upload photos while the models download)
+# Set JUPYTER_PASSWORD on the template to protect it (RunPod convention); empty = no password.
+mkdir -p "$WS/input/templates"
+nohup jupyter lab --allow-root --no-browser --ip=0.0.0.0 --port=8888 \
+  --ServerApp.token="${JUPYTER_PASSWORD:-}" --ServerApp.password="" \
+  --ServerApp.allow_origin='*' --ServerApp.root_dir="$WS" \
+  --FileContentsManager.delete_to_trash=False \
+  > "$WS/jupyter.log" 2>&1 &
+echo "[AI Empire] 📁 JupyterLab on port 8888 (templates go in input/templates/<set>/)"
+
 fetch() {
   local dir="$1" name="$2" url="$3"
   if [ -s "$dir/$name" ] && [ ! -f "$dir/$name.aria2" ]; then
