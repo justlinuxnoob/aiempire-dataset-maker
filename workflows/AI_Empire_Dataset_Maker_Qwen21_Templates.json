@@ -89,7 +89,7 @@
       "type": "MarkdownNote",
       "pos": [
         740,
-        520
+        760
       ],
       "size": [
         420,
@@ -104,7 +104,7 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "## AI Empire · Dataset Maker (Qwen-Image 2.1 · your template photos)\n\nEvery photo you upload = 1 dataset image: **same pose, outfit, place and light as the photo, her face from *Your face*.** 50 photos in = 50 dataset images out.\n\n**How to use**\n1. Load her face in **Your face** (clear, front-facing, even light).\n2. On **Template Presets** click **📁 Upload template photos**, select all your photos at once (or one `.zip`), then type a set name (e.g. `athletic`). They go to `input/templates/<set>/`.\n3. Pick the set in *template_set*. Fill *trigger_word* and *extra_description* (e.g. `with long straight blonde hair, blue eyes`): hair and eye colour here, or she keeps the template's hair.\n4. First run: **how_many = 3**. If they look like her, set **how_many = 0** (= all photos) and run again. Finished ones are skipped (*skip_done*), so a crash just means press Run again.\n5. Optional: Ctrl+B the **Body reference** box, load a full-body photo of her and tick *use_body_reference*. Off = her body comes from each template.\n\n**Template tips**\n- One woman per photo, face visible. A covered or turned-away face gives a bad image.\n- Captions: put `swap_01.txt` next to `swap_01.jpg` (e.g. `mirror selfie, black top, bathroom`) and it's added after the trigger word. No .txt = trigger word only.\n- One folder per body type (`athletic`, `curvy` …) = your body presets.\n\n**What gets saved**: `output/datasets/<name>/<name>_<template>.png` + `.txt`, and `<name>.zip`.\nDownload: `http://<pod-url>/view?filename=<name>.zip&subfolder=datasets&type=output`\n\n**Settings**\n- Qwen-Image 2.1, 25 steps, CFG 1, euler / simple.\n- Output = same shape and composition as each template. Size = *resolution* in the encoder: 1536 ≈ 2.3 MP (native 2K). 1024 = faster, 2048 = max detail.\n\n**Models**\n- diffusion_models: [qwen_image_2.1_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/diffusion_models/qwen_image_2.1_int8_convrot.safetensors)\n- text_encoders: [qwen3vl_8b_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/text_encoders/qwen3vl_8b_int8_convrot.safetensors)\n- vae: [qwen_image_2.1_vae_bf16.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/vae/qwen_image_2.1_vae_bf16.safetensors)"
+        "## AI Empire · Dataset Maker (Qwen-Image 2.1 · your template photos)\n\nEvery photo you upload = 1 dataset image: **same pose, outfit, place and light as the photo, her face from *Your face*.** 50 photos in = 50 dataset images out.\n\n**How to use**\n1. Load her face in **Your face** (clear, front-facing, even light).\n2. On **Template Presets** click **📁 Upload template photos**, select all your photos at once (or one `.zip`), then type a set name (e.g. `athletic`). They go to `input/templates/<set>/`.\n3. Pick the set in *template_set*. Fill *trigger_word* and *extra_description* (e.g. `with long straight blonde hair, blue eyes`): hair and eye colour here, or she keeps the template's hair.\n4. **one_per_run is ON**: every Run makes ONE image (the next one not done) and saves it right away. Set *how_many* to the range (e.g. 35) and the **Run count** (the number next to the Run button) to the same number → press Run once, it works through them one by one. First test: Run count 3.\n   A crash / cancel loses nothing: press Run again and it continues. To redo a bad one, delete it from `output/datasets/<name>/`.\n5. Optional: Ctrl+B the **Body reference** box, load a full-body photo of her and tick *use_body_reference*. Off = her body comes from each template.\n\n**Template tips**\n- One woman per photo, face visible. A covered or turned-away face gives a bad image.\n- Captions: put `swap_01.txt` next to `swap_01.jpg` (e.g. `mirror selfie, black top, bathroom`) and it's added after the trigger word. No .txt = trigger word only.\n- One folder per body type (`athletic`, `curvy` …) = your body presets.\n\n**What gets saved**: `output/datasets/<name>/<name>_<template>.png` + `.txt`, and `<name>.zip`.\nDownload: `http://<pod-url>/view?filename=<name>.zip&subfolder=datasets&type=output`\n\n**Settings**\n- *prompt* on Template Presets = the instruction for every photo (editable, `{extra}` = extra_description).\n- Qwen-Image 2.1, 25 steps, CFG 1, euler / simple.\n- Output = same shape and composition as each template. Size = *resolution* in the encoder: 1536 ≈ 2.3 MP (native 2K). 1024 = faster, 2048 = max detail.\n\n**Models**\n- diffusion_models: [qwen_image_2.1_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/diffusion_models/qwen_image_2.1_int8_convrot.safetensors)\n- text_encoders: [qwen3vl_8b_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/text_encoders/qwen3vl_8b_int8_convrot.safetensors)\n- vae: [qwen_image_2.1_vae_bf16.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/vae/qwen_image_2.1_vae_bf16.safetensors)"
       ],
       "title": "READ ME"
     },
@@ -117,7 +117,7 @@
       ],
       "size": [
         420,
-        470
+        700
       ],
       "flags": {},
       "order": 6,
@@ -190,7 +190,9 @@
         "fixed",
         false,
         "my_influencer",
-        true
+        true,
+        true,
+        "Image 1 is the photo to edit. Image 2 only shows who the woman is.\nTurn the woman in image 1 into the woman from image 2{extra}: same face shape, eyes and eye colour, eyebrows, nose, lips, skin tone, hair colour and hairstyle.\nDo not paste or copy the face photo from image 2. Redraw her face naturally inside image 1: her head angle, face direction, gaze, facial expression and the light and shadows on her face all follow image 1.\nKeep everything else from image 1 exactly the same: the pose, the hands, the outfit, the background, the camera angle, the framing and the lighting.\nPhotorealistic smartphone photo, natural skin texture with visible pores."
       ],
       "title": "Template Presets (upload your photos here)",
       "color": "#3d2a14",
@@ -766,7 +768,7 @@
         370,
         -60,
         810,
-        1360
+        1600
       ],
       "color": "#b06634",
       "flags": {}

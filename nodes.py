@@ -141,16 +141,19 @@ IMAGE_EXTS = (".png", ".jpg", ".jpeg", ".webp", ".bmp")
 
 # Qwen-Image 2.1 labels its reference images <image1>, <image2>, ... in order.
 # image 1 = the template (the output keeps its size and composition), image 2 = her face, image 3 = body (optional)
+# {extra} = the node's extra_description. Editable in the node ('prompt').
 TEMPLATE_PROMPT = (
-    "Replace the woman in image 1 with the woman from image 2{extra}. "
-    "Take her face, face shape, eyes and eye colour, eyebrows, nose, lips, skin tone, "
-    "hair colour and hairstyle from image 2. "
-    "Keep everything else from image 1 exactly the same: {keep}the pose, the hands, the outfit, "
-    "the background, the camera angle, the framing and the lighting. "
-    "{body}"
-    "Photorealistic smartphone photo, natural skin texture with visible pores, sharp focus on her face."
+    "Image 1 is the photo to edit. Image 2 only shows who the woman is.\n"
+    "Turn the woman in image 1 into the woman from image 2{extra}: same face shape, eyes and eye colour, eyebrows, nose, lips, "
+    "skin tone, hair colour and hairstyle.\n"
+    "Do not paste or copy the face photo from image 2. Redraw her face naturally inside image 1: her head angle, face direction, "
+    "gaze, facial expression and the light and shadows on her face all follow image 1.\n"
+    "Keep everything else from image 1 exactly the same: the pose, the hands, the outfit, the background, the camera angle, "
+    "the framing and the lighting.\n"
+    "Photorealistic smartphone photo, natural skin texture with visible pores."
 )
-TEMPLATE_BODY_REF = "Her body shape, figure and proportions are exactly the same as the woman in image 3. "
+TEMPLATE_KEEP_BODY = " Keep her body shape from image 1."
+TEMPLATE_BODY_REF = " Her body shape, figure and proportions are exactly the same as the woman in image 3."
 
 
 def _templates_dir():
@@ -218,6 +221,8 @@ class AIEmpireTemplatePresets:
                 "use_body_reference": ("BOOLEAN", {"default": False, "tooltip": "Turn on when you also load a full-body photo of her (Body reference box). Off = body comes from each template."}),
                 "dataset_name": ("STRING", {"default": "my_influencer"}),
                 "skip_done": ("BOOLEAN", {"default": True, "tooltip": "Skip templates that already have a saved image in this dataset (resume after a crash)."}),
+                "one_per_run": ("BOOLEAN", {"default": True, "tooltip": "ON = each Run makes ONE image (the next one not done yet) and saves it right away. Set the Run count next to the Run button to how many you want. OFF = all at once, saved only at the very end."}),
+                "prompt": ("STRING", {"default": TEMPLATE_PROMPT, "multiline": True, "tooltip": "The instruction Qwen gets for every photo. {extra} = extra_description."}),
             },
         }
 
@@ -238,7 +243,7 @@ class AIEmpireTemplatePresets:
         return "|".join(state)
 
     def build(self, template_set, trigger_word, extra_description, how_many, start_at, seed,
-              use_body_reference=False, dataset_name="my_influencer", skip_done=True):
+              use_body_reference=False, dataset_name="my_influencer", skip_done=True, one_per_run=True, prompt=TEMPLATE_PROMPT):
         folder = os.path.join(_templates_dir(), template_set)
         if not os.path.isdir(folder):
             raise ValueError("No template photos yet: click 'Upload template photos' on the Template Presets box.")
@@ -256,11 +261,9 @@ class AIEmpireTemplatePresets:
         extra = extra_description.strip().rstrip(".")
         if extra and not extra.startswith(","):
             extra = " " + extra
-        prompt = TEMPLATE_PROMPT.format(
-            extra=extra,
-            keep="" if use_body_reference else "her body shape, ",
-            body=TEMPLATE_BODY_REF if use_body_reference else "",
-        )
+        base = (prompt or TEMPLATE_PROMPT).strip()
+        base = base.replace("{extra}", extra) if "{extra}" in base else base + (f" She is{extra}." if extra else "")
+        prompt = base + (TEMPLATE_BODY_REF if use_body_reference else TEMPLATE_KEEP_BODY)
         trigger = trigger_word.strip()
 
         imgs, prompts, captions, seeds, stems, skipped = [], [], [], [], [], 0
@@ -280,11 +283,17 @@ class AIEmpireTemplatePresets:
             captions.append(", ".join(x for x in (trigger, cap) if x) or trigger)
             seeds.append((seed + files.index(f)) % 0xFFFFFFFFFFFFFFFF)
             stems.append(stem)
+            if one_per_run:
+                break
 
-        print(f"[AI Empire] Templates '{template_set}': {len(imgs)} to make, {skipped} already done")
+        left = sum(1 for f in chosen if not os.path.exists(os.path.join(out_folder, f"{name}_{_safe_name(os.path.splitext(f)[0]).strip('_') or 'img'}.png")))
+        if one_per_run and imgs:
+            print(f"[AI Empire] Templates '{template_set}': making {stems[0]} ({left} of {len(chosen)} still to do)")
+        else:
+            print(f"[AI Empire] Templates '{template_set}': {len(imgs)} to make, {skipped} already done")
         if not imgs:
-            raise ValueError(f"All {skipped} templates are already done in datasets/{name}. "
-                             "Turn off 'skip_done' or change 'dataset_name' to make them again.")
+            raise ValueError(f"✅ All done: every template in this range is already in datasets/{name}. "
+                             "To redo one, delete its image there. To redo all, change 'dataset_name'.")
         return (imgs, prompts, captions, seeds, len(imgs), name, stems)
 
 

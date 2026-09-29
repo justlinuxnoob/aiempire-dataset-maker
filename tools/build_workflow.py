@@ -11,10 +11,20 @@ Edit-model workflows: face (+ optional body photo) -> edit model -> saved as <na
                       -> Z-Image realism pass -> saved as <name>  (the one to train on)
 Run:  python tools/build_workflow.py
 """
+import ast
 import json
 import os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def _node_const(name):
+    """Reads a string constant from nodes.py (so the workflow defaults match the node)."""
+    tree = ast.parse(open(os.path.join(ROOT, "nodes.py"), encoding="utf-8").read())
+    for n in tree.body:
+        if isinstance(n, ast.Assign) and any(getattr(t, "id", "") == name for t in n.targets):
+            return ast.literal_eval(n.value)
+    raise KeyError(name)
 HF = "https://huggingface.co"
 
 M = {
@@ -88,7 +98,7 @@ WIDGETS = {
     "AIEmpireDatasetPresets": ["trigger_word", "preset_set", "extra_description", "how_many", "start_at", "seed", None,
                                "custom_presets", "use_body_reference", "dataset_name", "size_scale"],
     "AIEmpireTemplatePresets": ["template_set", "trigger_word", "extra_description", "how_many", "start_at", "seed", None,
-                                "use_body_reference", "dataset_name", "skip_done"],
+                                "use_body_reference", "dataset_name", "skip_done", "one_per_run", "prompt"],
     "AIEmpireBodyPresetMaker": ["source_set", "output_set", "body_target", "instructions", "how_many", "start_at", "seed", None, "skip_done", "use_body_example"],
     "AIEmpireSaveTemplateSet": ["output_set", "source_set"],
     "AIEmpireNanoBanana": ["auth", "model", "resolution", "api_key", "vertex_project", "vertex_location"],
@@ -168,7 +178,8 @@ def build(key, cfg):
             "1. Load her face in **Your face** (clear, front-facing, even light).",
             "2. On **Template Presets** click **📁 Upload template photos**, select all your photos at once (or one `.zip`), then type a set name (e.g. `athletic`). They go to `input/templates/<set>/`.",
             "3. Pick the set in *template_set*. Fill *trigger_word* and *extra_description* (e.g. `with long straight blonde hair, blue eyes`): hair and eye colour here, or she keeps the template's hair.",
-            "4. First run: **how_many = 3**. If they look like her, set **how_many = 0** (= all photos) and run again. Finished ones are skipped (*skip_done*), so a crash just means press Run again.",
+            "4. **one_per_run is ON**: every Run makes ONE image (the next one not done) and saves it right away. Set *how_many* to the range (e.g. 35) and the **Run count** (the number next to the Run button) to the same number → press Run once, it works through them one by one. First test: Run count 3.",
+            "   A crash / cancel loses nothing: press Run again and it continues. To redo a bad one, delete it from `output/datasets/<name>/`.",
             "5. Optional: Ctrl+B the **Body reference** box, load a full-body photo of her and tick *use_body_reference*. Off = her body comes from each template.", "",
             "**Template tips**",
             "- One woman per photo, face visible. A covered or turned-away face gives a bad image.",
@@ -177,13 +188,14 @@ def build(key, cfg):
             "**What gets saved**: `output/datasets/<name>/<name>_<template>.png` + `.txt`, and `<name>.zip`.",
             "Download: `http://<pod-url>/view?filename=<name>.zip&subfolder=datasets&type=output`", "",
             "**Settings**",
+            "- *prompt* on Template Presets = the instruction for every photo (editable, `{extra}` = extra_description).",
             "- Qwen-Image 2.1, 25 steps, CFG 1, euler / simple.",
             "- Output = same shape and composition as each template. Size = *resolution* in the encoder: 1536 ≈ 2.3 MP (native 2K). 1024 = faster, 2048 = max detail.", "",
             "**Models**",
             *[f"- {m[2]}: [{m[0]}]({m[1]})" for m in (cfg["unet"], cfg["clip"], cfg["vae"])]])
-        add(18, "MarkdownNote", [740, 520], [420, 760], [note], [], title="READ ME")
-        add(40, "AIEmpireTemplatePresets", [740, 0], [420, 470],
-            ["my_templates", "zvx woman", "", 3, 1, 42, "fixed", False, "my_influencer", True],
+        add(18, "MarkdownNote", [740, 760], [420, 760], [note], [], title="READ ME")
+        add(40, "AIEmpireTemplatePresets", [740, 0], [420, 700],
+            ["my_templates", "zvx woman", "", 3, 1, 42, "fixed", False, "my_influencer", True, True, _node_const("TEMPLATE_PROMPT")],
             [("templates", "IMAGE", True), ("prompts", "STRING", True), ("captions", "STRING", True),
              ("seeds", "INT", True), ("count", "INT"), ("dataset_name", "STRING"), ("file_names", "STRING", True)],
             title="Template Presets (upload your photos here)", color=ORANGE)
@@ -218,7 +230,7 @@ def build(key, cfg):
         link(40, 6, 17, "file_names", "STRING", optional=True)
         groups = [
             {"id": 1, "title": "1 · Models", "bounding": [-20, -60, 380, 720], "color": "#444", "flags": {}},
-            {"id": 2, "title": "2 · Your face + template photos", "bounding": [370, -60, 810, 1360], "color": "#b06634", "flags": {}},
+            {"id": 2, "title": "2 · Your face + template photos", "bounding": [370, -60, 810, 1600], "color": "#b06634", "flags": {}},
             {"id": 3, "title": "3 · Edit model", "bounding": [1190, -60, 1090, 620], "color": "#3f789e", "flags": {}},
             {"id": 4, "title": "4 · Save dataset", "bounding": [2290, -60, 540, 700], "color": "#6a8f4e", "flags": {}},
         ]
