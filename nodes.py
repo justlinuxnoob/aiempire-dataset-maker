@@ -290,13 +290,18 @@ class AIEmpireTemplatePresets:
 
 # ----------------------------------------------------------------- body presets
 
-ATHLETIC = ("an athletic, fit body: toned flat stomach with light ab definition, slim waist, "
-            "toned arms and shoulders, firm toned legs and glutes, natural healthy proportions")
+ATHLETIC = ("a slim athletic body: flat toned stomach with visible abs, slim waist, narrow hips, "
+            "slim toned arms and shoulders, slim toned legs, small to medium bust, lean natural proportions")
 
 BODY_PROMPT = (
     "Change only her body shape in image 1 to {target}.{extra} "
     "Keep her face, hair, skin tone, pose, hands, outfit, background, camera angle, framing and lighting exactly the same. "
     "The clothes fit her new body naturally. Photorealistic smartphone photo, natural skin texture."
+)
+BODY_PROMPT_REF = (
+    "Change only her body shape in image 1 so her figure and proportions match the woman in image 2: {target}.{extra} "
+    "Keep her face, hair, skin tone, pose, hands, outfit, background, camera angle, framing and lighting from image 1 exactly the same. "
+    "Take nothing else from image 2. The clothes fit her new body naturally. Photorealistic smartphone photo, natural skin texture."
 )
 
 
@@ -350,6 +355,7 @@ class AIEmpireBodyPresetMaker:
             },
             "optional": {
                 "skip_done": ("BOOLEAN", {"default": True, "tooltip": "Skip photos already in the output set (resume after a crash). Turn off to redo them."}),
+                "use_body_example": ("BOOLEAN", {"default": False, "tooltip": "Turn on when you load a photo with the target body in the Body example box (best: one of your own photos that already has it)."}),
             },
         }
 
@@ -367,7 +373,7 @@ class AIEmpireBodyPresetMaker:
                 state += [f"{f}:{os.path.getmtime(os.path.join(folder, f))}" for f in sorted(os.listdir(folder))]
         return "|".join(state)
 
-    def build(self, source_set, output_set, body_target, instructions, how_many, start_at, seed, skip_done=True):
+    def build(self, source_set, output_set, body_target, instructions, how_many, start_at, seed, skip_done=True, use_body_example=False):
         import shutil
         src = os.path.join(_templates_dir(), source_set)
         if not os.path.isdir(src):
@@ -405,7 +411,7 @@ class AIEmpireBodyPresetMaker:
                 continue
             extra = f" {what[0].upper()}{what[1:].rstrip('.')}." if what else ""
             imgs.append(_pil_to_tensor(_load_template(os.path.join(src, f))))
-            prompts.append(BODY_PROMPT.format(target=target, extra=extra))
+            prompts.append((BODY_PROMPT_REF if use_body_example else BODY_PROMPT).format(target=target, extra=extra))
             seeds.append((seed + files.index(f)) % 0xFFFFFFFFFFFFFFFF)
             stems.append(stem)
 

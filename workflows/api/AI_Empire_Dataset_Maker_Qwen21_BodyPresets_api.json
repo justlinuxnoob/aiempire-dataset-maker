@@ -4,12 +4,13 @@
     "inputs": {
       "source_set": "my_templates",
       "output_set": "athletic",
-      "body_target": "an athletic, fit body: toned flat stomach with light ab definition, slim waist, toned arms and shoulders, firm toned legs and glutes, natural healthy proportions",
+      "body_target": "a slim athletic body: flat toned stomach with visible abs, slim waist, narrow hips, slim toned arms and shoulders, slim toned legs, small to medium bust, lean natural proportions",
       "instructions": "# one line per photo (optional)\n# 1-35 | keep\n# swap_40 | her hips are wide, make them narrower\n",
       "how_many": 3,
       "start_at": 1,
       "seed": 42,
-      "skip_done": true
+      "skip_done": true,
+      "use_body_example": false
     },
     "_meta": {
       "title": "Body Preset Maker (upload base photos here)"
@@ -82,7 +83,7 @@
       ]
     },
     "_meta": {
-      "title": "Qwen 2.1 encoder (image 1 = base photo)"
+      "title": "Qwen 2.1 encoder (1 = base photo, 2 = body example)"
     }
   },
   "15": {

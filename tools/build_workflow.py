@@ -89,7 +89,7 @@ WIDGETS = {
                                "custom_presets", "use_body_reference", "dataset_name", "size_scale"],
     "AIEmpireTemplatePresets": ["template_set", "trigger_word", "extra_description", "how_many", "start_at", "seed", None,
                                 "use_body_reference", "dataset_name", "skip_done"],
-    "AIEmpireBodyPresetMaker": ["source_set", "output_set", "body_target", "instructions", "how_many", "start_at", "seed", None, "skip_done"],
+    "AIEmpireBodyPresetMaker": ["source_set", "output_set", "body_target", "instructions", "how_many", "start_at", "seed", None, "skip_done", "use_body_example"],
     "AIEmpireSaveTemplateSet": ["output_set", "source_set"],
     "AIEmpireNanoBanana": ["auth", "model", "resolution", "api_key", "vertex_project", "vertex_location"],
     "FluxKontextImageScale": [], "TextEncodeQwenImageEditPlus": ["prompt"],
@@ -430,7 +430,8 @@ def build_body(key, cfg, nodes, links, lid, add, node, link, mp, ORANGE, GREEN):
         "   - `swap_40 | her hips are very wide, make them much narrower` → extra help for one photo",
         "   - numbers = position in the set (sorted by name), or use the file name",
         "4. **how_many = 3** first. Check them, then **0** = all. Finished photos are skipped on re-runs; delete a bad one from `input/templates/<preset>/` and run again to redo it.",
-        "5. Next preset (curvy, skinny …): same *source_set*, new *output_set* + *body_target*, clear *instructions*.", "",
+        "5. **Body example (recommended):** select the purple box, Ctrl+B, load ONE photo that already has the target body (best: one of your own `keep` photos, so the edited ones match them), tick *use_body_example*. Qwen copies the figure from it, nothing else.",
+        "6. Next preset (curvy, skinny …): same *source_set*, new *output_set* + *body_target* (+ a new body example), clear *instructions*.", "",
         "Captions: a `.txt` next to a base photo is copied into the preset too.", "",
         "**Settings**: Qwen-Image 2.1, 25 steps, CFG 1, euler / simple. Output keeps each photo's size and shape (*resolution* 1536 ≈ 2.3 MP).", "",
         "**Models**",
@@ -438,17 +439,19 @@ def build_body(key, cfg, nodes, links, lid, add, node, link, mp, ORANGE, GREEN):
     add(18, "MarkdownNote", [380, 560], [440, 640], [note], [], title="READ ME")
     add(50, "AIEmpireBodyPresetMaker", [380, 0], [440, 500],
         ["my_templates", "athletic",
-         "an athletic, fit body: toned flat stomach with light ab definition, slim waist, toned arms and shoulders, firm toned legs and glutes, natural healthy proportions",
-         "# one line per photo (optional)\n# 1-35 | keep\n# swap_40 | her hips are wide, make them narrower\n", 3, 1, 42, "fixed", True],
+         "a slim athletic body: flat toned stomach with visible abs, slim waist, narrow hips, slim toned arms and shoulders, slim toned legs, small to medium bust, lean natural proportions",
+         "# one line per photo (optional)\n# 1-35 | keep\n# swap_40 | her hips are wide, make them narrower\n", 3, 1, 42, "fixed", True, False],
         [("images", "IMAGE", True), ("prompts", "STRING", True), ("seeds", "INT", True), ("file_names", "STRING", True),
          ("output_set", "STRING"), ("source_set", "STRING")],
         title="Body Preset Maker (upload base photos here)", color=ORANGE)
+    add(19, "LoadImage", [860, 300], [320, 400], ["body_example.png", "image"], [("IMAGE", "IMAGE"), ("MASK", "MASK")],
+        title="Body example (optional, Ctrl+B to turn on)", color=("#2e2240", "#1f172b"), mode=4)
     add(2, "UNETLoader", [0, 0], [340, 82], [cfg["unet"][0], "default"], [("MODEL", "MODEL")], title="Edit model", props=mp(cfg["unet"]))
     add(5, "QwenImage21Cache", [0, 120], [340, 82], ["auto", "default"], [("MODEL", "MODEL")])
     add(6, "CLIPLoader", [0, 440], [340, 106], [cfg["clip"][0], "qwen_image", "default"], [("CLIP", "CLIP")], props=mp(cfg["clip"]))
     add(7, "VAELoader", [0, 580], [340, 58], [cfg["vae"][0]], [("VAE", "VAE")], props=mp(cfg["vae"]))
     add(10, "TextEncodeQwenImage21", [860, 0], [360, 220], ["", "", 1536],
-        [("positive", "CONDITIONING"), ("negative", "CONDITIONING"), ("latent", "LATENT")], title="Qwen 2.1 encoder (image 1 = base photo)")
+        [("positive", "CONDITIONING"), ("negative", "CONDITIONING"), ("latent", "LATENT")], title="Qwen 2.1 encoder (1 = base photo, 2 = body example)")
     add(15, "KSampler", [1260, 0], [320, 262], [42, "fixed", cfg["steps"], 1, "euler", "simple", 1], [("LATENT", "LATENT")], title="KSampler (edit)")
     add(16, "VAEDecode", [1260, 320], [220, 46], [], [("IMAGE", "IMAGE")])
     add(51, "AIEmpireSaveTemplateSet", [1620, 0], [520, 620], ["athletic", "my_templates"], [], title="Save preset → input/templates/<output_set>", color=GREEN)
@@ -456,7 +459,7 @@ def build_body(key, cfg, nodes, links, lid, add, node, link, mp, ORANGE, GREEN):
     link(6, 0, 10, "clip", "CLIP")
     link(7, 0, 10, "vae", "VAE", optional=True)
     link(50, 0, 10, "images.image_1", "IMAGE", optional=True)
-    node(10)["inputs"].append({"name": "images.image_2", "type": "IMAGE", "link": None, "shape": 7})
+    link(19, 0, 10, "images.image_2", "IMAGE", optional=True)
     link(50, 1, 10, "prompt", "STRING", widget=True)
     link(5, 0, 15, "model", "MODEL")
     link(10, 0, 15, "positive", "CONDITIONING")
@@ -472,7 +475,7 @@ def build_body(key, cfg, nodes, links, lid, add, node, link, mp, ORANGE, GREEN):
     groups = [
         {"id": 1, "title": "1 · Models", "bounding": [-20, -60, 380, 720], "color": "#444", "flags": {}},
         {"id": 2, "title": "2 · Base photos + body", "bounding": [370, -60, 470, 1280], "color": "#b06634", "flags": {}},
-        {"id": 3, "title": "3 · Edit model", "bounding": [850, -60, 750, 620], "color": "#3f789e", "flags": {}},
+        {"id": 3, "title": "3 · Edit model", "bounding": [850, -60, 750, 780], "color": "#3f789e", "flags": {}},
         {"id": 4, "title": "4 · Save preset", "bounding": [1610, -60, 540, 700], "color": "#6a8f4e", "flags": {}},
     ]
     write(key, nodes, links, lid, groups, node)

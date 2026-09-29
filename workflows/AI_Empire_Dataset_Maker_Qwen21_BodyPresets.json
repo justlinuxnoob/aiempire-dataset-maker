@@ -2,7 +2,7 @@
   "id": "5e0c2f64-7a1b-4c8e-9d3f-b0d1b0d10003",
   "revision": 0,
   "last_node_id": 51,
-  "last_link_id": 16,
+  "last_link_id": 17,
   "nodes": [
     {
       "id": 18,
@@ -24,7 +24,7 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "## AI Empire · Body Preset Maker (Qwen-Image 2.1)\n\nTurns your base photos into a **body-type preset**: every photo gets the same body, everything else (face, hair, pose, outfit, place, light) stays.\nThe result is a new template set, ready for the Template Presets dataset workflow.\n\n**How to use**\n1. On **Body Preset Maker** click **📁 Upload template photos**, select your base photos, name the set (e.g. `base`).\n2. *output_set* = the new preset name (`athletic`). *body_target* = the body every photo gets.\n3. *instructions* (optional), one line per photo:\n   - `1-35 | keep` → copied unchanged (already the right body)\n   - `swap_40 | her hips are very wide, make them much narrower` → extra help for one photo\n   - numbers = position in the set (sorted by name), or use the file name\n4. **how_many = 3** first. Check them, then **0** = all. Finished photos are skipped on re-runs; delete a bad one from `input/templates/<preset>/` and run again to redo it.\n5. Next preset (curvy, skinny …): same *source_set*, new *output_set* + *body_target*, clear *instructions*.\n\nCaptions: a `.txt` next to a base photo is copied into the preset too.\n\n**Settings**: Qwen-Image 2.1, 25 steps, CFG 1, euler / simple. Output keeps each photo's size and shape (*resolution* 1536 ≈ 2.3 MP).\n\n**Models**\n- diffusion_models: [qwen_image_2.1_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/diffusion_models/qwen_image_2.1_int8_convrot.safetensors)\n- text_encoders: [qwen3vl_8b_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/text_encoders/qwen3vl_8b_int8_convrot.safetensors)\n- vae: [qwen_image_2.1_vae_bf16.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/vae/qwen_image_2.1_vae_bf16.safetensors)"
+        "## AI Empire · Body Preset Maker (Qwen-Image 2.1)\n\nTurns your base photos into a **body-type preset**: every photo gets the same body, everything else (face, hair, pose, outfit, place, light) stays.\nThe result is a new template set, ready for the Template Presets dataset workflow.\n\n**How to use**\n1. On **Body Preset Maker** click **📁 Upload template photos**, select your base photos, name the set (e.g. `base`).\n2. *output_set* = the new preset name (`athletic`). *body_target* = the body every photo gets.\n3. *instructions* (optional), one line per photo:\n   - `1-35 | keep` → copied unchanged (already the right body)\n   - `swap_40 | her hips are very wide, make them much narrower` → extra help for one photo\n   - numbers = position in the set (sorted by name), or use the file name\n4. **how_many = 3** first. Check them, then **0** = all. Finished photos are skipped on re-runs; delete a bad one from `input/templates/<preset>/` and run again to redo it.\n5. **Body example (recommended):** select the purple box, Ctrl+B, load ONE photo that already has the target body (best: one of your own `keep` photos, so the edited ones match them), tick *use_body_example*. Qwen copies the figure from it, nothing else.\n6. Next preset (curvy, skinny …): same *source_set*, new *output_set* + *body_target* (+ a new body example), clear *instructions*.\n\nCaptions: a `.txt` next to a base photo is copied into the preset too.\n\n**Settings**: Qwen-Image 2.1, 25 steps, CFG 1, euler / simple. Output keeps each photo's size and shape (*resolution* 1536 ≈ 2.3 MP).\n\n**Models**\n- diffusion_models: [qwen_image_2.1_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/diffusion_models/qwen_image_2.1_int8_convrot.safetensors)\n- text_encoders: [qwen3vl_8b_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/text_encoders/qwen3vl_8b_int8_convrot.safetensors)\n- vae: [qwen_image_2.1_vae_bf16.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/vae/qwen_image_2.1_vae_bf16.safetensors)"
       ],
       "title": "READ ME"
     },
@@ -56,7 +56,7 @@
           "name": "prompts",
           "type": "STRING",
           "links": [
-            5
+            6
           ],
           "shape": 6
         },
@@ -64,7 +64,7 @@
           "name": "seeds",
           "type": "INT",
           "links": [
-            10
+            11
           ],
           "shape": 6
         },
@@ -72,7 +72,7 @@
           "name": "file_names",
           "type": "STRING",
           "links": [
-            14
+            15
           ],
           "shape": 6
         },
@@ -80,14 +80,14 @@
           "name": "output_set",
           "type": "STRING",
           "links": [
-            15
+            16
           ]
         },
         {
           "name": "source_set",
           "type": "STRING",
           "links": [
-            16
+            17
           ]
         }
       ],
@@ -97,17 +97,58 @@
       "widgets_values": [
         "my_templates",
         "athletic",
-        "an athletic, fit body: toned flat stomach with light ab definition, slim waist, toned arms and shoulders, firm toned legs and glutes, natural healthy proportions",
+        "a slim athletic body: flat toned stomach with visible abs, slim waist, narrow hips, slim toned arms and shoulders, slim toned legs, small to medium bust, lean natural proportions",
         "# one line per photo (optional)\n# 1-35 | keep\n# swap_40 | her hips are wide, make them narrower\n",
         3,
         1,
         42,
         "fixed",
-        true
+        true,
+        false
       ],
       "title": "Body Preset Maker (upload base photos here)",
       "color": "#3d2a14",
       "bgcolor": "#2a1d0e"
+    },
+    {
+      "id": 19,
+      "type": "LoadImage",
+      "pos": [
+        860,
+        300
+      ],
+      "size": [
+        320,
+        400
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            5
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "body_example.png",
+        "image"
+      ],
+      "title": "Body example (optional, Ctrl+B to turn on)",
+      "color": "#2e2240",
+      "bgcolor": "#1f172b"
     },
     {
       "id": 2,
@@ -175,7 +216,7 @@
           "name": "MODEL",
           "type": "MODEL",
           "links": [
-            6
+            7
           ]
         }
       ],
@@ -248,7 +289,7 @@
           "type": "VAE",
           "links": [
             3,
-            12
+            13
           ]
         }
       ],
@@ -301,13 +342,13 @@
         {
           "name": "images.image_2",
           "type": "IMAGE",
-          "link": null,
+          "link": 5,
           "shape": 7
         },
         {
           "name": "prompt",
           "type": "STRING",
-          "link": 5,
+          "link": 6,
           "widget": {
             "name": "prompt"
           }
@@ -318,21 +359,21 @@
           "name": "positive",
           "type": "CONDITIONING",
           "links": [
-            7
+            8
           ]
         },
         {
           "name": "negative",
           "type": "CONDITIONING",
           "links": [
-            8
+            9
           ]
         },
         {
           "name": "latent",
           "type": "LATENT",
           "links": [
-            9
+            10
           ]
         }
       ],
@@ -344,7 +385,7 @@
         "",
         1536
       ],
-      "title": "Qwen 2.1 encoder (image 1 = base photo)"
+      "title": "Qwen 2.1 encoder (1 = base photo, 2 = body example)"
     },
     {
       "id": 15,
@@ -358,33 +399,33 @@
         262
       ],
       "flags": {},
-      "order": 7,
+      "order": 8,
       "mode": 0,
       "inputs": [
         {
           "name": "model",
           "type": "MODEL",
-          "link": 6
+          "link": 7
         },
         {
           "name": "positive",
           "type": "CONDITIONING",
-          "link": 7
+          "link": 8
         },
         {
           "name": "negative",
           "type": "CONDITIONING",
-          "link": 8
+          "link": 9
         },
         {
           "name": "latent_image",
           "type": "LATENT",
-          "link": 9
+          "link": 10
         },
         {
           "name": "seed",
           "type": "INT",
-          "link": 10,
+          "link": 11,
           "widget": {
             "name": "seed"
           }
@@ -395,7 +436,7 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            11
+            12
           ]
         }
       ],
@@ -425,18 +466,18 @@
         46
       ],
       "flags": {},
-      "order": 8,
+      "order": 9,
       "mode": 0,
       "inputs": [
         {
           "name": "samples",
           "type": "LATENT",
-          "link": 11
+          "link": 12
         },
         {
           "name": "vae",
           "type": "VAE",
-          "link": 12
+          "link": 13
         }
       ],
       "outputs": [
@@ -444,7 +485,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            13
+            14
           ]
         }
       ],
@@ -465,23 +506,23 @@
         620
       ],
       "flags": {},
-      "order": 9,
+      "order": 10,
       "mode": 0,
       "inputs": [
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 13
+          "link": 14
         },
         {
           "name": "file_names",
           "type": "STRING",
-          "link": 14
+          "link": 15
         },
         {
           "name": "output_set",
           "type": "STRING",
-          "link": 15,
+          "link": 16,
           "widget": {
             "name": "output_set"
           }
@@ -489,7 +530,7 @@
         {
           "name": "source_set",
           "type": "STRING",
-          "link": 16,
+          "link": 17,
           "widget": {
             "name": "source_set"
           }
@@ -543,6 +584,14 @@
     ],
     [
       5,
+      19,
+      0,
+      10,
+      3,
+      "IMAGE"
+    ],
+    [
+      6,
       50,
       1,
       10,
@@ -550,7 +599,7 @@
       "STRING"
     ],
     [
-      6,
+      7,
       5,
       0,
       15,
@@ -558,7 +607,7 @@
       "MODEL"
     ],
     [
-      7,
+      8,
       10,
       0,
       15,
@@ -566,7 +615,7 @@
       "CONDITIONING"
     ],
     [
-      8,
+      9,
       10,
       1,
       15,
@@ -574,7 +623,7 @@
       "CONDITIONING"
     ],
     [
-      9,
+      10,
       10,
       2,
       15,
@@ -582,7 +631,7 @@
       "LATENT"
     ],
     [
-      10,
+      11,
       50,
       2,
       15,
@@ -590,7 +639,7 @@
       "INT"
     ],
     [
-      11,
+      12,
       15,
       0,
       16,
@@ -598,7 +647,7 @@
       "LATENT"
     ],
     [
-      12,
+      13,
       7,
       0,
       16,
@@ -606,7 +655,7 @@
       "VAE"
     ],
     [
-      13,
+      14,
       16,
       0,
       51,
@@ -614,7 +663,7 @@
       "IMAGE"
     ],
     [
-      14,
+      15,
       50,
       3,
       51,
@@ -622,7 +671,7 @@
       "STRING"
     ],
     [
-      15,
+      16,
       50,
       4,
       51,
@@ -630,7 +679,7 @@
       "STRING"
     ],
     [
-      16,
+      17,
       50,
       5,
       51,
@@ -670,7 +719,7 @@
         850,
         -60,
         750,
-        620
+        780
       ],
       "color": "#3f789e",
       "flags": {}
