@@ -166,13 +166,15 @@ def build(key, cfg):
     else:
         note = "\n".join([f"## AI Empire · Dataset Maker ({cfg['title']})", "", *HOW_TO,
                           "", "**What gets saved** (in `output/datasets/`)",
-                          "- `<name>_raw` = straight from the edit model",
-                          "- `<name>` = after the **Z-Image realism pass** (real skin + light, same face). Train on this one.",
-                          "- Don't want the realism pass? Right-click the *5 · Realism pass* group → Bypass group nodes.",
+                          *(["- `<name>` = straight from Qwen-Image 2.1 + captions + zip. Train on this one.",
+                             "- Realism pass (Z-Image) is **off** here: Qwen 2.1 already looks real. To try it: select the *5 · Realism pass* group + *Save FINAL* and press Ctrl+B."] if q21 else
+                            ["- `<name>_raw` = straight from the edit model",
+                             "- `<name>` = after the **Z-Image realism pass** (real skin + light, same face). Train on this one.",
+                             "- Don't want the realism pass? Right-click the *5 · Realism pass* group → Bypass group nodes."]),
                           "", "**Settings**", *[f"- {x}" for x in cfg["notes"]],
                           (f"- Edit: {cfg['steps']} steps, CFG 1, euler / simple (official Qwen-Image 2.1 settings)." if q21 else
                            f"- Edit: {cfg['steps']} steps, CFG 1, euler / simple (Lightning LoRA). Max quality: Ctrl+B the LoRA and use 40 steps, CFG 4."),
-                          "- Realism pass: denoise 0.30 (higher = more realistic but can change the face; 0.25-0.35 is the sweet spot).",
+                          *([] if q21 else ["- Realism pass: denoise 0.30 (higher = more realistic but can change the face; 0.25-0.35 is the sweet spot)."]),
                           "", "**Models**",
                           *[f"- {m[2]}: [{m[0]}]({m[1]})" for m in ((cfg["unet"], cfg["clip"], cfg["vae"]) if q21 else (cfg["unet"], cfg["lora"], M["clip"], M["vae"])) + (M["z_unet"], M["z_clip"], M["z_vae"])]])
         add(18, "MarkdownNote", [740, 460], [400, 700], [note], [], title="READ ME")
@@ -200,19 +202,23 @@ def build(key, cfg):
         add(14, "EmptyLatentImage" if q21 else "EmptySD3LatentImage", [1580, 420], [300, 106], [1024, 1024, 1], [("LATENT", "LATENT")])
         add(15, "KSampler", [1920, 0], [320, 262], [42, "fixed", cfg["steps"], 1, "euler", "simple", 1], [("LATENT", "LATENT")], title="KSampler (edit)")
         add(16, "VAEDecode", [1920, 320], [220, 46], [], [("IMAGE", "IMAGE")])
+        RM = 4 if q21 else 0  # Qwen-Image 2.1 looks real on its own: realism pass off (Ctrl+B the group to turn it on)
         # realism pass
-        add(20, "UNETLoader", [1180, 760], [340, 82], [M["z_unet"][0], "default"], [("MODEL", "MODEL")], title="Z-Image Turbo", props=mp(M["z_unet"]))
-        add(21, "ModelSamplingAuraFlow", [1180, 880], [340, 58], [3], [("MODEL", "MODEL")])
-        add(22, "CLIPLoader", [1180, 980], [340, 106], [M["z_clip"][0], "lumina2", "default"], [("CLIP", "CLIP")], props=mp(M["z_clip"]))
-        add(23, "VAELoader", [1180, 1120], [340, 58], [M["z_vae"][0]], [("VAE", "VAE")], props=mp(M["z_vae"]))
-        add(24, "CLIPTextEncode", [1580, 760], [320, 120], [""], [("CONDITIONING", "CONDITIONING")], title="Realism prompt (from presets)")
-        add(25, "ConditioningZeroOut", [1580, 920], [240, 26], [], [("CONDITIONING", "CONDITIONING")])
-        add(26, "VAEEncode", [1580, 1000], [240, 46], [], [("LATENT", "LATENT")])
-        add(27, "KSampler", [1920, 760], [320, 262], [42, "fixed", 8, 1, "dpmpp_2m_sde", "beta", 0.3], [("LATENT", "LATENT")], title="KSampler (realism, denoise 0.30)")
-        add(28, "VAEDecode", [1920, 1080], [220, 46], [], [("IMAGE", "IMAGE")])
+        add(20, "UNETLoader", [1180, 760], [340, 82], [M["z_unet"][0], "default"], [("MODEL", "MODEL")], title="Z-Image Turbo", props=mp(M["z_unet"]), mode=RM)
+        add(21, "ModelSamplingAuraFlow", [1180, 880], [340, 58], [3], [("MODEL", "MODEL")], mode=RM)
+        add(22, "CLIPLoader", [1180, 980], [340, 106], [M["z_clip"][0], "lumina2", "default"], [("CLIP", "CLIP")], props=mp(M["z_clip"]), mode=RM)
+        add(23, "VAELoader", [1180, 1120], [340, 58], [M["z_vae"][0]], [("VAE", "VAE")], props=mp(M["z_vae"]), mode=RM)
+        add(24, "CLIPTextEncode", [1580, 760], [320, 120], [""], [("CONDITIONING", "CONDITIONING")], title="Realism prompt (from presets)", mode=RM)
+        add(25, "ConditioningZeroOut", [1580, 920], [240, 26], [], [("CONDITIONING", "CONDITIONING")], mode=RM)
+        add(26, "VAEEncode", [1580, 1000], [240, 46], [], [("LATENT", "LATENT")], mode=RM)
+        add(27, "KSampler", [1920, 760], [320, 262], [42, "fixed", 8, 1, "dpmpp_2m_sde", "beta", 0.3], [("LATENT", "LATENT")], title="KSampler (realism, denoise 0.30)", mode=RM)
+        add(28, "VAEDecode", [1920, 1080], [220, 46], [], [("IMAGE", "IMAGE")], mode=RM)
         # save
-        add(17, "AIEmpireSaveDataset", [2300, 0], [520, 620], ["my_influencer", False, "_raw"], [], title="Save RAW (edit model only)", color=GREEN)
-        add(29, "AIEmpireSaveDataset", [2300, 760], [520, 620], ["my_influencer", True, ""], [], title="Save FINAL (after realism pass) ← train on this", color=GREEN)
+        if q21:
+            add(17, "AIEmpireSaveDataset", [2300, 0], [520, 620], ["my_influencer", True, ""], [], title="Save Dataset ← train on this", color=GREEN)
+        else:
+            add(17, "AIEmpireSaveDataset", [2300, 0], [520, 620], ["my_influencer", False, "_raw"], [], title="Save RAW (edit model only)", color=GREEN)
+        add(29, "AIEmpireSaveDataset", [2300, 760], [520, 620], ["my_influencer", True, ""], [], title="Save FINAL (after realism pass) ← train on this", color=GREEN, mode=RM)
 
         if q21:
             link(2, 0, 5, "model", "MODEL")

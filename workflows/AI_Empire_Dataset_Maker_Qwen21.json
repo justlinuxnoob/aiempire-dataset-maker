@@ -204,7 +204,7 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "## AI Empire · Dataset Maker (Qwen-Image 2.1)\n\n**How to use**\n1. Load her face in **Your face** (clear, front-facing, even light).\n2. Optional: load a full-body photo of her in **Body reference**, select that box and press **Ctrl+B** to switch it on (it starts purple = off), then tick **use_body_reference** in Dataset Presets.\n3. **Dataset Presets**: trigger word (e.g. `zvx woman`), *extra_description* (e.g. `with long straight dark brown hair, brown eyes`), *dataset_name*.\n4. First run: **how_many = 3**. If they look like her, set 40 and run again.\n\n**What gets saved** (in `output/datasets/`)\n- `<name>_raw` = straight from the edit model\n- `<name>` = after the **Z-Image realism pass** (real skin + light, same face). Train on this one.\n- Don't want the realism pass? Right-click the *5 · Realism pass* group → Bypass group nodes.\n\n**Settings**\n- Edit model: **Qwen-Image 2.1** (best open edit model right now, native 2K). int8 file, runs on 24-48 GB GPUs.\n- Images are made at **1.5x size** (~2.3 MP): *size_scale* in Dataset Presets. 1.0 = faster, 2.0 = max detail.\n- *resolution* in the Qwen 2.1 encoder = how big her face photo is fed in (1536 default).\n- Edit: 25 steps, CFG 1, euler / simple (official Qwen-Image 2.1 settings).\n- Realism pass: denoise 0.30 (higher = more realistic but can change the face; 0.25-0.35 is the sweet spot).\n\n**Models**\n- diffusion_models: [qwen_image_2.1_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/diffusion_models/qwen_image_2.1_int8_convrot.safetensors)\n- text_encoders: [qwen3vl_8b_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/text_encoders/qwen3vl_8b_int8_convrot.safetensors)\n- vae: [qwen_image_2.1_vae_bf16.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/vae/qwen_image_2.1_vae_bf16.safetensors)\n- diffusion_models: [z_image_turbo_bf16.safetensors](https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/diffusion_models/z_image_turbo_bf16.safetensors)\n- text_encoders: [qwen_3_4b.safetensors](https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/text_encoders/qwen_3_4b.safetensors)\n- vae: [ae.safetensors](https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/vae/ae.safetensors)"
+        "## AI Empire · Dataset Maker (Qwen-Image 2.1)\n\n**How to use**\n1. Load her face in **Your face** (clear, front-facing, even light).\n2. Optional: load a full-body photo of her in **Body reference**, select that box and press **Ctrl+B** to switch it on (it starts purple = off), then tick **use_body_reference** in Dataset Presets.\n3. **Dataset Presets**: trigger word (e.g. `zvx woman`), *extra_description* (e.g. `with long straight dark brown hair, brown eyes`), *dataset_name*.\n4. First run: **how_many = 3**. If they look like her, set 40 and run again.\n\n**What gets saved** (in `output/datasets/`)\n- `<name>` = straight from Qwen-Image 2.1 + captions + zip. Train on this one.\n- Realism pass (Z-Image) is **off** here: Qwen 2.1 already looks real. To try it: select the *5 · Realism pass* group + *Save FINAL* and press Ctrl+B.\n\n**Settings**\n- Edit model: **Qwen-Image 2.1** (best open edit model right now, native 2K). int8 file, runs on 24-48 GB GPUs.\n- Images are made at **1.5x size** (~2.3 MP): *size_scale* in Dataset Presets. 1.0 = faster, 2.0 = max detail.\n- *resolution* in the Qwen 2.1 encoder = how big her face photo is fed in (1536 default).\n- Edit: 25 steps, CFG 1, euler / simple (official Qwen-Image 2.1 settings).\n\n**Models**\n- diffusion_models: [qwen_image_2.1_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/diffusion_models/qwen_image_2.1_int8_convrot.safetensors)\n- text_encoders: [qwen3vl_8b_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/text_encoders/qwen3vl_8b_int8_convrot.safetensors)\n- vae: [qwen_image_2.1_vae_bf16.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/vae/qwen_image_2.1_vae_bf16.safetensors)\n- diffusion_models: [z_image_turbo_bf16.safetensors](https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/diffusion_models/z_image_turbo_bf16.safetensors)\n- text_encoders: [qwen_3_4b.safetensors](https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/text_encoders/qwen_3_4b.safetensors)\n- vae: [ae.safetensors](https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/vae/ae.safetensors)"
       ],
       "title": "READ ME"
     },
@@ -620,7 +620,7 @@
       ],
       "flags": {},
       "order": 9,
-      "mode": 0,
+      "mode": 4,
       "inputs": [],
       "outputs": [
         {
@@ -660,7 +660,7 @@
       ],
       "flags": {},
       "order": 10,
-      "mode": 0,
+      "mode": 4,
       "inputs": [
         {
           "name": "model",
@@ -697,7 +697,7 @@
       ],
       "flags": {},
       "order": 11,
-      "mode": 0,
+      "mode": 4,
       "inputs": [],
       "outputs": [
         {
@@ -737,7 +737,7 @@
       ],
       "flags": {},
       "order": 12,
-      "mode": 0,
+      "mode": 4,
       "inputs": [],
       "outputs": [
         {
@@ -776,7 +776,7 @@
       ],
       "flags": {},
       "order": 14,
-      "mode": 0,
+      "mode": 4,
       "inputs": [
         {
           "name": "clip",
@@ -823,7 +823,7 @@
       ],
       "flags": {},
       "order": 15,
-      "mode": 0,
+      "mode": 4,
       "inputs": [
         {
           "name": "conditioning",
@@ -858,7 +858,7 @@
       ],
       "flags": {},
       "order": 16,
-      "mode": 0,
+      "mode": 4,
       "inputs": [
         {
           "name": "pixels",
@@ -898,7 +898,7 @@
       ],
       "flags": {},
       "order": 19,
-      "mode": 0,
+      "mode": 4,
       "inputs": [
         {
           "name": "model",
@@ -965,7 +965,7 @@
       ],
       "flags": {},
       "order": 20,
-      "mode": 0,
+      "mode": 4,
       "inputs": [
         {
           "name": "samples",
@@ -1032,10 +1032,10 @@
       },
       "widgets_values": [
         "my_influencer",
-        false,
-        "_raw"
+        true,
+        ""
       ],
-      "title": "Save RAW (edit model only)",
+      "title": "Save Dataset ← train on this",
       "color": "#1f3320",
       "bgcolor": "#162416"
     },
@@ -1052,7 +1052,7 @@
       ],
       "flags": {},
       "order": 22,
-      "mode": 0,
+      "mode": 4,
       "inputs": [
         {
           "name": "images",

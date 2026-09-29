@@ -36,7 +36,9 @@ if [ "$EDIT_MODEL" != "none" ] && [ "$EDIT_MODEL" != "qwen21" ]; then
     "$HF/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/vae/qwen_image_vae.safetensors"
 fi
 
-if [ "${REALISM:-1}" = "1" ]; then
+# realism pass models: on by default for FireRed / Qwen 2511, off for Qwen-Image 2.1 (looks real on its own)
+if [ "$EDIT_MODEL" = "qwen21" ]; then REALISM="${REALISM:-0}"; else REALISM="${REALISM:-1}"; fi
+if [ "$REALISM" = "1" ]; then
   # Z-Image Turbo for the realism pass
   fetch "$M/diffusion_models" "z_image_turbo_bf16.safetensors" \
     "$HF/Comfy-Org/z_image_turbo/resolve/main/split_files/diffusion_models/z_image_turbo_bf16.safetensors"
