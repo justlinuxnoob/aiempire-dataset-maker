@@ -82,8 +82,11 @@ if [ "${QWEN21:-0}" = "1" ] || [ "$EDIT_MODEL" = "qwen21" ]; then
   Q21="$HF/Comfy-Org/Qwen-Image-2.1/resolve/main"
   fetch "$M/diffusion_models" "qwen_image_2.1_int8_convrot.safetensors" "$Q21/diffusion_models/qwen_image_2.1_int8_convrot.safetensors"
   fetch "$M/text_encoders" "qwen3vl_8b_int8_convrot.safetensors" "$Q21/text_encoders/qwen3vl_8b_int8_convrot.safetensors"
-  fetch "$M/text_encoders" "qwen3.5_9b_qwen_image_2.1_pe_i2i.int8_convrot.safetensors" "$Q21/text_encoders/qwen3.5_9b_qwen_image_2.1_pe_i2i.int8_convrot.safetensors"
   fetch "$M/vae" "qwen_image_2.1_vae_bf16.safetensors" "$Q21/vae/qwen_image_2.1_vae_bf16.safetensors"
+  # prompt-enhancer encoder: only the Qwen 2.1 TEST workflow uses it, the dataset workflows don't (saves ~10 GB)
+  if [ "${QWEN21:-0}" = "1" ]; then
+    fetch "$M/text_encoders" "qwen3.5_9b_qwen_image_2.1_pe_i2i.int8_convrot.safetensors" "$Q21/text_encoders/qwen3.5_9b_qwen_image_2.1_pe_i2i.int8_convrot.safetensors"
+  fi
 fi
 
 # KREA2 = 1 -> Krea2 RAW workflow: RawGirl Krea2 + Flux 2 Klein 9B realism pass + skin detailer (~60 GB)
