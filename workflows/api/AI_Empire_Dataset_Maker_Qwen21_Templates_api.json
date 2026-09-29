@@ -93,7 +93,7 @@
         1
       ],
       "negative_prompt": "",
-      "resolution": 1536,
+      "resolution": 2048,
       "clip": [
         "6",
         0
@@ -189,6 +189,10 @@
       "remaining": [
         "40",
         7
+      ],
+      "progress": [
+        "40",
+        8
       ]
     },
     "_meta": {

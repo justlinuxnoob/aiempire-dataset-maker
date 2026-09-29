@@ -2,7 +2,7 @@
   "id": "5e0c2f64-7a1b-4c8e-9d3f-7e3a1a7e0002",
   "revision": 0,
   "last_node_id": 40,
-  "last_link_id": 20,
+  "last_link_id": 21,
   "nodes": [
     {
       "id": 1,
@@ -104,7 +104,7 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "## AI Empire · Dataset Maker (Qwen-Image 2.1 · your template photos)\n\nEvery photo you upload = 1 dataset image: **same pose, outfit, place and light as the photo, her face from *Your face*.** 50 photos in = 50 dataset images out.\n\n**How to use**\n1. Load her face in **Your face** (clear, front-facing, even light).\n2. On **Template Presets** click **📁 Upload template photos**, select all your photos at once (or one `.zip`), then type a set name (e.g. `athletic`). They go to `input/templates/<set>/`.\n3. Pick the set in *template_set*. Fill *trigger_word* and *extra_description* (e.g. `with long straight blonde hair, blue eyes`): hair and eye colour here, or she keeps the template's hair.\n4. Set *how_many* (e.g. 3 to test, 35 for the set) → press **Run ONCE** (Run count 1). It makes one image, saves it right away, then queues the next by itself until all are done (*auto_continue* on Save Dataset). **X / Cancel** stops it.\n   Already-made images are skipped, so a crash or cancel loses nothing: press Run again and it continues. To redo a bad one, delete it from `output/datasets/<name>/`. New test = new *dataset_name*.\n5. Optional: Ctrl+B the **Body reference** box, load a full-body photo of her and tick *use_body_reference*. Off = her body comes from each template.\n\n**Template tips**\n- One woman per photo, face visible. A covered or turned-away face gives a bad image.\n- Captions: put `swap_01.txt` next to `swap_01.jpg` (e.g. `mirror selfie, black top, bathroom`) and it's added after the trigger word. No .txt = trigger word only.\n- One folder per body type (`athletic`, `curvy` …) = your body presets.\n\n**What gets saved**: `output/datasets/<name>/<name>_<template>.png` + `.txt`, and `<name>.zip`.\nDownload: `http://<pod-url>/view?filename=<name>.zip&subfolder=datasets&type=output`\n\n**Settings**\n- *prompt* on Template Presets = the instruction for every photo (editable, `{extra}` = extra_description).\n- **BFS Head Swap v1.1 LoRA** (MIT, by Alissonerdx) = trained for exactly this job. The *prompt* is the one it was trained with, keep the `head_swap:` start. If faces look overdone, try LoRA strength 0.8.\n- Qwen-Image 2.1, 25 steps, CFG 1, euler / simple.\n- Output = same shape and composition as each template. Size = *resolution* in the encoder: 1536 ≈ 2.3 MP (native 2K). 2048 = max detail (slower).\n- Works best when her face is big enough in the template. Tiny faces in far-away full-body shots come out weaker.\n\n**Models**\n- diffusion_models: [qwen_image_2.1_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/diffusion_models/qwen_image_2.1_int8_convrot.safetensors)\n- loras: [bfs_head_v1.1_qwen_2.1.safetensors](https://huggingface.co/Alissonerdx/BFS-Best-Face-Swap/resolve/main/bfs_head_v1.1_qwen_2.1.safetensors)\n- text_encoders: [qwen3vl_8b_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/text_encoders/qwen3vl_8b_int8_convrot.safetensors)\n- vae: [qwen_image_2.1_vae_bf16.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/vae/qwen_image_2.1_vae_bf16.safetensors)"
+        "## AI Empire · Dataset Maker (Qwen-Image 2.1 · your template photos)\n\nEvery photo you upload = 1 dataset image: **same pose, outfit, place and light as the photo, her face from *Your face*.** 50 photos in = 50 dataset images out.\n\n**How to use**\n1. Load her face in **Your face** (clear, front-facing, even light).\n2. On **Template Presets** click **📁 Upload template photos**, select all your photos at once (or one `.zip`), then type a set name (e.g. `athletic`). They go to `input/templates/<set>/`.\n3. Pick the set in *template_set*. Fill *trigger_word* and *extra_description* (e.g. `with long straight blonde hair, blue eyes`): hair and eye colour here, or she keeps the template's hair.\n4. Set *how_many* (e.g. 3 to test, 35 for the set) → press **Run ONCE** (Run count 1). It makes one image, saves it right away, then queues the next by itself until all are done (*auto_continue* on Save Dataset). **X / Cancel** stops it.\n   Already-made images are skipped, so a crash or cancel loses nothing: press Run again and it continues. To redo a bad one, delete it from `output/datasets/<name>/`. New test = new *dataset_name*.\n5. Optional: Ctrl+B the **Body reference** box, load a full-body photo of her and tick *use_body_reference*. Off = her body comes from each template.\n\n**Template tips**\n- One woman per photo, face visible. A covered or turned-away face gives a bad image.\n- Captions: put `swap_01.txt` next to `swap_01.jpg` (e.g. `mirror selfie, black top, bathroom`) and it's added after the trigger word. No .txt = trigger word only.\n- One folder per body type (`athletic`, `curvy` …) = your body presets.\n\n**What gets saved**: `output/datasets/<name>/<name>_<template>.png` + `.txt`, and `<name>.zip`.\nDownload: `http://<pod-url>/view?filename=<name>.zip&subfolder=datasets&type=output`\n\n**Settings**\n- *prompt* on Template Presets = the instruction for every photo (editable, `{extra}` = extra_description).\n- **BFS Head Swap v1.1 LoRA** (MIT, by Alissonerdx) = trained for exactly this job. The *prompt* is the one it was trained with, keep the `head_swap:` start. If faces look overdone, try LoRA strength 0.8.\n- Qwen-Image 2.1, 25 steps, CFG 1, euler / simple.\n- Output = same shape and composition as each template. Size = *resolution* in the encoder: **2048** (default, max detail, ~2-3 min per image on an A100). 1536 = about 2x faster, less face detail.\n- You can close the browser tab: it keeps running on the pod. Progress shows on the Save box and in the tab title. Don't stop the pod until it's done.\n- Works best when her face is big enough in the template. Tiny faces in far-away full-body shots come out weaker.\n\n**Models**\n- diffusion_models: [qwen_image_2.1_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/diffusion_models/qwen_image_2.1_int8_convrot.safetensors)\n- loras: [bfs_head_v1.1_qwen_2.1.safetensors](https://huggingface.co/Alissonerdx/BFS-Best-Face-Swap/resolve/main/bfs_head_v1.1_qwen_2.1.safetensors)\n- text_encoders: [qwen3vl_8b_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/text_encoders/qwen3vl_8b_int8_convrot.safetensors)\n- vae: [qwen_image_2.1_vae_bf16.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/vae/qwen_image_2.1_vae_bf16.safetensors)"
       ],
       "title": "READ ME"
     },
@@ -181,6 +181,13 @@
           "type": "INT",
           "links": [
             20
+          ]
+        },
+        {
+          "name": "progress",
+          "type": "STRING",
+          "links": [
+            21
           ]
         }
       ],
@@ -490,7 +497,7 @@
       "widgets_values": [
         "",
         "",
-        1536
+        2048
       ],
       "title": "Qwen 2.1 encoder (1 = template, 2 = face, 3 = body)"
     },
@@ -644,6 +651,12 @@
           "name": "remaining",
           "type": "INT",
           "link": 20,
+          "shape": 7
+        },
+        {
+          "name": "progress",
+          "type": "STRING",
+          "link": 21,
           "shape": 7
         }
       ],
@@ -822,6 +835,14 @@
       17,
       4,
       "INT"
+    ],
+    [
+      21,
+      40,
+      8,
+      17,
+      5,
+      "STRING"
     ]
   ],
   "groups": [

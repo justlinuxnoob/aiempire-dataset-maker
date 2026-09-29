@@ -199,7 +199,8 @@ def build(key, cfg):
             "- *prompt* on Template Presets = the instruction for every photo (editable, `{extra}` = extra_description).",
             "- **BFS Head Swap v1.1 LoRA** (MIT, by Alissonerdx) = trained for exactly this job. The *prompt* is the one it was trained with, keep the `head_swap:` start. If faces look overdone, try LoRA strength 0.8.",
             "- Qwen-Image 2.1, 25 steps, CFG 1, euler / simple.",
-            "- Output = same shape and composition as each template. Size = *resolution* in the encoder: 1536 ≈ 2.3 MP (native 2K). 2048 = max detail (slower).",
+            "- Output = same shape and composition as each template. Size = *resolution* in the encoder: **2048** (default, max detail, ~2-3 min per image on an A100). 1536 = about 2x faster, less face detail.",
+            "- You can close the browser tab: it keeps running on the pod. Progress shows on the Save box and in the tab title. Don't stop the pod until it's done.",
             "- Works best when her face is big enough in the template. Tiny faces in far-away full-body shots come out weaker.", "",
             "**Models**",
             *[f"- {m[2]}: [{m[0]}]({m[1]})" for m in (cfg["unet"], BFS_LORA, cfg["clip"], cfg["vae"])]])
@@ -208,7 +209,7 @@ def build(key, cfg):
             ["my_templates", "zvx woman", "", 3, 1, 42, "fixed", False, "my_influencer", True, True, BFS_PROMPT],
             [("templates", "IMAGE", True), ("prompts", "STRING", True), ("captions", "STRING", True),
              ("seeds", "INT", True), ("count", "INT"), ("dataset_name", "STRING"), ("file_names", "STRING", True),
-             ("remaining", "INT")],
+             ("remaining", "INT"), ("progress", "STRING")],
             title="Template Presets (upload your photos here)", color=ORANGE)
         add(2, "UNETLoader", [0, 0], [340, 82], [cfg["unet"][0], "default"], [("MODEL", "MODEL")], title="Edit model", props=mp(cfg["unet"]))
         add(3, "LoraLoaderModelOnly", [0, 240], [340, 82], [BFS_LORA[0], 1.0], [("MODEL", "MODEL")],
@@ -216,7 +217,7 @@ def build(key, cfg):
         add(5, "QwenImage21Cache", [0, 120], [340, 82], ["auto", "default"], [("MODEL", "MODEL")])
         add(6, "CLIPLoader", [0, 440], [340, 106], [cfg["clip"][0], "qwen_image", "default"], [("CLIP", "CLIP")], props=mp(cfg["clip"]))
         add(7, "VAELoader", [0, 580], [340, 58], [cfg["vae"][0]], [("VAE", "VAE")], props=mp(cfg["vae"]))
-        add(10, "TextEncodeQwenImage21", [1200, 0], [360, 220], ["", "", 1536],
+        add(10, "TextEncodeQwenImage21", [1200, 0], [360, 220], ["", "", 2048],
             [("positive", "CONDITIONING"), ("negative", "CONDITIONING"), ("latent", "LATENT")],
             title="Qwen 2.1 encoder (1 = template, 2 = face, 3 = body)")
         add(15, "KSampler", [1940, 0], [320, 262], [42, "fixed", cfg["steps"], 1, "euler", "simple", 1], [("LATENT", "LATENT")], title="KSampler (edit)")
@@ -243,6 +244,7 @@ def build(key, cfg):
         link(40, 5, 17, "dataset_name", "STRING", widget=True)
         link(40, 6, 17, "file_names", "STRING", optional=True)
         link(40, 7, 17, "remaining", "INT", optional=True)
+        link(40, 8, 17, "progress", "STRING", optional=True)
         groups = [
             {"id": 1, "title": "1 · Models", "bounding": [-20, -60, 380, 720], "color": "#444", "flags": {}},
             {"id": 2, "title": "2 · Your face + template photos", "bounding": [370, -60, 810, 1600], "color": "#b06634", "flags": {}},

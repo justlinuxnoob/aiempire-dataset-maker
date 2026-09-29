@@ -226,9 +226,9 @@ class AIEmpireTemplatePresets:
             },
         }
 
-    RETURN_TYPES = ("IMAGE", "STRING", "STRING", "INT", "INT", "STRING", "STRING", "INT")
-    RETURN_NAMES = ("templates", "prompts", "captions", "seeds", "count", "dataset_name", "file_names", "remaining")
-    OUTPUT_IS_LIST = (True, True, True, True, False, False, True, False)
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING", "INT", "INT", "STRING", "STRING", "INT", "STRING")
+    RETURN_NAMES = ("templates", "prompts", "captions", "seeds", "count", "dataset_name", "file_names", "remaining", "progress")
+    OUTPUT_IS_LIST = (True, True, True, True, False, False, True, False, False)
     FUNCTION = "build"
     CATEGORY = "AI Empire"
 
@@ -295,7 +295,8 @@ class AIEmpireTemplatePresets:
             raise ValueError(f"✅ All done: every template in this range is already in datasets/{name}. "
                              "To redo one, delete its image there. To redo all, change 'dataset_name'.")
         remaining = max(left - len(imgs), 0) if one_per_run else 0  # still to do after this run
-        return (imgs, prompts, captions, seeds, len(imgs), name, stems, remaining)
+        progress = f"{len(chosen) - left + len(imgs)}/{len(chosen)}"  # done after this run / total
+        return (imgs, prompts, captions, seeds, len(imgs), name, stems, remaining, progress)
 
 
 # ----------------------------------------------------------------- body presets
@@ -672,6 +673,7 @@ class AIEmpireSaveDataset:
                 "suffix": ("STRING", {"default": "", "tooltip": "Added to the folder name, e.g. _raw"}),
                 "file_names": ("STRING", {"forceInput": True, "tooltip": "From Template Presets: each image is named after its template, so re-runs skip finished ones."}),
                 "remaining": ("INT", {"forceInput": True, "tooltip": "From Template Presets: how many are still to do."}),
+                "progress": ("STRING", {"forceInput": True, "tooltip": "From Template Presets: done / total, shown on this box."}),
                 "auto_continue": ("BOOLEAN", {"default": True, "tooltip": "ON = after saving, it queues the next one by itself until all are done. Press Run once. Cancel (X) stops it."}),
             },
             "hidden": {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
@@ -684,7 +686,7 @@ class AIEmpireSaveDataset:
     CATEGORY = "AI Empire"
 
     def save(self, images, captions, dataset_name, make_zip, suffix=None, file_names=None,
-             remaining=None, auto_continue=None, prompt=None, extra_pnginfo=None):
+             remaining=None, auto_continue=None, prompt=None, extra_pnginfo=None, progress=None):
         sfx = (_first(suffix) if suffix else "") or ""
         name = _safe_name(_first(dataset_name) + sfx)
         do_zip = bool(_first(make_zip))
@@ -730,12 +732,19 @@ class AIEmpireSaveDataset:
                       key=lambda f: os.path.getmtime(os.path.join(folder, f)), reverse=True)
         gallery = [{"filename": f, "subfolder": subfolder, "type": "output"} for f in pngs[:100]]
         left = _first(remaining) if remaining else 0
+        prog = _first(progress) if progress else ""
+        if prog:
+            try:  # live progress on the Save box + browser tab (js/aiempire_templates.js)
+                import server
+                server.PromptServer.instance.send_sync("aiempire.progress", {"progress": prog, "left": int(left or 0), "dataset": name})
+            except Exception:
+                pass
         if left and _first(auto_continue) is not False and prompt and _first(prompt):
             _queue_again(_first(prompt), _first(extra_pnginfo) if extra_pnginfo else None)
             print(f"[AI Empire] {left} still to do - queued the next one (press X / Cancel to stop)")
         elif remaining:
             print("[AI Empire] ✅ All templates in this range are done.")
-        return {"ui": {"images": gallery or ui_images}}
+        return {"ui": {"images": gallery or ui_images, "progress": [prog] if prog else []}}
 
 
 NODE_CLASS_MAPPINGS = {

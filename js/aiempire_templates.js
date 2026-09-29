@@ -89,3 +89,45 @@ app.registerExtension({
     };
   },
 });
+
+// ---- live progress on "Save Dataset": title + bar + browser tab title
+function showProgress(progress, left, dataset) {
+  const m = /^(\d+)\/(\d+)$/.exec(progress || "");
+  if (!m) return;
+  const done = +m[1], total = +m[2];
+  for (const node of app.graph?._nodes || []) {
+    if (node.type !== "AIEmpireSaveDataset") continue;
+    node.aiempireProgress = { done, total };
+    if (!node.aiempireBaseTitle) node.aiempireBaseTitle = node.title;
+    node.title = `${node.aiempireBaseTitle}  ·  ${done >= total ? "✅" : "⏳"} ${done} / ${total}`;
+    node.setDirtyCanvas(true, true);
+  }
+  document.title = done >= total ? `✅ ${dataset} done (${total})` : `⏳ ${done}/${total} · ${dataset}`;
+}
+
+api.addEventListener("aiempire.progress", (e) => showProgress(e.detail.progress, e.detail.left, e.detail.dataset));
+
+app.registerExtension({
+  name: "aiempire.saveProgress",
+  async beforeRegisterNodeDef(nodeType, nodeData) {
+    if (nodeData.name !== "AIEmpireSaveDataset") return;
+    const onExecuted = nodeType.prototype.onExecuted;
+    nodeType.prototype.onExecuted = function (msg) {
+      const r = onExecuted?.apply(this, arguments);
+      if (msg?.progress?.[0]) showProgress(msg.progress[0], 0, "dataset");
+      return r;
+    };
+    const onDraw = nodeType.prototype.onDrawForeground;
+    nodeType.prototype.onDrawForeground = function (ctx) {
+      const r = onDraw?.apply(this, arguments);
+      const p = this.aiempireProgress;
+      if (p && p.total && !this.flags?.collapsed) {
+        const w = this.size[0] - 20, y = 4;
+        ctx.fillStyle = "#333"; ctx.fillRect(10, y, w, 6);
+        ctx.fillStyle = p.done >= p.total ? "#5cb85c" : "#e8a33d";
+        ctx.fillRect(10, y, (w * Math.min(p.done, p.total)) / p.total, 6);
+      }
+      return r;
+    };
+  },
+});
