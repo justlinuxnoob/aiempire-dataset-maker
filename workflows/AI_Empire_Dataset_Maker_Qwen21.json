@@ -1,8 +1,8 @@
 {
-  "id": "5e0c2f64-7a1b-4c8e-9d3f-a1e3e4e5e6e7",
+  "id": "5e0c2f64-7a1b-4c8e-9d3f-21e21e210001",
   "revision": 0,
   "last_node_id": 29,
-  "last_link_id": 43,
+  "last_link_id": 34,
   "nodes": [
     {
       "id": 1,
@@ -16,7 +16,7 @@
         360
       ],
       "flags": {},
-      "order": 6,
+      "order": 4,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -56,7 +56,7 @@
         360
       ],
       "flags": {},
-      "order": 7,
+      "order": 5,
       "mode": 4,
       "inputs": [],
       "outputs": [
@@ -64,8 +64,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            8,
-            12
+            5
           ]
         },
         {
@@ -97,7 +96,7 @@
         400
       ],
       "flags": {},
-      "order": 9,
+      "order": 6,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -105,7 +104,7 @@
           "name": "prompts",
           "type": "STRING",
           "links": [
-            13
+            6
           ],
           "shape": 6
         },
@@ -113,8 +112,8 @@
           "name": "captions",
           "type": "STRING",
           "links": [
-            39,
-            42
+            30,
+            33
           ],
           "shape": 6
         },
@@ -122,7 +121,7 @@
           "name": "widths",
           "type": "INT",
           "links": [
-            14
+            7
           ],
           "shape": 6
         },
@@ -130,7 +129,7 @@
           "name": "heights",
           "type": "INT",
           "links": [
-            15
+            8
           ],
           "shape": 6
         },
@@ -138,8 +137,8 @@
           "name": "seeds",
           "type": "INT",
           "links": [
-            22,
-            35
+            13,
+            26
           ],
           "shape": 6
         },
@@ -152,7 +151,7 @@
           "name": "realism_prompts",
           "type": "STRING",
           "links": [
-            27
+            18
           ],
           "shape": 6
         },
@@ -160,8 +159,8 @@
           "name": "dataset_name",
           "type": "STRING",
           "links": [
-            40,
-            43
+            31,
+            34
           ]
         }
       ],
@@ -179,7 +178,7 @@
         "",
         false,
         "my_influencer",
-        1.0
+        1.5
       ],
       "title": "Dataset Presets",
       "color": "#3d2a14",
@@ -197,7 +196,7 @@
         700
       ],
       "flags": {},
-      "order": 10,
+      "order": 7,
       "mode": 0,
       "inputs": [],
       "outputs": [],
@@ -205,7 +204,7 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "## AI Empire · Dataset Maker (Qwen Image Edit 2511)\n\n**How to use**\n1. Load her face in **Your face** (clear, front-facing, even light).\n2. Optional: load a full-body photo of her in **Body reference**, select that box and press **Ctrl+B** to switch it on (it starts purple = off), then tick **use_body_reference** in Dataset Presets.\n3. **Dataset Presets**: trigger word (e.g. `zvx woman`), *extra_description* (e.g. `with long straight dark brown hair, brown eyes`), *dataset_name*.\n4. First run: **how_many = 3**. If they look like her, set 40 and run again.\n\n**What gets saved** (in `output/datasets/`)\n- `<name>_raw` = straight from the edit model\n- `<name>` = after the **Z-Image realism pass** (real skin + light, same face). Train on this one.\n- Don't want the realism pass? Right-click the *5 · Realism pass* group → Bypass group nodes.\n\n**Settings**\n- Edit model: **Qwen Image Edit 2511** (Apache 2.0). fp8mixed file, 20 GB, fits 24-48 GB GPUs.\n- Edit: 8 steps, CFG 1, euler / simple (Lightning LoRA). Max quality: Ctrl+B the LoRA and use 40 steps, CFG 4.\n- Realism pass: denoise 0.30 (higher = more realistic but can change the face; 0.25-0.35 is the sweet spot).\n\n**Models**\n- diffusion_models: [qwen_image_edit_2511_fp8mixed.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_2511_fp8mixed.safetensors)\n- loras: [Qwen-Image-Edit-2511-Lightning-8steps-V1.0-bf16.safetensors](https://huggingface.co/lightx2v/Qwen-Image-Edit-2511-Lightning/resolve/main/Qwen-Image-Edit-2511-Lightning-8steps-V1.0-bf16.safetensors)\n- text_encoders: [qwen_2.5_vl_7b_fp8_scaled.safetensors](https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors)\n- vae: [qwen_image_vae.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/vae/qwen_image_vae.safetensors)\n- diffusion_models: [z_image_turbo_bf16.safetensors](https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/diffusion_models/z_image_turbo_bf16.safetensors)\n- text_encoders: [qwen_3_4b.safetensors](https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/text_encoders/qwen_3_4b.safetensors)\n- vae: [ae.safetensors](https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/vae/ae.safetensors)"
+        "## AI Empire · Dataset Maker (Qwen-Image 2.1)\n\n**How to use**\n1. Load her face in **Your face** (clear, front-facing, even light).\n2. Optional: load a full-body photo of her in **Body reference**, select that box and press **Ctrl+B** to switch it on (it starts purple = off), then tick **use_body_reference** in Dataset Presets.\n3. **Dataset Presets**: trigger word (e.g. `zvx woman`), *extra_description* (e.g. `with long straight dark brown hair, brown eyes`), *dataset_name*.\n4. First run: **how_many = 3**. If they look like her, set 40 and run again.\n\n**What gets saved** (in `output/datasets/`)\n- `<name>_raw` = straight from the edit model\n- `<name>` = after the **Z-Image realism pass** (real skin + light, same face). Train on this one.\n- Don't want the realism pass? Right-click the *5 · Realism pass* group → Bypass group nodes.\n\n**Settings**\n- Edit model: **Qwen-Image 2.1** (best open edit model right now, native 2K). int8 file, runs on 24-48 GB GPUs.\n- Images are made at **1.5x size** (~2.3 MP): *size_scale* in Dataset Presets. 1.0 = faster, 2.0 = max detail.\n- *resolution* in the Qwen 2.1 encoder = how big her face photo is fed in (1536 default).\n- Edit: 25 steps, CFG 1, euler / simple (official Qwen-Image 2.1 settings).\n- Realism pass: denoise 0.30 (higher = more realistic but can change the face; 0.25-0.35 is the sweet spot).\n\n**Models**\n- diffusion_models: [qwen_image_2.1_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/diffusion_models/qwen_image_2.1_int8_convrot.safetensors)\n- text_encoders: [qwen3vl_8b_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/text_encoders/qwen3vl_8b_int8_convrot.safetensors)\n- vae: [qwen_image_2.1_vae_bf16.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/vae/qwen_image_2.1_vae_bf16.safetensors)\n- diffusion_models: [z_image_turbo_bf16.safetensors](https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/diffusion_models/z_image_turbo_bf16.safetensors)\n- text_encoders: [qwen_3_4b.safetensors](https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/text_encoders/qwen_3_4b.safetensors)\n- vae: [ae.safetensors](https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/vae/ae.safetensors)"
       ],
       "title": "READ ME"
     },
@@ -237,21 +236,21 @@
         "Node name for S&R": "UNETLoader",
         "models": [
           {
-            "name": "qwen_image_edit_2511_fp8mixed.safetensors",
-            "url": "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_2511_fp8mixed.safetensors",
+            "name": "qwen_image_2.1_int8_convrot.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/diffusion_models/qwen_image_2.1_int8_convrot.safetensors",
             "directory": "diffusion_models"
           }
         ]
       },
       "widgets_values": [
-        "qwen_image_edit_2511_fp8mixed.safetensors",
+        "qwen_image_2.1_int8_convrot.safetensors",
         "default"
       ],
       "title": "Edit model"
     },
     {
-      "id": 3,
-      "type": "LoraLoaderModelOnly",
+      "id": 5,
+      "type": "QwenImage21Cache",
       "pos": [
         0,
         120
@@ -275,98 +274,16 @@
           "name": "MODEL",
           "type": "MODEL",
           "links": [
-            2
+            9
           ]
         }
       ],
       "properties": {
-        "Node name for S&R": "LoraLoaderModelOnly",
-        "models": [
-          {
-            "name": "Qwen-Image-Edit-2511-Lightning-8steps-V1.0-bf16.safetensors",
-            "url": "https://huggingface.co/lightx2v/Qwen-Image-Edit-2511-Lightning/resolve/main/Qwen-Image-Edit-2511-Lightning-8steps-V1.0-bf16.safetensors",
-            "directory": "loras"
-          }
-        ]
+        "Node name for S&R": "QwenImage21Cache"
       },
       "widgets_values": [
-        "Qwen-Image-Edit-2511-Lightning-8steps-V1.0-bf16.safetensors",
-        1.0
-      ],
-      "title": "Lightning 8-step LoRA"
-    },
-    {
-      "id": 4,
-      "type": "ModelSamplingAuraFlow",
-      "pos": [
-        0,
-        240
-      ],
-      "size": [
-        340,
-        58
-      ],
-      "flags": {},
-      "order": 2,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "model",
-          "type": "MODEL",
-          "link": 2
-        }
-      ],
-      "outputs": [
-        {
-          "name": "MODEL",
-          "type": "MODEL",
-          "links": [
-            3
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ModelSamplingAuraFlow"
-      },
-      "widgets_values": [
-        3.1
-      ]
-    },
-    {
-      "id": 5,
-      "type": "CFGNorm",
-      "pos": [
-        0,
-        340
-      ],
-      "size": [
-        340,
-        58
-      ],
-      "flags": {},
-      "order": 3,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "model",
-          "type": "MODEL",
-          "link": 3
-        }
-      ],
-      "outputs": [
-        {
-          "name": "MODEL",
-          "type": "MODEL",
-          "links": [
-            16
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "CFGNorm"
-      },
-      "widgets_values": [
-        1
+        "auto",
+        "default"
       ]
     },
     {
@@ -381,7 +298,7 @@
         106
       ],
       "flags": {},
-      "order": 4,
+      "order": 2,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -389,8 +306,7 @@
           "name": "CLIP",
           "type": "CLIP",
           "links": [
-            5,
-            9
+            2
           ]
         }
       ],
@@ -398,14 +314,14 @@
         "Node name for S&R": "CLIPLoader",
         "models": [
           {
-            "name": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
-            "url": "https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors",
+            "name": "qwen3vl_8b_int8_convrot.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/text_encoders/qwen3vl_8b_int8_convrot.safetensors",
             "directory": "text_encoders"
           }
         ]
       },
       "widgets_values": [
-        "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+        "qwen3vl_8b_int8_convrot.safetensors",
         "qwen_image",
         "default"
       ]
@@ -422,7 +338,7 @@
         58
       ],
       "flags": {},
-      "order": 5,
+      "order": 3,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -430,9 +346,8 @@
           "name": "VAE",
           "type": "VAE",
           "links": [
-            6,
-            10,
-            24
+            3,
+            15
           ]
         }
       ],
@@ -440,90 +355,56 @@
         "Node name for S&R": "VAELoader",
         "models": [
           {
-            "name": "qwen_image_vae.safetensors",
-            "url": "https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/vae/qwen_image_vae.safetensors",
+            "name": "qwen_image_2.1_vae_bf16.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/vae/qwen_image_2.1_vae_bf16.safetensors",
             "directory": "vae"
           }
         ]
       },
       "widgets_values": [
-        "qwen_image_vae.safetensors"
+        "qwen_image_2.1_vae_bf16.safetensors"
       ]
     },
     {
-      "id": 8,
-      "type": "FluxKontextImageScale",
-      "pos": [
-        380,
-        820
-      ],
-      "size": [
-        260,
-        30
-      ],
-      "flags": {},
-      "order": 8,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "image",
-          "type": "IMAGE",
-          "link": 4
-        }
-      ],
-      "outputs": [
-        {
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "links": [
-            7,
-            11
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "FluxKontextImageScale"
-      },
-      "widgets_values": []
-    },
-    {
       "id": 10,
-      "type": "TextEncodeQwenImageEditPlus",
+      "type": "TextEncodeQwenImage21",
       "pos": [
         1180,
         0
       ],
       "size": [
         360,
-        160
+        220
       ],
       "flags": {},
-      "order": 11,
+      "order": 8,
       "mode": 0,
       "inputs": [
         {
           "name": "clip",
           "type": "CLIP",
-          "link": 5
+          "link": 2
         },
         {
           "name": "vae",
           "type": "VAE",
-          "link": 6
-        },
-        {
-          "name": "image1",
-          "type": "IMAGE",
-          "link": 7
-        },
-        {
-          "name": "image2",
-          "type": "IMAGE",
-          "link": 8,
+          "link": 3,
           "shape": 7
         },
         {
-          "name": "image3",
+          "name": "images.image_1",
+          "type": "IMAGE",
+          "link": 4,
+          "shape": 7
+        },
+        {
+          "name": "images.image_2",
+          "type": "IMAGE",
+          "link": 5,
+          "shape": 7
+        },
+        {
+          "name": "images.image_3",
           "type": "IMAGE",
           "link": null,
           "shape": 7
@@ -531,7 +412,7 @@
         {
           "name": "prompt",
           "type": "STRING",
-          "link": 13,
+          "link": 6,
           "widget": {
             "name": "prompt"
           }
@@ -539,158 +420,38 @@
       ],
       "outputs": [
         {
-          "name": "CONDITIONING",
+          "name": "positive",
           "type": "CONDITIONING",
           "links": [
-            17
+            10
           ]
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "links": [
+            11
+          ]
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "links": []
         }
       ],
       "properties": {
-        "Node name for S&R": "TextEncodeQwenImageEditPlus"
+        "Node name for S&R": "TextEncodeQwenImage21"
       },
       "widgets_values": [
-        ""
+        "",
+        "",
+        1536
       ],
-      "title": "Prompt (from presets)"
-    },
-    {
-      "id": 11,
-      "type": "TextEncodeQwenImageEditPlus",
-      "pos": [
-        1180,
-        220
-      ],
-      "size": [
-        360,
-        160
-      ],
-      "flags": {},
-      "order": 12,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "clip",
-          "type": "CLIP",
-          "link": 9
-        },
-        {
-          "name": "vae",
-          "type": "VAE",
-          "link": 10
-        },
-        {
-          "name": "image1",
-          "type": "IMAGE",
-          "link": 11
-        },
-        {
-          "name": "image2",
-          "type": "IMAGE",
-          "link": 12,
-          "shape": 7
-        },
-        {
-          "name": "image3",
-          "type": "IMAGE",
-          "link": null,
-          "shape": 7
-        }
-      ],
-      "outputs": [
-        {
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
-          "links": [
-            18
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "TextEncodeQwenImageEditPlus"
-      },
-      "widgets_values": [
-        ""
-      ],
-      "title": "Negative (leave empty)"
-    },
-    {
-      "id": 12,
-      "type": "FluxKontextMultiReferenceLatentMethod",
-      "pos": [
-        1580,
-        0
-      ],
-      "size": [
-        300,
-        58
-      ],
-      "flags": {},
-      "order": 17,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "conditioning",
-          "type": "CONDITIONING",
-          "link": 17
-        }
-      ],
-      "outputs": [
-        {
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
-          "links": [
-            19
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "FluxKontextMultiReferenceLatentMethod"
-      },
-      "widgets_values": [
-        "index_timestep_zero"
-      ]
-    },
-    {
-      "id": 13,
-      "type": "FluxKontextMultiReferenceLatentMethod",
-      "pos": [
-        1580,
-        220
-      ],
-      "size": [
-        300,
-        58
-      ],
-      "flags": {},
-      "order": 18,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "conditioning",
-          "type": "CONDITIONING",
-          "link": 18
-        }
-      ],
-      "outputs": [
-        {
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
-          "links": [
-            20
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "FluxKontextMultiReferenceLatentMethod"
-      },
-      "widgets_values": [
-        "index_timestep_zero"
-      ]
+      "title": "Qwen 2.1 encoder (prompt from presets)"
     },
     {
       "id": 14,
-      "type": "EmptySD3LatentImage",
+      "type": "EmptyLatentImage",
       "pos": [
         1580,
         420
@@ -700,13 +461,13 @@
         106
       ],
       "flags": {},
-      "order": 19,
+      "order": 13,
       "mode": 0,
       "inputs": [
         {
           "name": "width",
           "type": "INT",
-          "link": 14,
+          "link": 7,
           "widget": {
             "name": "width"
           }
@@ -714,7 +475,7 @@
         {
           "name": "height",
           "type": "INT",
-          "link": 15,
+          "link": 8,
           "widget": {
             "name": "height"
           }
@@ -725,12 +486,12 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            21
+            12
           ]
         }
       ],
       "properties": {
-        "Node name for S&R": "EmptySD3LatentImage"
+        "Node name for S&R": "EmptyLatentImage"
       },
       "widgets_values": [
         1024,
@@ -750,33 +511,33 @@
         262
       ],
       "flags": {},
-      "order": 23,
+      "order": 17,
       "mode": 0,
       "inputs": [
         {
           "name": "model",
           "type": "MODEL",
-          "link": 16
+          "link": 9
         },
         {
           "name": "positive",
           "type": "CONDITIONING",
-          "link": 19
+          "link": 10
         },
         {
           "name": "negative",
           "type": "CONDITIONING",
-          "link": 20
+          "link": 11
         },
         {
           "name": "latent_image",
           "type": "LATENT",
-          "link": 21
+          "link": 12
         },
         {
           "name": "seed",
           "type": "INT",
-          "link": 22,
+          "link": 13,
           "widget": {
             "name": "seed"
           }
@@ -787,7 +548,7 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            23
+            14
           ]
         }
       ],
@@ -797,7 +558,7 @@
       "widgets_values": [
         42,
         "fixed",
-        8,
+        25,
         1,
         "euler",
         "simple",
@@ -817,18 +578,18 @@
         46
       ],
       "flags": {},
-      "order": 24,
+      "order": 18,
       "mode": 0,
       "inputs": [
         {
           "name": "samples",
           "type": "LATENT",
-          "link": 23
+          "link": 14
         },
         {
           "name": "vae",
           "type": "VAE",
-          "link": 24
+          "link": 15
         }
       ],
       "outputs": [
@@ -836,8 +597,8 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            29,
-            38
+            20,
+            29
           ]
         }
       ],
@@ -858,7 +619,7 @@
         82
       ],
       "flags": {},
-      "order": 13,
+      "order": 9,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -866,7 +627,7 @@
           "name": "MODEL",
           "type": "MODEL",
           "links": [
-            25
+            16
           ]
         }
       ],
@@ -898,13 +659,13 @@
         58
       ],
       "flags": {},
-      "order": 14,
+      "order": 10,
       "mode": 0,
       "inputs": [
         {
           "name": "model",
           "type": "MODEL",
-          "link": 25
+          "link": 16
         }
       ],
       "outputs": [
@@ -912,7 +673,7 @@
           "name": "MODEL",
           "type": "MODEL",
           "links": [
-            31
+            22
           ]
         }
       ],
@@ -935,7 +696,7 @@
         106
       ],
       "flags": {},
-      "order": 15,
+      "order": 11,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -943,7 +704,7 @@
           "name": "CLIP",
           "type": "CLIP",
           "links": [
-            26
+            17
           ]
         }
       ],
@@ -975,7 +736,7 @@
         58
       ],
       "flags": {},
-      "order": 16,
+      "order": 12,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -983,8 +744,8 @@
           "name": "VAE",
           "type": "VAE",
           "links": [
-            30,
-            37
+            21,
+            28
           ]
         }
       ],
@@ -1014,18 +775,18 @@
         120
       ],
       "flags": {},
-      "order": 20,
+      "order": 14,
       "mode": 0,
       "inputs": [
         {
           "name": "clip",
           "type": "CLIP",
-          "link": 26
+          "link": 17
         },
         {
           "name": "text",
           "type": "STRING",
-          "link": 27,
+          "link": 18,
           "widget": {
             "name": "text"
           }
@@ -1036,8 +797,8 @@
           "name": "CONDITIONING",
           "type": "CONDITIONING",
           "links": [
-            28,
-            32
+            19,
+            23
           ]
         }
       ],
@@ -1061,13 +822,13 @@
         26
       ],
       "flags": {},
-      "order": 21,
+      "order": 15,
       "mode": 0,
       "inputs": [
         {
           "name": "conditioning",
           "type": "CONDITIONING",
-          "link": 28
+          "link": 19
         }
       ],
       "outputs": [
@@ -1075,7 +836,7 @@
           "name": "CONDITIONING",
           "type": "CONDITIONING",
           "links": [
-            33
+            24
           ]
         }
       ],
@@ -1096,18 +857,18 @@
         46
       ],
       "flags": {},
-      "order": 22,
+      "order": 16,
       "mode": 0,
       "inputs": [
         {
           "name": "pixels",
           "type": "IMAGE",
-          "link": 29
+          "link": 20
         },
         {
           "name": "vae",
           "type": "VAE",
-          "link": 30
+          "link": 21
         }
       ],
       "outputs": [
@@ -1115,7 +876,7 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            34
+            25
           ]
         }
       ],
@@ -1136,33 +897,33 @@
         262
       ],
       "flags": {},
-      "order": 25,
+      "order": 19,
       "mode": 0,
       "inputs": [
         {
           "name": "model",
           "type": "MODEL",
-          "link": 31
+          "link": 22
         },
         {
           "name": "positive",
           "type": "CONDITIONING",
-          "link": 32
+          "link": 23
         },
         {
           "name": "negative",
           "type": "CONDITIONING",
-          "link": 33
+          "link": 24
         },
         {
           "name": "latent_image",
           "type": "LATENT",
-          "link": 34
+          "link": 25
         },
         {
           "name": "seed",
           "type": "INT",
-          "link": 35,
+          "link": 26,
           "widget": {
             "name": "seed"
           }
@@ -1173,7 +934,7 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            36
+            27
           ]
         }
       ],
@@ -1203,18 +964,18 @@
         46
       ],
       "flags": {},
-      "order": 26,
+      "order": 20,
       "mode": 0,
       "inputs": [
         {
           "name": "samples",
           "type": "LATENT",
-          "link": 36
+          "link": 27
         },
         {
           "name": "vae",
           "type": "VAE",
-          "link": 37
+          "link": 28
         }
       ],
       "outputs": [
@@ -1222,7 +983,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            41
+            32
           ]
         }
       ],
@@ -1243,23 +1004,23 @@
         620
       ],
       "flags": {},
-      "order": 27,
+      "order": 21,
       "mode": 0,
       "inputs": [
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 38
+          "link": 29
         },
         {
           "name": "captions",
           "type": "STRING",
-          "link": 39
+          "link": 30
         },
         {
           "name": "dataset_name",
           "type": "STRING",
-          "link": 40,
+          "link": 31,
           "widget": {
             "name": "dataset_name"
           }
@@ -1290,23 +1051,23 @@
         620
       ],
       "flags": {},
-      "order": 28,
+      "order": 22,
       "mode": 0,
       "inputs": [
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 41
+          "link": 32
         },
         {
           "name": "captions",
           "type": "STRING",
-          "link": 42
+          "link": 33
         },
         {
           "name": "dataset_name",
           "type": "STRING",
-          "link": 43,
+          "link": 34,
           "widget": {
             "name": "dataset_name"
           }
@@ -1331,36 +1092,12 @@
       1,
       2,
       0,
-      3,
+      5,
       0,
       "MODEL"
     ],
     [
       2,
-      3,
-      0,
-      4,
-      0,
-      "MODEL"
-    ],
-    [
-      3,
-      4,
-      0,
-      5,
-      0,
-      "MODEL"
-    ],
-    [
-      4,
-      1,
-      0,
-      8,
-      0,
-      "IMAGE"
-    ],
-    [
-      5,
       6,
       0,
       10,
@@ -1368,7 +1105,7 @@
       "CLIP"
     ],
     [
-      6,
+      3,
       7,
       0,
       10,
@@ -1376,55 +1113,23 @@
       "VAE"
     ],
     [
-      7,
-      8,
-      0,
-      10,
-      2,
-      "IMAGE"
-    ],
-    [
-      8,
-      19,
-      0,
-      10,
-      3,
-      "IMAGE"
-    ],
-    [
-      9,
-      6,
-      0,
-      11,
-      0,
-      "CLIP"
-    ],
-    [
-      10,
-      7,
-      0,
-      11,
+      4,
       1,
-      "VAE"
-    ],
-    [
-      11,
-      8,
       0,
-      11,
+      10,
       2,
       "IMAGE"
     ],
     [
-      12,
+      5,
       19,
       0,
-      11,
+      10,
       3,
       "IMAGE"
     ],
     [
-      13,
+      6,
       9,
       0,
       10,
@@ -1432,7 +1137,7 @@
       "STRING"
     ],
     [
-      14,
+      7,
       9,
       2,
       14,
@@ -1440,7 +1145,7 @@
       "INT"
     ],
     [
-      15,
+      8,
       9,
       3,
       14,
@@ -1448,87 +1153,71 @@
       "INT"
     ],
     [
-      16,
+      9,
       5,
       0,
       15,
+      0,
+      "MODEL"
+    ],
+    [
+      10,
+      10,
+      0,
+      15,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      11,
+      10,
+      1,
+      15,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      12,
+      14,
+      0,
+      15,
+      3,
+      "LATENT"
+    ],
+    [
+      13,
+      9,
+      4,
+      15,
+      4,
+      "INT"
+    ],
+    [
+      14,
+      15,
+      0,
+      16,
+      0,
+      "LATENT"
+    ],
+    [
+      15,
+      7,
+      0,
+      16,
+      1,
+      "VAE"
+    ],
+    [
+      16,
+      20,
+      0,
+      21,
       0,
       "MODEL"
     ],
     [
       17,
-      10,
-      0,
-      12,
-      0,
-      "CONDITIONING"
-    ],
-    [
-      18,
-      11,
-      0,
-      13,
-      0,
-      "CONDITIONING"
-    ],
-    [
-      19,
-      12,
-      0,
-      15,
-      1,
-      "CONDITIONING"
-    ],
-    [
-      20,
-      13,
-      0,
-      15,
-      2,
-      "CONDITIONING"
-    ],
-    [
-      21,
-      14,
-      0,
-      15,
-      3,
-      "LATENT"
-    ],
-    [
-      22,
-      9,
-      4,
-      15,
-      4,
-      "INT"
-    ],
-    [
-      23,
-      15,
-      0,
-      16,
-      0,
-      "LATENT"
-    ],
-    [
-      24,
-      7,
-      0,
-      16,
-      1,
-      "VAE"
-    ],
-    [
-      25,
-      20,
-      0,
-      21,
-      0,
-      "MODEL"
-    ],
-    [
-      26,
       22,
       0,
       24,
@@ -1536,7 +1225,7 @@
       "CLIP"
     ],
     [
-      27,
+      18,
       9,
       6,
       24,
@@ -1544,7 +1233,7 @@
       "STRING"
     ],
     [
-      28,
+      19,
       24,
       0,
       25,
@@ -1552,87 +1241,87 @@
       "CONDITIONING"
     ],
     [
-      29,
+      20,
       16,
       0,
       26,
+      0,
+      "IMAGE"
+    ],
+    [
+      21,
+      23,
+      0,
+      26,
+      1,
+      "VAE"
+    ],
+    [
+      22,
+      21,
+      0,
+      27,
+      0,
+      "MODEL"
+    ],
+    [
+      23,
+      24,
+      0,
+      27,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      24,
+      25,
+      0,
+      27,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      25,
+      26,
+      0,
+      27,
+      3,
+      "LATENT"
+    ],
+    [
+      26,
+      9,
+      4,
+      27,
+      4,
+      "INT"
+    ],
+    [
+      27,
+      27,
+      0,
+      28,
+      0,
+      "LATENT"
+    ],
+    [
+      28,
+      23,
+      0,
+      28,
+      1,
+      "VAE"
+    ],
+    [
+      29,
+      16,
+      0,
+      17,
       0,
       "IMAGE"
     ],
     [
       30,
-      23,
-      0,
-      26,
-      1,
-      "VAE"
-    ],
-    [
-      31,
-      21,
-      0,
-      27,
-      0,
-      "MODEL"
-    ],
-    [
-      32,
-      24,
-      0,
-      27,
-      1,
-      "CONDITIONING"
-    ],
-    [
-      33,
-      25,
-      0,
-      27,
-      2,
-      "CONDITIONING"
-    ],
-    [
-      34,
-      26,
-      0,
-      27,
-      3,
-      "LATENT"
-    ],
-    [
-      35,
-      9,
-      4,
-      27,
-      4,
-      "INT"
-    ],
-    [
-      36,
-      27,
-      0,
-      28,
-      0,
-      "LATENT"
-    ],
-    [
-      37,
-      23,
-      0,
-      28,
-      1,
-      "VAE"
-    ],
-    [
-      38,
-      16,
-      0,
-      17,
-      0,
-      "IMAGE"
-    ],
-    [
-      39,
       9,
       1,
       17,
@@ -1640,7 +1329,7 @@
       "STRING"
     ],
     [
-      40,
+      31,
       9,
       7,
       17,
@@ -1648,7 +1337,7 @@
       "STRING"
     ],
     [
-      41,
+      32,
       28,
       0,
       29,
@@ -1656,7 +1345,7 @@
       "IMAGE"
     ],
     [
-      42,
+      33,
       9,
       1,
       29,
@@ -1664,7 +1353,7 @@
       "STRING"
     ],
     [
-      43,
+      34,
       9,
       7,
       29,

@@ -20,7 +20,7 @@
       "custom_presets": "",
       "use_body_reference": false,
       "dataset_name": "my_influencer",
-      "size_scale": 1.0
+      "size_scale": 1.5
     },
     "_meta": {
       "title": "Dataset Presets"
@@ -29,57 +29,31 @@
   "2": {
     "class_type": "UNETLoader",
     "inputs": {
-      "unet_name": "FireRed-Image-Edit-1.1-transformer.safetensors",
+      "unet_name": "qwen_image_2.1_int8_convrot.safetensors",
       "weight_dtype": "default"
     },
     "_meta": {
       "title": "Edit model"
     }
   },
-  "3": {
-    "class_type": "LoraLoaderModelOnly",
+  "5": {
+    "class_type": "QwenImage21Cache",
     "inputs": {
-      "lora_name": "FireRed-Image-Edit-1.1-Lightning-8steps-v1.2.safetensors",
-      "strength_model": 1.0,
+      "device": "auto",
+      "dtype": "default",
       "model": [
         "2",
         0
       ]
     },
     "_meta": {
-      "title": "Lightning 8-step LoRA"
-    }
-  },
-  "4": {
-    "class_type": "ModelSamplingAuraFlow",
-    "inputs": {
-      "shift": 3.1,
-      "model": [
-        "3",
-        0
-      ]
-    },
-    "_meta": {
-      "title": "ModelSamplingAuraFlow"
-    }
-  },
-  "5": {
-    "class_type": "CFGNorm",
-    "inputs": {
-      "strength": 1,
-      "model": [
-        "4",
-        0
-      ]
-    },
-    "_meta": {
-      "title": "CFGNorm"
+      "title": "QwenImage21Cache"
     }
   },
   "6": {
     "class_type": "CLIPLoader",
     "inputs": {
-      "clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+      "clip_name": "qwen3vl_8b_int8_convrot.safetensors",
       "type": "qwen_image",
       "device": "default"
     },
@@ -90,31 +64,21 @@
   "7": {
     "class_type": "VAELoader",
     "inputs": {
-      "vae_name": "qwen_image_vae.safetensors"
+      "vae_name": "qwen_image_2.1_vae_bf16.safetensors"
     },
     "_meta": {
       "title": "VAELoader"
     }
   },
-  "8": {
-    "class_type": "FluxKontextImageScale",
-    "inputs": {
-      "image": [
-        "1",
-        0
-      ]
-    },
-    "_meta": {
-      "title": "FluxKontextImageScale"
-    }
-  },
   "10": {
-    "class_type": "TextEncodeQwenImageEditPlus",
+    "class_type": "TextEncodeQwenImage21",
     "inputs": {
       "prompt": [
         "9",
         0
       ],
+      "negative_prompt": "",
+      "resolution": 1536,
       "clip": [
         "6",
         0
@@ -123,38 +87,17 @@
         "7",
         0
       ],
-      "image1": [
-        "8",
+      "images.image_1": [
+        "1",
         0
       ]
     },
     "_meta": {
-      "title": "Prompt (from presets)"
-    }
-  },
-  "11": {
-    "class_type": "TextEncodeQwenImageEditPlus",
-    "inputs": {
-      "prompt": "",
-      "clip": [
-        "6",
-        0
-      ],
-      "vae": [
-        "7",
-        0
-      ],
-      "image1": [
-        "8",
-        0
-      ]
-    },
-    "_meta": {
-      "title": "Negative (leave empty)"
+      "title": "Qwen 2.1 encoder (prompt from presets)"
     }
   },
   "14": {
-    "class_type": "EmptySD3LatentImage",
+    "class_type": "EmptyLatentImage",
     "inputs": {
       "width": [
         "9",
@@ -167,7 +110,7 @@
       "batch_size": 1
     },
     "_meta": {
-      "title": "EmptySD3LatentImage"
+      "title": "EmptyLatentImage"
     }
   },
   "15": {
@@ -177,7 +120,7 @@
         "9",
         4
       ],
-      "steps": 8,
+      "steps": 25,
       "cfg": 1,
       "sampler_name": "euler",
       "scheduler": "simple",
@@ -191,8 +134,8 @@
         0
       ],
       "negative": [
-        "11",
-        0
+        "10",
+        1
       ],
       "latent_image": [
         "14",

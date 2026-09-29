@@ -5,6 +5,7 @@ ComfyUI nodes + a workflow that turn **one face photo** into a full **LoRA train
 Runs 100% open-source on your own GPU. No API keys, no paid services.
 
 - **Models:** FireRed Image Edit 1.1 (default, best identity consistency) or Qwen Image Edit 2511, each with its Lightning 8-step LoRA. Both Apache 2.0, commercial use OK
+- **Qwen-Image 2.1 version** (`AI_Empire_Dataset_Maker_Qwen21.json`, pod env `QWEN21=1`): best open edit model, native 2K, 25 steps, images at 1.5x size
 - **Output:** `ComfyUI/output/datasets/<name>/<name>_001.png` + `<name>_001.txt` … and `<name>.zip`
 - **Captions:** `trigger word, framing, angle, expression, outfit, place, light`. They never describe the face or hair, so the LoRA ties the face to the trigger word.
 

@@ -93,6 +93,7 @@ class AIEmpireDatasetPresets:
                 "custom_presets": ("STRING", {"default": "", "multiline": True, "tooltip": "Optional. One per line: shot | caption | square/portrait/tall. If filled, used instead of the preset set."}),
                 "use_body_reference": ("BOOLEAN", {"default": False, "tooltip": "Turn on when you also load a full-body photo of her (Body reference box)."}),
                 "dataset_name": ("STRING", {"default": "my_influencer", "tooltip": "Folder / zip name for the dataset."}),
+                "size_scale": ("FLOAT", {"default": 1.0, "min": 0.5, "max": 2.0, "step": 0.05, "tooltip": "Multiplies every image size (1.0 = ~1 MP, 1.5 = ~2.3 MP for 2K models like Qwen-Image 2.1)."}),
             },
         }
 
@@ -103,7 +104,7 @@ class AIEmpireDatasetPresets:
     CATEGORY = "AI Empire"
 
     def build(self, trigger_word, preset_set, extra_description, how_many, start_at, seed,
-              custom_presets="", use_body_reference=False, dataset_name="my_influencer"):
+              custom_presets="", use_body_reference=False, dataset_name="my_influencer", size_scale=1.0):
         presets = _parse_custom(custom_presets) if custom_presets and custom_presets.strip() else _load_preset(preset_set)
         chosen = presets[start_at - 1:start_at - 1 + how_many]
         if not chosen:
@@ -123,6 +124,8 @@ class AIEmpireDatasetPresets:
             captions.append(f"{trigger}, {cap}" if trigger else cap)
             realism.append(REALISM_PROMPT.format(extra=extra, caption=cap))
             w, h = SIZES.get(p.get("size", "portrait"), SIZES["portrait"])
+            if size_scale != 1.0:
+                w, h = int(round(w * size_scale / 32)) * 32, int(round(h * size_scale / 32)) * 32
             widths.append(w)
             heights.append(h)
             seeds.append((seed + i) % 0xFFFFFFFFFFFFFFFF)

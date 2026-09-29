@@ -46,6 +46,21 @@ CONFIGS = {
         "notes": ["Edit model: **Qwen Image Edit 2511** (Apache 2.0). fp8mixed file, 20 GB, fits 24-48 GB GPUs."],
     },
     "NanoBanana": {"kind": "nanobanana", "title": "Nano Banana Pro"},
+    "Qwen21": {
+        "kind": "edit",
+        "q21": True,
+        "title": "Qwen-Image 2.1",
+        "unet": ("qwen_image_2.1_int8_convrot.safetensors", f"{HF}/Comfy-Org/Qwen-Image-2.1/resolve/main/diffusion_models/qwen_image_2.1_int8_convrot.safetensors", "diffusion_models"),
+        "clip": ("qwen3vl_8b_int8_convrot.safetensors", f"{HF}/Comfy-Org/Qwen-Image-2.1/resolve/main/text_encoders/qwen3vl_8b_int8_convrot.safetensors", "text_encoders"),
+        "vae": ("qwen_image_2.1_vae_bf16.safetensors", f"{HF}/Comfy-Org/Qwen-Image-2.1/resolve/main/vae/qwen_image_2.1_vae_bf16.safetensors", "vae"),
+        "steps": 25,
+        "size_scale": 1.5,
+        "notes": [
+            "Edit model: **Qwen-Image 2.1** (best open edit model right now, native 2K). int8 file, runs on 24-48 GB GPUs.",
+            "Images are made at **1.5x size** (~2.3 MP): *size_scale* in Dataset Presets. 1.0 = faster, 2.0 = max detail.",
+            "*resolution* in the Qwen 2.1 encoder = how big her face photo is fed in (1536 default).",
+        ],
+    },
 }
 
 WIDGETS = {
@@ -53,7 +68,7 @@ WIDGETS = {
     "LoraLoaderModelOnly": ["lora_name", "strength_model"], "ModelSamplingAuraFlow": ["shift"],
     "CFGNorm": ["strength"], "CLIPLoader": ["clip_name", "type", "device"], "VAELoader": ["vae_name"],
     "AIEmpireDatasetPresets": ["trigger_word", "preset_set", "extra_description", "how_many", "start_at", "seed", None,
-                               "custom_presets", "use_body_reference", "dataset_name"],
+                               "custom_presets", "use_body_reference", "dataset_name", "size_scale"],
     "AIEmpireNanoBanana": ["auth", "model", "resolution", "api_key", "vertex_project", "vertex_location"],
     "FluxKontextImageScale": [], "TextEncodeQwenImageEditPlus": ["prompt"],
     "FluxKontextMultiReferenceLatentMethod": ["reference_latents_method"],
@@ -61,6 +76,9 @@ WIDGETS = {
     "KSampler": ["seed", None, "steps", "cfg", "sampler_name", "scheduler", "denoise"],
     "VAEDecode": [], "VAEEncode": [], "CLIPTextEncode": ["text"], "ConditioningZeroOut": [],
     "AIEmpireSaveDataset": ["dataset_name", "make_zip", "suffix"],
+    "QwenImage21Cache": ["device", "dtype"],
+    "TextEncodeQwenImage21": ["prompt", "negative_prompt", "resolution"],
+    "EmptyLatentImage": ["width", "height", "batch_size"],
 }
 
 HOW_TO = [
@@ -106,7 +124,8 @@ def build(key, cfg):
         node(nid)["inputs"].append({"name": name, "type": typ, "link": None, "shape": 7})
 
     ORANGE, GREEN, PURPLE = ("#3d2a14", "#2a1d0e"), ("#1f3320", "#162416"), ("#2e2240", "#1f172b")
-    PRESET_W = ["zvx woman", "core40", "", 3, 1, 42, "fixed", "", False, "my_influencer"]
+    q21 = cfg.get("q21", False)
+    PRESET_W = ["zvx woman", "core40", "", 3, 1, 42, "fixed", "", False, "my_influencer", cfg.get("size_scale", 1.0)]
     PRESET_OUT = [("prompts", "STRING", True), ("captions", "STRING", True), ("widths", "INT", True), ("heights", "INT", True),
                   ("seeds", "INT", True), ("count", "INT"), ("realism_prompts", "STRING", True), ("dataset_name", "STRING")]
 
@@ -151,26 +170,34 @@ def build(key, cfg):
                           "- `<name>` = after the **Z-Image realism pass** (real skin + light, same face). Train on this one.",
                           "- Don't want the realism pass? Right-click the *5 · Realism pass* group → Bypass group nodes.",
                           "", "**Settings**", *[f"- {x}" for x in cfg["notes"]],
-                          f"- Edit: {cfg['steps']} steps, CFG 1, euler / simple (Lightning LoRA). Max quality: Ctrl+B the LoRA and use 40 steps, CFG 4.",
+                          (f"- Edit: {cfg['steps']} steps, CFG 1, euler / simple (official Qwen-Image 2.1 settings)." if q21 else
+                           f"- Edit: {cfg['steps']} steps, CFG 1, euler / simple (Lightning LoRA). Max quality: Ctrl+B the LoRA and use 40 steps, CFG 4."),
                           "- Realism pass: denoise 0.30 (higher = more realistic but can change the face; 0.25-0.35 is the sweet spot).",
                           "", "**Models**",
-                          *[f"- {m[2]}: [{m[0]}]({m[1]})" for m in (cfg["unet"], cfg["lora"], M["clip"], M["vae"], M["z_unet"], M["z_clip"], M["z_vae"])]])
+                          *[f"- {m[2]}: [{m[0]}]({m[1]})" for m in ((cfg["unet"], cfg["clip"], cfg["vae"]) if q21 else (cfg["unet"], cfg["lora"], M["clip"], M["vae"])) + (M["z_unet"], M["z_clip"], M["z_vae"])]])
         add(18, "MarkdownNote", [740, 460], [400, 700], [note], [], title="READ ME")
         # models
         add(2, "UNETLoader", [0, 0], [340, 82], [cfg["unet"][0], "default"], [("MODEL", "MODEL")], title="Edit model", props=mp(cfg["unet"]))
-        add(3, "LoraLoaderModelOnly", [0, 120], [340, 82], [cfg["lora"][0], 1.0], [("MODEL", "MODEL")], title="Lightning 8-step LoRA", props=mp(cfg["lora"]))
-        add(4, "ModelSamplingAuraFlow", [0, 240], [340, 58], [3.1], [("MODEL", "MODEL")])
-        add(5, "CFGNorm", [0, 340], [340, 58], [1], [("MODEL", "MODEL")])
-        add(6, "CLIPLoader", [0, 440], [340, 106], [M["clip"][0], "qwen_image", "default"], [("CLIP", "CLIP")], props=mp(M["clip"]))
-        add(7, "VAELoader", [0, 580], [340, 58], [M["vae"][0]], [("VAE", "VAE")], props=mp(M["vae"]))
-        add(8, "FluxKontextImageScale", [380, 820], [260, 30], [], [("IMAGE", "IMAGE")])
-        # generate
-        add(10, "TextEncodeQwenImageEditPlus", [1180, 0], [360, 160], [""], [("CONDITIONING", "CONDITIONING")], title="Prompt (from presets)")
-        add(11, "TextEncodeQwenImageEditPlus", [1180, 220], [360, 160], [""], [("CONDITIONING", "CONDITIONING")], title="Negative (leave empty)")
-        if cfg["ref_method"]:
+        if q21:
+            add(5, "QwenImage21Cache", [0, 120], [340, 82], ["auto", "default"], [("MODEL", "MODEL")])
+            add(6, "CLIPLoader", [0, 440], [340, 106], [cfg["clip"][0], "qwen_image", "default"], [("CLIP", "CLIP")], props=mp(cfg["clip"]))
+            add(7, "VAELoader", [0, 580], [340, 58], [cfg["vae"][0]], [("VAE", "VAE")], props=mp(cfg["vae"]))
+            add(10, "TextEncodeQwenImage21", [1180, 0], [360, 220], ["", "", 1536],
+                [("positive", "CONDITIONING"), ("negative", "CONDITIONING"), ("latent", "LATENT")], title="Qwen 2.1 encoder (prompt from presets)")
+        else:
+            add(3, "LoraLoaderModelOnly", [0, 120], [340, 82], [cfg["lora"][0], 1.0], [("MODEL", "MODEL")], title="Lightning 8-step LoRA", props=mp(cfg["lora"]))
+            add(4, "ModelSamplingAuraFlow", [0, 240], [340, 58], [3.1], [("MODEL", "MODEL")])
+            add(5, "CFGNorm", [0, 340], [340, 58], [1], [("MODEL", "MODEL")])
+            add(6, "CLIPLoader", [0, 440], [340, 106], [M["clip"][0], "qwen_image", "default"], [("CLIP", "CLIP")], props=mp(M["clip"]))
+            add(7, "VAELoader", [0, 580], [340, 58], [M["vae"][0]], [("VAE", "VAE")], props=mp(M["vae"]))
+            add(8, "FluxKontextImageScale", [380, 820], [260, 30], [], [("IMAGE", "IMAGE")])
+            # generate
+            add(10, "TextEncodeQwenImageEditPlus", [1180, 0], [360, 160], [""], [("CONDITIONING", "CONDITIONING")], title="Prompt (from presets)")
+            add(11, "TextEncodeQwenImageEditPlus", [1180, 220], [360, 160], [""], [("CONDITIONING", "CONDITIONING")], title="Negative (leave empty)")
+        if cfg.get("ref_method"):
             add(12, "FluxKontextMultiReferenceLatentMethod", [1580, 0], [300, 58], ["index_timestep_zero"], [("CONDITIONING", "CONDITIONING")])
             add(13, "FluxKontextMultiReferenceLatentMethod", [1580, 220], [300, 58], ["index_timestep_zero"], [("CONDITIONING", "CONDITIONING")])
-        add(14, "EmptySD3LatentImage", [1580, 420], [300, 106], [1024, 1024, 1], [("LATENT", "LATENT")])
+        add(14, "EmptyLatentImage" if q21 else "EmptySD3LatentImage", [1580, 420], [300, 106], [1024, 1024, 1], [("LATENT", "LATENT")])
         add(15, "KSampler", [1920, 0], [320, 262], [42, "fixed", cfg["steps"], 1, "euler", "simple", 1], [("LATENT", "LATENT")], title="KSampler (edit)")
         add(16, "VAEDecode", [1920, 320], [220, 46], [], [("IMAGE", "IMAGE")])
         # realism pass
@@ -187,21 +214,32 @@ def build(key, cfg):
         add(17, "AIEmpireSaveDataset", [2300, 0], [520, 620], ["my_influencer", False, "_raw"], [], title="Save RAW (edit model only)", color=GREEN)
         add(29, "AIEmpireSaveDataset", [2300, 760], [520, 620], ["my_influencer", True, ""], [], title="Save FINAL (after realism pass) ← train on this", color=GREEN)
 
-        link(2, 0, 3, "model", "MODEL")
-        link(3, 0, 4, "model", "MODEL")
-        link(4, 0, 5, "model", "MODEL")
-        link(1, 0, 8, "image", "IMAGE")
-        for enc in (10, 11):
-            link(6, 0, enc, "clip", "CLIP")
-            link(7, 0, enc, "vae", "VAE")
-            link(8, 0, enc, "image1", "IMAGE")
-            link(19, 0, enc, "image2", "IMAGE", optional=True)
-            socket(enc, "image3", "IMAGE")
+        if q21:
+            link(2, 0, 5, "model", "MODEL")
+            link(6, 0, 10, "clip", "CLIP")
+            link(7, 0, 10, "vae", "VAE", optional=True)
+            link(1, 0, 10, "images.image_1", "IMAGE", optional=True)
+            link(19, 0, 10, "images.image_2", "IMAGE", optional=True)
+            socket(10, "images.image_3", "IMAGE")
+        else:
+            link(2, 0, 3, "model", "MODEL")
+            link(3, 0, 4, "model", "MODEL")
+            link(4, 0, 5, "model", "MODEL")
+            link(1, 0, 8, "image", "IMAGE")
+            for enc in (10, 11):
+                link(6, 0, enc, "clip", "CLIP")
+                link(7, 0, enc, "vae", "VAE")
+                link(8, 0, enc, "image1", "IMAGE")
+                link(19, 0, enc, "image2", "IMAGE", optional=True)
+                socket(enc, "image3", "IMAGE")
         link(9, 0, 10, "prompt", "STRING", widget=True)
         link(9, 2, 14, "width", "INT", widget=True)
         link(9, 3, 14, "height", "INT", widget=True)
         link(5, 0, 15, "model", "MODEL")
-        if cfg["ref_method"]:
+        if q21:
+            link(10, 0, 15, "positive", "CONDITIONING")
+            link(10, 1, 15, "negative", "CONDITIONING")
+        elif cfg["ref_method"]:
             link(10, 0, 12, "conditioning", "CONDITIONING")
             link(11, 0, 13, "conditioning", "CONDITIONING")
             link(12, 0, 15, "positive", "CONDITIONING")
@@ -250,7 +288,7 @@ def build(key, cfg):
         assert l[0] in node(l[1])["outputs"][l[2]]["links"], l
         assert node(l[3])["inputs"][l[4]]["link"] == l[0], l
 
-    ids = {"FireRed11": "5e0c2f64-7a1b-4c8e-9d3f-f1e3d11a0001", "Qwen2511": "5e0c2f64-7a1b-4c8e-9d3f-a1e3e4e5e6e7",
+    ids = {"FireRed11": "5e0c2f64-7a1b-4c8e-9d3f-f1e3d11a0001", "Qwen2511": "5e0c2f64-7a1b-4c8e-9d3f-a1e3e4e5e6e7", "Qwen21": "5e0c2f64-7a1b-4c8e-9d3f-21e21e210001",
            "NanoBanana": "5e0c2f64-7a1b-4c8e-9d3f-0a0ba0a0a0b1"}
     workflow = {"id": ids[key], "revision": 0, "last_node_id": max(n["id"] for n in nodes), "last_link_id": lid[0],
                 "nodes": nodes, "links": links, "groups": groups, "config": {},

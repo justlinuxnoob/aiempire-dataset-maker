@@ -178,7 +178,8 @@
         "fixed",
         "",
         false,
-        "my_influencer"
+        "my_influencer",
+        1.0
       ],
       "title": "Dataset Presets",
       "color": "#3d2a14",

@@ -19,7 +19,8 @@
       "seed": 42,
       "custom_presets": "",
       "use_body_reference": false,
-      "dataset_name": "my_influencer"
+      "dataset_name": "my_influencer",
+      "size_scale": 1.0
     },
     "_meta": {
       "title": "Dataset Presets"
