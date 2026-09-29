@@ -627,6 +627,70 @@ class AIEmpireNanoBanana:
         return (out_imgs, out_caps)
 
 
+class AIEmpireNanoBananaTemplates:
+    """Template photo + her face -> Nano Banana Pro / 2 (your Google key). Same job as the Qwen 2.1
+    template workflow, but runs on Google: no GPU, better identity. Runs once per template."""
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "face": ("IMAGE",),
+                "template": ("IMAGE",),
+                "prompt": ("STRING", {"forceInput": True}),
+                "auth": (["Vertex AI", "AI Studio API key"], {"default": "Vertex AI"}),
+                "model": ("STRING", {"default": "gemini-3-pro-image", "tooltip": "Nano Banana Pro = gemini-3-pro-image · Nano Banana 2 = gemini-3.1-flash-image"}),
+                "resolution": (["1K", "2K", "4K"], {"default": "2K"}),
+                "api_key": ("STRING", {"default": "", "tooltip": "AI Studio key. Leave empty to use GEMINI_API_KEY from the pod (safer)."}),
+                "vertex_project": ("STRING", {"default": "", "tooltip": "Leave empty to read it from VERTEX_SA_JSON / GOOGLE_CLOUD_PROJECT."}),
+                "vertex_location": ("STRING", {"default": "global"}),
+            },
+            "optional": {
+                "body": ("IMAGE",),
+            },
+        }
+
+    RETURN_TYPES = ("IMAGE",)
+    RETURN_NAMES = ("image",)
+    FUNCTION = "run"
+    CATEGORY = "AI Empire"
+
+    def run(self, face, template, prompt, auth, model, resolution, api_key, vertex_project, vertex_location, body=None):
+        from google.genai import types
+        client = _make_client(auth, api_key, vertex_project.strip(), vertex_location.strip())
+        tpl = _tensor_to_pil(template)
+        contents = ["Image 1 (the photo to edit):", tpl, "Image 2 (who the woman is):", _tensor_to_pil(face)]
+        if body is not None:
+            contents += ["Image 3 (her body):", _tensor_to_pil(body)]
+        contents.append(prompt)
+        cfg = types.GenerateContentConfig(
+            response_modalities=["IMAGE"],
+            image_config=types.ImageConfig(aspect_ratio=_aspect(*tpl.size), image_size=resolution),
+        )
+        models = [model.strip()] + ([model.strip() + "-preview"] if not model.strip().endswith("-preview") else [])
+        last = ""
+        for attempt in range(4):
+            try:
+                resp = client.models.generate_content(model=models[0], contents=contents, config=cfg)
+                for cand in (resp.candidates or []):
+                    for part in (cand.content.parts if cand.content and cand.content.parts else []):
+                        if getattr(part, "inline_data", None) and part.inline_data.data:
+                            print("[AI Empire] Nano Banana ✔")
+                            return (_pil_to_tensor(Image.open(io.BytesIO(part.inline_data.data))),)
+                reason = str(getattr(resp.candidates[0], "finish_reason", "")) if resp.candidates else ""
+                raise RuntimeError(f"Google returned no image (refused by its filter? {reason}). "
+                                   "Skip this template: delete it from the set, or run again with another seed.")
+            except RuntimeError:
+                raise
+            except Exception as e:  # network / quota / wrong model name
+                last = str(e)
+                if ("NOT_FOUND" in last or "404" in last) and len(models) > 1:
+                    models.pop(0)
+                    continue
+                time.sleep(4 * (attempt + 1))
+        raise RuntimeError(f"Nano Banana failed: {last[:300]}")
+
+
 # ----------------------------------------------------------------- saving
 
 def _safe_name(name):
@@ -706,6 +770,7 @@ NODE_CLASS_MAPPINGS = {
     "AIEmpireBodyPresetMaker": AIEmpireBodyPresetMaker,
     "AIEmpireSaveTemplateSet": AIEmpireSaveTemplateSet,
     "AIEmpireNanoBanana": AIEmpireNanoBanana,
+    "AIEmpireNanoBananaTemplates": AIEmpireNanoBananaTemplates,
     "AIEmpireSaveDataset": AIEmpireSaveDataset,
 }
 
@@ -715,5 +780,6 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "AIEmpireBodyPresetMaker": "AI Empire · Body Preset Maker",
     "AIEmpireSaveTemplateSet": "AI Empire · Save Template Set (new preset)",
     "AIEmpireNanoBanana": "AI Empire · Nano Banana (your Google key)",
+    "AIEmpireNanoBananaTemplates": "AI Empire · Nano Banana on templates (your Google key)",
     "AIEmpireSaveDataset": "AI Empire · Save Dataset (images + captions)",
 }

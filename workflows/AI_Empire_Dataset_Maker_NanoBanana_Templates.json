@@ -1,0 +1,429 @@
+{
+  "id": "5e0c2f64-7a1b-4c8e-9d3f-0a0b7e3a0004",
+  "revision": 0,
+  "last_node_id": 45,
+  "last_link_id": 8,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [
+        380,
+        0
+      ],
+      "size": [
+        320,
+        360
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "your_face.png",
+        "image"
+      ],
+      "title": "Your face",
+      "color": "#1f3320",
+      "bgcolor": "#162416"
+    },
+    {
+      "id": 19,
+      "type": "LoadImage",
+      "pos": [
+        380,
+        420
+      ],
+      "size": [
+        320,
+        360
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            4
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "your_body.png",
+        "image"
+      ],
+      "title": "Body reference (optional, Ctrl+B to turn on)",
+      "color": "#2e2240",
+      "bgcolor": "#1f172b"
+    },
+    {
+      "id": 18,
+      "type": "MarkdownNote",
+      "pos": [
+        740,
+        760
+      ],
+      "size": [
+        420,
+        640
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "MarkdownNote"
+      },
+      "widgets_values": [
+        "## AI Empire · Dataset Maker (Nano Banana Pro · your template photos)\n\nEvery photo you upload = 1 image: **same pose, outfit, place and light, her face from *Your face*.** Runs on Google, **no GPU needed**.\n\n**Your Google key (set it on the RunPod template, not in the workflow)**\n- Vertex AI: env `VERTEX_SA_JSON` = the whole service-account .json (as a RunPod *secret*). Project is read from it.\n- Or AI Studio: choose *AI Studio API key* and set env `GEMINI_API_KEY` (or paste it in *api_key*, then don't share this workflow).\n- Pod: cheapest GPU is fine, env `EDIT_MODEL=none` = no model downloads, boots in ~1 min.\n\n**How to use**\n1. **Your face**: a natural photo of her (not a tight passport crop).\n2. **Template Presets** → 📁 Upload template photos → name the set. Pick it in *template_set*.\n3. *extra_description*: her hair + eyes, e.g. `with long straight dark brown hair, brown eyes`.\n4. *one_per_run* is ON: set *how_many* (e.g. 35) and the **Run count** next to the Run button → Run. Each image is saved right away; press Run again after a crash.\n5. Optional body photo: Ctrl+B the purple box + tick *use_body_reference*.\n\n**Notes**\n- Model: `gemini-3-pro-image` (Nano Banana Pro, best) or `gemini-3.1-flash-image` (Nano Banana 2, cheaper). 2K by default.\n- If Google refuses a photo (its filter), that run errors: delete that template or skip it with *start_at*.\n- Output: `output/datasets/<name>/` + zip, same as the Qwen workflow."
+      ],
+      "title": "READ ME"
+    },
+    {
+      "id": 40,
+      "type": "AIEmpireTemplatePresets",
+      "pos": [
+        740,
+        0
+      ],
+      "size": [
+        420,
+        700
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "templates",
+          "type": "IMAGE",
+          "links": [
+            2
+          ],
+          "shape": 6
+        },
+        {
+          "name": "prompts",
+          "type": "STRING",
+          "links": [
+            3
+          ],
+          "shape": 6
+        },
+        {
+          "name": "captions",
+          "type": "STRING",
+          "links": [
+            6
+          ],
+          "shape": 6
+        },
+        {
+          "name": "seeds",
+          "type": "INT",
+          "links": [],
+          "shape": 6
+        },
+        {
+          "name": "count",
+          "type": "INT",
+          "links": []
+        },
+        {
+          "name": "dataset_name",
+          "type": "STRING",
+          "links": [
+            7
+          ]
+        },
+        {
+          "name": "file_names",
+          "type": "STRING",
+          "links": [
+            8
+          ],
+          "shape": 6
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AIEmpireTemplatePresets"
+      },
+      "widgets_values": [
+        "my_templates",
+        "zvx woman",
+        "",
+        3,
+        1,
+        42,
+        "fixed",
+        false,
+        "my_influencer",
+        true,
+        true,
+        "Image 1 is the photo to edit. Image 2 only shows who the woman is.\nTurn the woman in image 1 into the woman from image 2{extra}: same face shape, eyes and eye colour, eyebrows, nose, lips, skin tone, hair colour and hairstyle.\nDo not paste or copy the face photo from image 2. Redraw her face naturally inside image 1: her head angle, face direction, gaze, facial expression and the light and shadows on her face all follow image 1.\nKeep everything else from image 1 exactly the same: the pose, the hands, the outfit, the background, the camera angle, the framing and the lighting.\nPhotorealistic smartphone photo, natural skin texture with visible pores."
+      ],
+      "title": "Template Presets (upload your photos here)",
+      "color": "#3d2a14",
+      "bgcolor": "#2a1d0e"
+    },
+    {
+      "id": 45,
+      "type": "AIEmpireNanoBananaTemplates",
+      "pos": [
+        1200,
+        0
+      ],
+      "size": [
+        400,
+        330
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "face",
+          "type": "IMAGE",
+          "link": 1
+        },
+        {
+          "name": "template",
+          "type": "IMAGE",
+          "link": 2
+        },
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "link": 3
+        },
+        {
+          "name": "body",
+          "type": "IMAGE",
+          "link": 4,
+          "shape": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            5
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AIEmpireNanoBananaTemplates"
+      },
+      "widgets_values": [
+        "Vertex AI",
+        "gemini-3-pro-image",
+        "2K",
+        "",
+        "",
+        "global"
+      ],
+      "title": "Nano Banana Pro (your Google key)",
+      "color": "#3d2a14",
+      "bgcolor": "#2a1d0e"
+    },
+    {
+      "id": 17,
+      "type": "AIEmpireSaveDataset",
+      "pos": [
+        1640,
+        0
+      ],
+      "size": [
+        520,
+        620
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 5
+        },
+        {
+          "name": "captions",
+          "type": "STRING",
+          "link": 6
+        },
+        {
+          "name": "dataset_name",
+          "type": "STRING",
+          "link": 7,
+          "widget": {
+            "name": "dataset_name"
+          }
+        },
+        {
+          "name": "file_names",
+          "type": "STRING",
+          "link": 8,
+          "shape": 7
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "AIEmpireSaveDataset"
+      },
+      "widgets_values": [
+        "my_influencer",
+        true,
+        ""
+      ],
+      "title": "Save Dataset ← train on this",
+      "color": "#1f3320",
+      "bgcolor": "#162416"
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      45,
+      0,
+      "IMAGE"
+    ],
+    [
+      2,
+      40,
+      0,
+      45,
+      1,
+      "IMAGE"
+    ],
+    [
+      3,
+      40,
+      1,
+      45,
+      2,
+      "STRING"
+    ],
+    [
+      4,
+      19,
+      0,
+      45,
+      3,
+      "IMAGE"
+    ],
+    [
+      5,
+      45,
+      0,
+      17,
+      0,
+      "IMAGE"
+    ],
+    [
+      6,
+      40,
+      2,
+      17,
+      1,
+      "STRING"
+    ],
+    [
+      7,
+      40,
+      5,
+      17,
+      2,
+      "STRING"
+    ],
+    [
+      8,
+      40,
+      6,
+      17,
+      3,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 2,
+      "title": "1 · Your face + template photos",
+      "bounding": [
+        370,
+        -60,
+        810,
+        1480
+      ],
+      "color": "#b06634",
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "2 · Nano Banana",
+      "bounding": [
+        1190,
+        -60,
+        420,
+        420
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 4,
+      "title": "3 · Save dataset",
+      "bounding": [
+        1630,
+        -60,
+        540,
+        700
+      ],
+      "color": "#6a8f4e",
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.55,
+      "offset": [
+        60,
+        120
+      ]
+    }
+  },
+  "version": 0.4
+}

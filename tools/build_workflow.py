@@ -58,6 +58,7 @@ CONFIGS = {
         "notes": ["Edit model: **Qwen Image Edit 2511** (Apache 2.0). fp8mixed file, 20 GB, fits 24-48 GB GPUs."],
     },
     "NanoBanana": {"kind": "nanobanana", "title": "Nano Banana Pro"},
+    "NanoBanana_Templates": {"kind": "nb_templates", "title": "Nano Banana Pro · your template photos"},
     "Qwen21": {
         "kind": "edit",
         "q21": True,
@@ -101,6 +102,7 @@ WIDGETS = {
                                 "use_body_reference", "dataset_name", "skip_done", "one_per_run", "prompt"],
     "AIEmpireBodyPresetMaker": ["source_set", "output_set", "body_target", "instructions", "how_many", "start_at", "seed", None, "skip_done", "use_body_example"],
     "AIEmpireSaveTemplateSet": ["output_set", "source_set"],
+    "AIEmpireNanoBananaTemplates": ["auth", "model", "resolution", "api_key", "vertex_project", "vertex_location"],
     "AIEmpireNanoBanana": ["auth", "model", "resolution", "api_key", "vertex_project", "vertex_location"],
     "FluxKontextImageScale": [], "TextEncodeQwenImageEditPlus": ["prompt"],
     "FluxKontextMultiReferenceLatentMethod": ["reference_latents_method"],
@@ -167,10 +169,50 @@ def build(key, cfg):
     add(1, "LoadImage", [380, 0], [320, 360], ["your_face.png", "image"], [("IMAGE", "IMAGE"), ("MASK", "MASK")], title="Your face", color=GREEN)
     add(19, "LoadImage", [380, 420], [320, 360], ["your_body.png", "image"], [("IMAGE", "IMAGE"), ("MASK", "MASK")],
         title="Body reference (optional, Ctrl+B to turn on)", color=PURPLE, mode=4)
-    if cfg["kind"] != "templates":
+    if cfg["kind"] not in ("templates", "nb_templates"):
         add(9, "AIEmpireDatasetPresets", [740, 0], [400, 400], PRESET_W, PRESET_OUT, title="Dataset Presets", color=ORANGE)
 
-    if cfg["kind"] == "templates":
+    if cfg["kind"] == "nb_templates":
+        note = "\n".join([
+            f"## AI Empire · Dataset Maker ({cfg['title']})", "",
+            "Every photo you upload = 1 image: **same pose, outfit, place and light, her face from *Your face*.** Runs on Google, **no GPU needed**.", "",
+            "**Your Google key (set it on the RunPod template, not in the workflow)**",
+            "- Vertex AI: env `VERTEX_SA_JSON` = the whole service-account .json (as a RunPod *secret*). Project is read from it.",
+            "- Or AI Studio: choose *AI Studio API key* and set env `GEMINI_API_KEY` (or paste it in *api_key*, then don't share this workflow).",
+            "- Pod: cheapest GPU is fine, env `EDIT_MODEL=none` = no model downloads, boots in ~1 min.", "",
+            "**How to use**",
+            "1. **Your face**: a natural photo of her (not a tight passport crop).",
+            "2. **Template Presets** → 📁 Upload template photos → name the set. Pick it in *template_set*.",
+            "3. *extra_description*: her hair + eyes, e.g. `with long straight dark brown hair, brown eyes`.",
+            "4. *one_per_run* is ON: set *how_many* (e.g. 35) and the **Run count** next to the Run button → Run. Each image is saved right away; press Run again after a crash.",
+            "5. Optional body photo: Ctrl+B the purple box + tick *use_body_reference*.", "",
+            "**Notes**",
+            "- Model: `gemini-3-pro-image` (Nano Banana Pro, best) or `gemini-3.1-flash-image` (Nano Banana 2, cheaper). 2K by default.",
+            "- If Google refuses a photo (its filter), that run errors: delete that template or skip it with *start_at*.",
+            "- Output: `output/datasets/<name>/` + zip, same as the Qwen workflow."])
+        add(18, "MarkdownNote", [740, 760], [420, 640], [note], [], title="READ ME")
+        add(40, "AIEmpireTemplatePresets", [740, 0], [420, 700],
+            ["my_templates", "zvx woman", "", 3, 1, 42, "fixed", False, "my_influencer", True, True, _node_const("TEMPLATE_PROMPT")],
+            [("templates", "IMAGE", True), ("prompts", "STRING", True), ("captions", "STRING", True),
+             ("seeds", "INT", True), ("count", "INT"), ("dataset_name", "STRING"), ("file_names", "STRING", True)],
+            title="Template Presets (upload your photos here)", color=ORANGE)
+        add(45, "AIEmpireNanoBananaTemplates", [1200, 0], [400, 330], ["Vertex AI", "gemini-3-pro-image", "2K", "", "", "global"],
+            [("image", "IMAGE")], title="Nano Banana Pro (your Google key)", color=ORANGE)
+        add(17, "AIEmpireSaveDataset", [1640, 0], [520, 620], ["my_influencer", True, ""], [], title="Save Dataset ← train on this", color=GREEN)
+        link(1, 0, 45, "face", "IMAGE")
+        link(40, 0, 45, "template", "IMAGE")
+        link(40, 1, 45, "prompt", "STRING")
+        link(19, 0, 45, "body", "IMAGE", optional=True)
+        link(45, 0, 17, "images", "IMAGE")
+        link(40, 2, 17, "captions", "STRING")
+        link(40, 5, 17, "dataset_name", "STRING", widget=True)
+        link(40, 6, 17, "file_names", "STRING", optional=True)
+        groups = [
+            {"id": 2, "title": "1 · Your face + template photos", "bounding": [370, -60, 810, 1480], "color": "#b06634", "flags": {}},
+            {"id": 3, "title": "2 · Nano Banana", "bounding": [1190, -60, 420, 420], "color": "#3f789e", "flags": {}},
+            {"id": 4, "title": "3 · Save dataset", "bounding": [1630, -60, 540, 700], "color": "#6a8f4e", "flags": {}},
+        ]
+    elif cfg["kind"] == "templates":
         note = "\n".join([
             f"## AI Empire · Dataset Maker ({cfg['title']})", "",
             "Every photo you upload = 1 dataset image: **same pose, outfit, place and light as the photo, her face from *Your face*.** 50 photos in = 50 dataset images out.", "",
@@ -399,7 +441,7 @@ def write(key, nodes, links, lid, groups, node):
 
     ids = {"FireRed11": "5e0c2f64-7a1b-4c8e-9d3f-f1e3d11a0001", "Qwen2511": "5e0c2f64-7a1b-4c8e-9d3f-a1e3e4e5e6e7", "Qwen21": "5e0c2f64-7a1b-4c8e-9d3f-21e21e210001",
            "NanoBanana": "5e0c2f64-7a1b-4c8e-9d3f-0a0ba0a0a0b1", "Qwen21_Templates": "5e0c2f64-7a1b-4c8e-9d3f-7e3a1a7e0002",
-           "Qwen21_BodyPresets": "5e0c2f64-7a1b-4c8e-9d3f-b0d1b0d10003"}
+           "Qwen21_BodyPresets": "5e0c2f64-7a1b-4c8e-9d3f-b0d1b0d10003", "NanoBanana_Templates": "5e0c2f64-7a1b-4c8e-9d3f-0a0b7e3a0004"}
     workflow = {"id": ids[key], "revision": 0, "last_node_id": max(n["id"] for n in nodes), "last_link_id": lid[0],
                 "nodes": nodes, "links": links, "groups": groups, "config": {},
                 "extra": {"ds": {"scale": 0.55, "offset": [60, 120]}}, "version": 0.4}
