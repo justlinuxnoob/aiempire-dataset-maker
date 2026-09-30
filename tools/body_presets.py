@@ -54,8 +54,8 @@ BODY = {
     "curvy":     "make her softer and a little curvier instead of athletic: no visible abs or muscle definition, a soft smooth flat stomach, slightly fuller hips and thighs, a slightly fuller bust. Not muscular, not heavy, still slim.",
     "thick":     "make her clearly thick: much wider hips, a big round butt and thick full thighs, with a defined waist; her bust stays as it is.",
     "busty":     "make her bust clearly much bigger and fuller, at least two cup sizes larger; keep her waist slim and her hips and legs as they are.",
-    "slim":      "make her clearly thin and petite: noticeably thinner arms, slender thighs and legs, a tiny waist, narrow hips, a smaller flatter butt and a small bust. Her whole body is visibly narrower.",
-    "plus":      "make her a plus-size woman, around US dress size 18: much heavier and softer all over, with thick soft arms, a soft round belly, very wide hips, very thick thighs and a fuller bust.",
+    "slim":      "a very slim, petite build, clothing size XS: thin arms, slender thighs and calves, a tiny waist, narrow hips, a small flat butt and a small bust",
+    "plus":      "a plus-size build, US clothing size 20: heavy soft arms, a big soft belly, very wide hips, very thick thighs, a large bust and a softer, fuller face",
 }
 
 # body parts each type changes. A photo is only sent if it shows at least one of them.
@@ -86,6 +86,16 @@ PROMPT_WITH_REF = (
     "in image 2 the body proportions of the woman in image 1 — match the size and shape of her {parts} closely: {body} "
     "Copy nothing else from image 1: not her face, skin tone, clothes, pose or background. Her skin is smooth and clean everywhere: no scars, marks, lines, creases "
     "or blemishes on her arms, legs or body. {strength} Realistic anatomy. Her clothes fit her new shape naturally. "
+    "Photorealistic smartphone photo."
+)
+# weight changes (slim / plus): the "edit, keep everything" prompts barely moved her, so these recreate the
+# photo with a different body instead. Used when there is no body example for the type.
+REIMAGINE = {"slim", "plus"}
+PROMPT_REIMAGINE = (
+    "Recreate this exact photo: the same scene, background, lighting, camera angle, framing and pose, the same hair, "
+    "and the same outfit ({outfit}, same colors and style, same coverage). But the woman has a completely different "
+    "body: {body}. The difference from the original photo must be obvious at a glance. Her face stays recognizable as "
+    "the same woman. Her clothes fit this new body naturally. Realistic anatomy, smooth natural skin, no scars or marks. "
     "Photorealistic smartphone photo."
 )
 # used when body_refs/<type>.* is missing: only the athletic photo is sent
@@ -190,6 +200,8 @@ def join_words(words):
 
 
 def build_prompt(kind, info, parts, with_ref):
+    if kind in REIMAGINE and not with_ref:
+        return PROMPT_REIMAGINE.format(outfit=info.get("outfit", "her own clothes"), body=BODY[kind].rstrip("."))
     tpl = PROMPT_WITH_REF if with_ref else PROMPT_NO_REF
     return tpl.format(
         pose=info.get("pose", "in this photo"),
