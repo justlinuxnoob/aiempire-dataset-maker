@@ -124,7 +124,20 @@ PROMPT_NO_REF = (
 
 # ────────────────────────────────────────────────────────────────────────────────
 
-BASE_URL = os.environ.get("NB_BASE_URL", "https://api.runpod.ai/v2/nano-banana-pro-edit")
+MODELS = {
+    "nano": "https://api.runpod.ai/v2/nano-banana-pro-edit",   # Nano Banana Pro Edit, $0.14 at 2K
+    "seedream": "https://api.runpod.ai/v2/seedream-v4-edit",   # Seedream 4.0 Edit, ~$0.03
+}
+TYPE_MODEL = {}   # which model a type uses by default, e.g. {"petite": "seedream"}; everything else = nano
+
+
+def model_url(model):
+    return os.environ.get("NB_BASE_URL") or MODELS[model]
+
+
+def seedream_size(w, h, long_side=2048):
+    s = long_side / max(w, h)
+    return f"{max(16, round(w * s / 16) * 16)}*{max(16, round(h * s / 16) * 16)}"
 RATIOS = ["1:1", "3:2", "2:3", "4:3", "3:4", "4:5", "5:4", "9:16", "16:9", "21:9"]
 EXTS = {".png", ".jpg", ".jpeg", ".webp"}
 PRINT = threading.Lock()
@@ -272,10 +285,11 @@ def http(url, key, body=None, timeout=120):
 JOB_TIMEOUT = int(os.environ.get("NB_JOB_TIMEOUT", "240"))  # seconds per photo before cancelling and retrying
 
 
-def run_job(key, payload, label=""):
+def run_job(key, payload, label="", base=None):
     """/run returns a job id at once; poll /status. A job stuck longer than JOB_TIMEOUT is cancelled
     (so it isn't billed) and the caller retries it."""
-    res = http(f"{BASE_URL}/run", key, {"input": payload}, timeout=60)
+    base = base or model_url("nano")
+    res = http(f"{base}/run", key, {"input": payload}, timeout=60)
     job = res.get("id")
     start = time.time()
     warned = False
@@ -283,7 +297,7 @@ def run_job(key, payload, label=""):
         waited = time.time() - start
         if waited > JOB_TIMEOUT:
             try:
-                http(f"{BASE_URL}/cancel/{job}", key, {}, timeout=30)
+                http(f"{base}/cancel/{job}", key, {}, timeout=30)
             except Exception:  # noqa: BLE001
                 pass
             raise RuntimeError(f"stuck for {JOB_TIMEOUT // 60} min in RunPod's queue — cancelled, trying again")
@@ -291,7 +305,7 @@ def run_job(key, payload, label=""):
             say(f"  ⏳ {label} is slow ({res.get('status', 'waiting').lower().replace('_', ' ')}) — still waiting, max {JOB_TIMEOUT // 60} min")
             warned = True
         time.sleep(3)
-        res = http(f"{BASE_URL}/status/{job}", key, timeout=30)
+        res = http(f"{base}/status/{job}", key, timeout=30)
     if res.get("status") != "COMPLETED":
         raise RuntimeError(f"{res.get('status')}: {res.get('error') or json.dumps(res.get('output'))[:300]}")
     out = res.get("output") or {}
@@ -312,9 +326,13 @@ def find_ref(kind):
     return None
 
 
-def make_type(kind, key, info, only=None, test=False):
+def make_type(kind, key, info, only=None, test=False, model=None):
     src = HERE / SOURCE
-    out = HERE / ("_test" if test else "") / kind
+    default_model = TYPE_MODEL.get(kind, "nano")
+    model = model or default_model
+    base = model_url(model)
+    folder = kind if (model == default_model or not test) else f"{kind}_{model}"
+    out = HERE / ("_test" if test else "") / folder
     out.mkdir(parents=True, exist_ok=True)
 
     todo = photos(src)
@@ -326,7 +344,7 @@ def make_type(kind, key, info, only=None, test=False):
     ref = find_ref(kind)
     ref_url = as_data_url(ref, 1536)[0] if ref else None
     say(f"\n━━ {kind} ━━ {len(todo)} photos → {out.relative_to(HERE)}/  "
-        f"({'body example: ' + ref.name if ref else 'no body example, text only'})")
+        f"({'body example: ' + ref.name if ref else 'no body example, text only'}) · model: {model}")
 
     cost = 0.0
     failed = []
@@ -354,17 +372,22 @@ def make_type(kind, key, info, only=None, test=False):
             shutil.copy2(p, target) if p.suffix.lower() == ".png" else _to_png(p, target)
             return p, "kept", 0.0, None
         photo_url, (w, h) = as_data_url(p, 2048)
-        payload = {
-            "prompt": build_prompt(kind, meta, parts, bool(ref_url)),
-            "images": ([ref_url] if ref_url else []) + [photo_url],
-            "resolution": RESOLUTION,
-            "aspect_ratio": nearest_ratio(w, h),
-            "output_format": "png",
-        }
+        images = ([ref_url] if ref_url else []) + [photo_url]
+        prompt = build_prompt(kind, meta, parts, bool(ref_url))
+        if model == "seedream":
+            payload = {"prompt": prompt, "images": images, "size": seedream_size(w, h)}
+        else:
+            payload = {
+                "prompt": prompt,
+                "images": images,
+                "resolution": RESOLUTION,
+                "aspect_ratio": nearest_ratio(w, h),
+                "output_format": "png",
+            }
         err = None
         for attempt in range(1, TRIES + 1):
             try:
-                data, c = run_job(key, payload, f"image_{n:02d}" if n is not None else p.stem)
+                data, c = run_job(key, payload, f"image_{n:02d}" if n is not None else p.stem, base)
                 tmp = target.with_suffix(".part")
                 tmp.write_bytes(data)
                 _normalise(tmp, target)
@@ -435,6 +458,7 @@ def _normalise(tmp, target):
 def main():
     ap = argparse.ArgumentParser(description="Make body-type presets from the athletic set with Nano Banana Pro.")
     ap.add_argument("type", help="one of: " + ", ".join(BODY) + ", or all")
+    ap.add_argument("--model", choices=list(MODELS), help="override the model for this run (nano or seedream)")
     ap.add_argument("--review", action="store_true",
                     help="make <type>_review.zip (small JPEGs, fits in a chat upload) instead of generating")
     ap.add_argument("--test", metavar="NUMS", nargs="?", const="default",
@@ -475,7 +499,7 @@ def main():
         only = {int(x) for x in a.test.split(",") if x.strip()} if a.test else None
     total, all_failed = 0.0, {}
     for k in kinds:
-        c, f = make_type(k, key, info, only=only, test=bool(only))
+        c, f = make_type(k, key, info, only=only, test=bool(only), model=a.model)
         total += c
         if f:
             all_failed[k] = f
