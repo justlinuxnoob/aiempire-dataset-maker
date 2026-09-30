@@ -4,13 +4,19 @@ AI Empire - make body-type presets from the athletic set with Nano Banana Pro
 (RunPod public endpoint). Runs on your own PC, no pod needed.
 
 Folder layout (next to this script):
-    athletic/            image_01.png ... image_50.png   (+ optional image_01.txt captions)
-    body_refs/           curvy.jpg, thick.jpg, ...        (one body example per type, optional)
+    body_presets.py
+    photos.json          per-photo pose / outfit / visible body parts / caption (made by Claude)
+    athletic/            the 50 athletic photos (any names with a number work, they get renamed image_01...)
+    body_refs/           curvy.jpg, thick.jpg, ...  (one body example per type, optional)
 
 Commands:
-    python3 body_presets.py curvy --test 5,22,41   -> 3 test photos into _test/curvy/
-    python3 body_presets.py curvy                  -> all 50 into curvy/ (skips ones already done)
-    python3 body_presets.py all                    -> every body type below, one after another
+    python3 body_presets.py curvy --test           -> 3 test photos (13, 25, 47) into _test/curvy/
+    python3 body_presets.py curvy --test 5,22,41   -> pick your own test photos
+    python3 body_presets.py curvy                  -> the whole set into curvy/ (skips ones already done)
+    python3 body_presets.py all                    -> every body type, one after another
+
+Photos that show none of the body parts a type changes (close-ups, headshots) are copied unchanged
+for free. Every output gets its caption .txt from photos.json.
 
 API key: set RUNPOD_API_KEY, or just run it and paste the key when asked (it is never saved).
 """
@@ -40,8 +46,7 @@ RESOLUTION = "2k"            # 1k / 2k ($0.14)  or 4k ($0.24). Pipeline works at
 AT_ONCE = 3                  # photos running at the same time
 TRIES = 3                    # attempts per photo before giving up
 
-# photo numbers to copy unchanged (close-ups / headshots with no body to change)
-KEEP_AS_IS = []              # e.g. [3, 7, 12]
+TEST_PICKS = [13, 25, 47]    # default --test photos: full body standing, kneeling, bent forward
 
 BODY = {
     "curvy":     "give her a curvy hourglass figure: fuller bust and hips, a clearly narrower waist, soft fuller thighs.",
@@ -52,20 +57,34 @@ BODY = {
     "plus":      "make her plus-size: a softer, fuller body overall, with fuller arms, stomach, hips and thighs.",
 }
 
+# body parts each type changes. A photo is only sent if it shows at least one of them.
+PARTS = {
+    "curvy":     ["chest", "waist", "hips", "butt", "legs"],
+    "thick":     ["hips", "butt", "legs"],
+    "busty":     ["chest"],
+    "slim":      ["chest", "waist", "hips", "butt", "legs", "arms"],
+    "slimthick": ["waist", "hips", "butt", "legs"],
+    "plus":      ["chest", "waist", "hips", "butt", "legs", "arms"],
+}
+PART_WORDS = {"chest": "chest", "waist": "waist", "hips": "hips", "butt": "butt", "legs": "thighs", "arms": "arms"}
+
 # image 1 = body example, image 2 = the athletic photo (same order that worked for 36-50)
 PROMPT_WITH_REF = (
-    "Output image 2, edited. Keep the woman from image 2 with her own face, hair, clothes, pose, background, "
-    "camera angle, framing and lighting, all exactly the same. Image 1 only shows the body shape to aim for; "
-    "do not copy anything else from it. The only change: {body} Her skin is smooth and clean everywhere: no scars, "
-    "marks, lines, creases or blemishes on her arms, legs or body. Realistic, natural proportions. Her own clothes "
-    "fit her new shape naturally. Photorealistic smartphone photo."
+    "Output image 2, edited. Image 2 is a photo of a woman {pose}, wearing {outfit}. Keep the woman from image 2 "
+    "with her own face, hair, pose, background, camera angle, framing and lighting, all exactly the same. Keep exactly "
+    "the same clothes: {outfit}, same colors, same cut, same coverage, not more revealing. Image 1 only shows the body "
+    "shape to aim for; do not copy her face, clothes, pose or background. The only change: {body} In this photo you can "
+    "see her {parts}, so reshape only those. Her skin is smooth and clean everywhere: no scars, marks, lines, creases "
+    "or blemishes on her arms, legs or body. Realistic, natural proportions. Her clothes fit her new shape naturally. "
+    "Photorealistic smartphone photo."
 )
 # used when body_refs/<type>.* is missing: only the athletic photo is sent
 PROMPT_NO_REF = (
-    "Edit this photo. Keep the woman with her own face, hair, clothes, pose, background, camera angle, framing and "
-    "lighting, all exactly the same. The only change: {body} Her skin is smooth and clean everywhere: no scars, "
-    "marks, lines, creases or blemishes on her arms, legs or body. Realistic, natural proportions. Her own clothes "
-    "fit her new shape naturally. Photorealistic smartphone photo."
+    "Edit this photo of a woman {pose}, wearing {outfit}. Keep her own face, hair, pose, background, camera angle, "
+    "framing and lighting, all exactly the same. Keep exactly the same clothes: {outfit}, same colors, same cut, same "
+    "coverage, not more revealing. The only change: {body} In this photo you can see her {parts}, so reshape only those. "
+    "Her skin is smooth and clean everywhere: no scars, marks, lines, creases or blemishes on her arms, legs or body. "
+    "Realistic, natural proportions. Her clothes fit her new shape naturally. Photorealistic smartphone photo."
 )
 
 # ────────────────────────────────────────────────────────────────────────────────
@@ -108,6 +127,43 @@ def number_of(p):
     import re
     nums = re.findall(r"\d+", p.stem)
     return int(nums[-1]) if nums else None
+
+
+def load_info():
+    f = HERE / "photos.json"
+    if not f.exists():
+        return {}
+    data = json.loads(f.read_text(encoding="utf-8"))
+    return {int(k): v for k, v in data.items() if k.isdigit()}
+
+
+def tidy_names(folder):
+    """36.jpeg / my_influencer_image7.png ... -> image_36.jpeg / image_07.png (numbers kept, nothing else changes)."""
+    moved = 0
+    for p in list(folder.iterdir()):
+        n = number_of(p) if p.suffix.lower() in EXTS | {".txt"} else None
+        if n is None:
+            continue
+        new = p.with_name(f"image_{n:02d}{p.suffix.lower()}")
+        if new != p and not new.exists():
+            p.rename(new)
+            moved += 1
+    if moved:
+        say(f"📝 renamed {moved} files in {folder.name}/ to image_01 ... style")
+
+
+def join_words(words):
+    return words[0] if len(words) == 1 else ", ".join(words[:-1]) + " and " + words[-1]
+
+
+def build_prompt(kind, info, parts, with_ref):
+    tpl = PROMPT_WITH_REF if with_ref else PROMPT_NO_REF
+    return tpl.format(
+        pose=info.get("pose", "in this photo"),
+        outfit=info.get("outfit", "her own clothes"),
+        body=BODY[kind],
+        parts=join_words([PART_WORDS[x] for x in parts]),
+    )
 
 
 def photos(folder):
@@ -178,7 +234,7 @@ def find_ref(kind):
     return None
 
 
-def make_type(kind, key, only=None, test=False):
+def make_type(kind, key, info, only=None, test=False):
     src = HERE / SOURCE
     out = HERE / ("_test" if test else "") / kind
     out.mkdir(parents=True, exist_ok=True)
@@ -191,7 +247,6 @@ def make_type(kind, key, only=None, test=False):
 
     ref = find_ref(kind)
     ref_url = as_data_url(ref, 1536)[0] if ref else None
-    prompt = (PROMPT_WITH_REF if ref else PROMPT_NO_REF).format(body=BODY[kind])
     say(f"\n━━ {kind} ━━ {len(todo)} photos → {out.relative_to(HERE)}/  "
         f"({'body example: ' + ref.name if ref else 'no body example, text only'})")
 
@@ -200,18 +255,27 @@ def make_type(kind, key, only=None, test=False):
     done = 0
 
     def one(p):
-        target = out / (p.stem + ".png")
-        cap = p.with_suffix(".txt")
-        if cap.exists():
-            shutil.copy2(cap, out / cap.name)
+        n = number_of(p)
+        stem = f"image_{n:02d}" if n is not None else p.stem
+        target = out / (stem + ".png")
+        meta = info.get(n, {})
+        cap = meta.get("caption")
+        if cap:
+            (out / (stem + ".txt")).write_text(cap, encoding="utf-8")
+        elif p.with_suffix(".txt").exists():
+            shutil.copy2(p.with_suffix(".txt"), out / (stem + ".txt"))
         if target.exists():
             return p, "skip", 0.0, None
-        if not test and number_of(p) in KEEP_AS_IS:
+        if meta:
+            parts = [x for x in PARTS[kind] if x in meta.get("shows", [])]
+        else:
+            parts = list(PARTS[kind])  # no info for this photo: edit it anyway
+        if not parts:
             shutil.copy2(p, target) if p.suffix.lower() == ".png" else _to_png(p, target)
             return p, "kept", 0.0, None
         photo_url, (w, h) = as_data_url(p, 2048)
         payload = {
-            "prompt": prompt,
+            "prompt": build_prompt(kind, meta, parts, bool(ref_url)),
             "images": ([ref_url] if ref_url else []) + [photo_url],
             "resolution": RESOLUTION,
             "aspect_ratio": nearest_ratio(w, h),
@@ -238,8 +302,9 @@ def make_type(kind, key, only=None, test=False):
             done += 1
             cost += c
             icon = {"ok": "✅", "skip": "⏭ ", "kept": "📋", "fail": "❌"}[state]
-            extra = {"skip": "already done", "kept": "copied unchanged", "fail": err, "ok": f"${c:.2f}"}[state]
-            say(f"  {icon} {done:>2}/{len(todo)}  {p.stem}  {extra}")
+            extra = {"skip": "already done", "kept": "no body part to change, copied", "fail": err, "ok": f"${c:.2f}"}[state]
+            n = number_of(p)
+            say(f"  {icon} {done:>2}/{len(todo)}  image_{n:02d}  {extra}" if n is not None else f"  {icon} {p.stem}  {extra}")
             if state == "fail":
                 failed.append(p.stem)
 
@@ -271,7 +336,8 @@ def _normalise(tmp, target):
 def main():
     ap = argparse.ArgumentParser(description="Make body-type presets from the athletic set with Nano Banana Pro.")
     ap.add_argument("type", help="one of: " + ", ".join(BODY) + ", or all")
-    ap.add_argument("--test", metavar="NUMS", help="only these photo numbers, into _test/<type>/  e.g. 5,22,41")
+    ap.add_argument("--test", metavar="NUMS", nargs="?", const="default",
+                    help="test run into _test/<type>/: photos 13,25,47, or your own numbers e.g. --test 5,22,41")
     a = ap.parse_args()
 
     kinds = list(BODY) if a.type == "all" else [a.type]
@@ -282,14 +348,29 @@ def main():
         sys.exit(f"🛑 put the athletic photos in {HERE / SOURCE}/ first (image_01.png ... image_50.png)")
 
     ensure_pillow()
+    tidy_names(HERE / SOURCE)
+    info = load_info()
+    if not info:
+        say("⚠ photos.json not found next to the script: every photo gets edited with the plain prompt")
+    wrote = 0
+    for p in photos(HERE / SOURCE):  # the athletic preset gets its captions too
+        cap = info.get(number_of(p), {}).get("caption")
+        if cap and not p.with_suffix(".txt").exists():
+            p.with_suffix(".txt").write_text(cap, encoding="utf-8")
+            wrote += 1
+    if wrote:
+        say(f"📝 wrote {wrote} captions into {SOURCE}/")
     key = os.environ.get("RUNPOD_API_KEY") or getpass.getpass("RunPod API key (hidden, not saved): ").strip()
     if not key:
         sys.exit("🛑 no API key")
 
-    only = {int(x) for x in a.test.split(",") if x.strip()} if a.test else None
+    if a.test == "default":
+        only = set(TEST_PICKS)
+    else:
+        only = {int(x) for x in a.test.split(",") if x.strip()} if a.test else None
     total, all_failed = 0.0, {}
     for k in kinds:
-        c, f = make_type(k, key, only=only, test=bool(only))
+        c, f = make_type(k, key, info, only=only, test=bool(only))
         total += c
         if f:
             all_failed[k] = f
