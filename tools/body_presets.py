@@ -54,8 +54,8 @@ BODY = {
     "curvy":     "make her softer and a little curvier instead of athletic: no visible abs or muscle definition, a soft smooth flat stomach, slightly fuller hips and thighs, a slightly fuller bust. Not muscular, not heavy, still slim.",
     "thick":     "make her clearly thick: much wider hips, a big round butt and thick full thighs, with a defined waist; her bust stays as it is.",
     "busty":     "make her bust clearly much bigger and fuller, at least two cup sizes larger; keep her waist slim and her hips and legs as they are.",
-    "slim":      "make her clearly slimmer and petite: thin arms, a very narrow waist, narrow hips, slender legs and a small bust.",
-    "plus":      "make her clearly plus-size: a soft, full, heavier body overall, with fuller arms, a soft rounder stomach, wide hips and thick thighs.",
+    "slim":      "make her clearly thin and petite: noticeably thinner arms, slender thighs and legs, a tiny waist, narrow hips, a smaller flatter butt and a small bust. Her whole body is visibly narrower.",
+    "plus":      "make her a plus-size woman, around US dress size 18: much heavier and softer all over, with thick soft arms, a soft round belly, very wide hips, very thick thighs and a fuller bust.",
 }
 
 # body parts each type changes. A photo is only sent if it shows at least one of them.
@@ -67,7 +67,14 @@ PARTS = {
     "plus":      ["chest", "waist", "hips", "butt", "legs", "arms"],
 }
 # how big the change should look. Curvy is a gentle step from athletic; the others are clearly different bodies.
-STRENGTH = {"curvy": "The change is gentle but visible: same girl, just softer and less toned."}
+STRENGTH = {
+    "curvy": "The change is gentle but visible: same girl, just softer and less toned.",
+    "slim": "The change must be obvious at first glance: she is clearly thinner than in the original. "
+            "Her clothes stay the same size, so they sit a little looser on her.",
+    "plus": "The change must be obvious at first glance: she is clearly a plus-size woman now, not just curvy. "
+            "Her neck, jaw and cheeks can be slightly fuller to match her body, but she is still recognizably "
+            "the same person. Her clothes stretch tighter over her fuller body.",
+}
 STRENGTH_DEFAULT = "The body change must be obvious at first glance compared to the original."
 PART_WORDS = {"chest": "chest", "waist": "waist", "hips": "hips", "butt": "butt", "legs": "thighs", "arms": "arms"}
 
