@@ -220,7 +220,7 @@ class AIEmpireTemplatePresets:
             "optional": {
                 "use_body_reference": ("BOOLEAN", {"default": False, "tooltip": "Turn on when you also load a full-body photo of her (Body reference box). Off = body comes from each template."}),
                 "dataset_name": ("STRING", {"default": "my_influencer"}),
-                "skip_done": ("BOOLEAN", {"default": True, "tooltip": "Skip templates that already have a saved image in this dataset (resume after a crash)."}),
+                "skip_done": ("BOOLEAN", {"default": True, "tooltip": "Skip templates that already have a saved image in this dataset (resume after a crash). OFF = redo the first photo of the range, one per Run (no auto-continue). To redo one image, better: delete it and keep this ON."}),
                 "one_per_run": ("BOOLEAN", {"default": True, "tooltip": "ON = each Run makes ONE image (the next one not done yet) and saves it right away. Set the Run count next to the Run button to how many you want. OFF = all at once, saved only at the very end."}),
                 "prompt": ("STRING", {"default": TEMPLATE_PROMPT, "multiline": True, "tooltip": "The instruction Qwen gets for every photo. {extra} = extra_description."}),
             },
@@ -294,7 +294,9 @@ class AIEmpireTemplatePresets:
         if not imgs:
             raise ValueError(f"✅ All done: every template in this range is already in datasets/{name}. "
                              "To redo one, delete its image there. To redo all, change 'dataset_name'.")
-        remaining = max(left - len(imgs), 0) if one_per_run else 0  # still to do after this run
+        # still to do after this run. With skip_done OFF the next run would pick this same photo again,
+        # so auto-continue would loop forever: then it's one image per Run, no auto-continue.
+        remaining = max(left - len(imgs), 0) if (one_per_run and skip_done) else 0
         progress = f"{len(chosen) - left + len(imgs)}/{len(chosen)}"  # done after this run / total
         return (imgs, prompts, captions, seeds, len(imgs), name, stems, remaining, progress)
 
