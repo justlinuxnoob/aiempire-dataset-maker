@@ -18,7 +18,9 @@ Commands:
 Photos that show none of the body parts a type changes (close-ups, headshots) are copied unchanged
 for free. Every output gets its caption .txt from photos.json.
 
-API key: set RUNPOD_API_KEY, or just run it and paste the key when asked (it is never saved).
+API key: paste it the first time you run it. It's saved in .runpod_key next to this script (only readable by you),
+so it never asks again. Wrong key? The file is deleted automatically and it asks again next run.
+Don't share this folder with the .runpod_key file inside it.
 """
 import argparse
 import base64
@@ -98,6 +100,29 @@ PRINT = threading.Lock()
 def say(*a):
     with PRINT:
         print(*a, flush=True)
+
+
+KEY_FILE = HERE / ".runpod_key"
+
+
+def get_key():
+    """env RUNPOD_API_KEY > saved .runpod_key > ask once and save it."""
+    key = os.environ.get("RUNPOD_API_KEY", "").strip()
+    if key:
+        return key
+    if KEY_FILE.exists():
+        key = KEY_FILE.read_text().strip()
+        if key:
+            return key
+    key = getpass.getpass("RunPod API key (hidden while you paste, saved for next time): ").strip()
+    if key:
+        KEY_FILE.write_text(key)
+        try:
+            KEY_FILE.chmod(0o600)
+        except OSError:
+            pass
+        say(f"🔑 key saved in {KEY_FILE.name} — you won't be asked again")
+    return key
 
 
 def ensure_pillow():
@@ -201,6 +226,7 @@ def http(url, key, body=None, timeout=120):
     except urllib.error.HTTPError as e:
         msg = e.read().decode(errors="replace")[:400]
         if e.code in (401, 403):
+            KEY_FILE.unlink(missing_ok=True)
             raise SystemExit(f"🛑 RunPod says the API key is wrong or has no access ({e.code}): {msg}")
         raise RuntimeError(f"HTTP {e.code}: {msg}")
 
@@ -360,7 +386,7 @@ def main():
             wrote += 1
     if wrote:
         say(f"📝 wrote {wrote} captions into {SOURCE}/")
-    key = os.environ.get("RUNPOD_API_KEY") or getpass.getpass("RunPod API key (hidden, not saved): ").strip()
+    key = get_key()
     if not key:
         sys.exit("🛑 no API key")
 
