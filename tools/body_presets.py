@@ -54,7 +54,6 @@ BODY = {
     "curvy":     "make her softer and a little curvier instead of athletic: no visible abs or muscle definition, a soft smooth flat stomach, slightly fuller hips and thighs, a slightly fuller bust. Not muscular, not heavy, still slim.",
     "thick":     "make her clearly thick: much wider hips, a big round butt and thick full thighs, with a defined waist; her bust stays as it is.",
     "petite":    "make her chest clearly smaller, a small A-cup bust, and her butt clearly smaller and flatter, with narrower hips and slimmer thighs. A small, slender, petite figure, the opposite of curvy.",
-    "petiteb":   "flat-chested, small flat butt, narrow straight hips",
     "busty":     "make her bust clearly much bigger and fuller, at least two cup sizes larger; keep her waist slim and her hips and legs as they are.",
     "plus":      "a plus-size build, US clothing size 20: heavy soft arms, a big soft belly, very wide hips, very thick thighs, a large bust and a softer, fuller face",
 }
@@ -64,7 +63,6 @@ PARTS = {
     "curvy":     ["chest", "waist", "hips", "butt", "legs"],
     "thick":     ["hips", "butt", "legs"],
     "petite":    ["chest", "hips", "butt", "legs"],
-    "petiteb":   ["chest", "hips", "butt", "legs"],
     "busty":     ["chest"],
     "plus":      ["chest", "waist", "hips", "butt", "legs", "arms"],
 }
@@ -107,11 +105,6 @@ SHORT = {
         "and flatter, like a skinny petite girl. Keep her face, hair, outfit ({outfit}), pose, background and "
         "lighting the same. Photorealistic phone photo."
     ),
-    "petiteb": (
-        "This same girl, but flat-chested, with a small flat butt and narrow boyish hips: a skinny, petite, straight "
-        "figure with almost no curves. Same face, hair, outfit ({outfit}), pose, background and lighting. "
-        "Photorealistic phone photo."
-    ),
 }
 # used when body_refs/<type>.* is missing: only the athletic photo is sent
 PROMPT_NO_REF = (
@@ -129,7 +122,7 @@ MODELS = {
     "nano2": "https://api.runpod.ai/v2/google-nano-banana-2-edit",  # Nano Banana 2 Edit (newer, cheaper than Pro)
     "seedream": "https://api.runpod.ai/v2/seedream-v4-edit",   # Seedream 4.0 Edit, ~$0.03
 }
-TYPE_MODEL = {}   # which model a type uses by default, e.g. {"petite": "seedream"}; everything else = nano
+TYPE_MODEL = {"petite": "seedream"}   # Nano Banana refuses to make her smaller; Seedream does it. Everything else = nano
 
 
 def model_url(model):
