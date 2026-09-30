@@ -3,7 +3,7 @@ name: Build pod image
 on:
   push:
     branches: [main]
-    paths-ignore: ["**.md"]
+    paths-ignore: ["**.md", "tools/**", "workflows/**"]
   workflow_dispatch:
 
 permissions:
