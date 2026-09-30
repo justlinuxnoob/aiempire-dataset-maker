@@ -84,8 +84,8 @@ PROMPT_WITH_REF = (
     "with her own face, hair, pose, background, camera angle, framing and lighting, all exactly the same. Keep exactly "
     "the same clothes: {outfit}, same colors, same cut, same coverage, not more revealing. The only change: give the woman "
     "in image 2 the body proportions of the woman in image 1 — match the size and shape of her {parts} closely: {body} "
-    "Copy nothing else from image 1: not her face, skin tone, clothes, pose or background. Her skin is smooth and clean everywhere: no scars, marks, lines, creases "
-    "or blemishes on her arms, legs or body. {strength} Realistic anatomy. Her clothes fit her new shape naturally. "
+    "Copy nothing else from image 1: not her face, skin tone, clothes, pose or background. Natural, realistic skin texture like a real phone photo, not "
+    "airbrushed; no scars, marks or blemishes on her arms, legs or body. {strength} Realistic anatomy. Her clothes fit her new shape naturally. "
     "Photorealistic smartphone photo."
 )
 # weight changes (slim / plus): the "edit, keep everything" prompts barely moved her, so these recreate the
@@ -95,7 +95,7 @@ PROMPT_REIMAGINE = (
     "Recreate this exact photo: the same scene, background, lighting, camera angle, framing and pose, the same hair, "
     "and the same outfit ({outfit}, same colors and style, same coverage). But the woman has a completely different "
     "body: {body}. The difference from the original photo must be obvious at a glance. Her face stays recognizable as "
-    "the same woman. Her clothes fit this new body naturally. Realistic anatomy, smooth natural skin, no scars or marks. "
+    "the same woman. Her clothes fit this new body naturally. Realistic anatomy, natural realistic skin texture (not airbrushed), no scars or marks. "
     "Photorealistic smartphone photo."
 )
 # used when body_refs/<type>.* is missing: only the athletic photo is sent
@@ -103,7 +103,7 @@ PROMPT_NO_REF = (
     "Edit this photo of a woman {pose}, wearing {outfit}. Keep her own face, hair, pose, background, camera angle, "
     "framing and lighting, all exactly the same. Keep exactly the same clothes: {outfit}, same colors, same cut, same "
     "coverage, not more revealing. The only change: {body} In this photo you can see her {parts}, so reshape only those. "
-    "Her skin is smooth and clean everywhere: no scars, marks, lines, creases or blemishes on her arms, legs or body. "
+    "Natural, realistic skin texture like a real phone photo, not airbrushed; no scars, marks or blemishes on her arms, legs or body. "
     "{strength} Realistic anatomy. Her clothes fit her new shape naturally. Photorealistic smartphone photo."
 )
 
