@@ -290,8 +290,10 @@ def make_type(kind, key, info, only=None, test=False):
             (out / (stem + ".txt")).write_text(cap, encoding="utf-8")
         elif p.with_suffix(".txt").exists():
             shutil.copy2(p.with_suffix(".txt"), out / (stem + ".txt"))
-        if target.exists() and not test:
-            return p, "skip", 0.0, None
+        if target.exists():
+            if not test:
+                return p, "skip", 0.0, None
+            target.unlink()  # test = always fresh, so an old result can't be mistaken for a new one
         if meta:
             parts = [x for x in PARTS[kind] if x in meta.get("shows", [])]
         else:
