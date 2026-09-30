@@ -51,7 +51,7 @@ TRIES = 3                    # attempts per photo before giving up
 TEST_PICKS = [13, 25, 47]    # default --test photos: full body standing, kneeling, bent forward
 
 BODY = {
-    "curvy":     "make her clearly curvier, a full hourglass figure: much wider hips, a bigger rounder butt, thick soft thighs and a fuller bust, with a small narrow waist.",
+    "curvy":     "make her softer and a little curvier instead of athletic: no visible abs or muscle definition, a soft smooth flat stomach, slightly fuller hips and thighs, a slightly fuller bust. Not muscular, not heavy, still slim.",
     "thick":     "make her clearly thick: much wider hips, a big round butt and thick full thighs, with a defined waist; her bust stays as it is.",
     "busty":     "make her bust clearly much bigger and fuller, at least two cup sizes larger; keep her waist slim and her hips and legs as they are.",
     "slim":      "make her clearly slimmer and petite: thin arms, a very narrow waist, narrow hips, slender legs and a small bust.",
@@ -68,6 +68,9 @@ PARTS = {
     "slimthick": ["waist", "hips", "butt", "legs"],
     "plus":      ["chest", "waist", "hips", "butt", "legs", "arms"],
 }
+# how big the change should look. Curvy is a gentle step from athletic; the others are clearly different bodies.
+STRENGTH = {"curvy": "The change is gentle but visible: same girl, just softer and less toned."}
+STRENGTH_DEFAULT = "The body change must be obvious at first glance compared to the original."
 PART_WORDS = {"chest": "chest", "waist": "waist", "hips": "hips", "butt": "butt", "legs": "thighs", "arms": "arms"}
 
 # image 1 = body example, image 2 = the athletic photo (same order that worked for 36-50)
@@ -77,7 +80,7 @@ PROMPT_WITH_REF = (
     "the same clothes: {outfit}, same colors, same cut, same coverage, not more revealing. The only change: give the woman "
     "in image 2 the body proportions of the woman in image 1 — match the size and shape of her {parts} closely: {body} "
     "Copy nothing else from image 1: not her face, skin tone, clothes, pose or background. Her skin is smooth and clean everywhere: no scars, marks, lines, creases "
-    "or blemishes on her arms, legs or body. The body change must be obvious at first glance compared to the original. Realistic anatomy. Her clothes fit her new shape naturally. "
+    "or blemishes on her arms, legs or body. {strength} Realistic anatomy. Her clothes fit her new shape naturally. "
     "Photorealistic smartphone photo."
 )
 # used when body_refs/<type>.* is missing: only the athletic photo is sent
@@ -86,7 +89,7 @@ PROMPT_NO_REF = (
     "framing and lighting, all exactly the same. Keep exactly the same clothes: {outfit}, same colors, same cut, same "
     "coverage, not more revealing. The only change: {body} In this photo you can see her {parts}, so reshape only those. "
     "Her skin is smooth and clean everywhere: no scars, marks, lines, creases or blemishes on her arms, legs or body. "
-    "The body change must be obvious at first glance compared to the original. Realistic anatomy. Her clothes fit her new shape naturally. Photorealistic smartphone photo."
+    "{strength} Realistic anatomy. Her clothes fit her new shape naturally. Photorealistic smartphone photo."
 )
 
 # ────────────────────────────────────────────────────────────────────────────────
@@ -188,6 +191,7 @@ def build_prompt(kind, info, parts, with_ref):
         outfit=info.get("outfit", "her own clothes"),
         body=BODY[kind],
         parts=join_words([PART_WORDS[x] for x in parts]),
+        strength=STRENGTH.get(kind, STRENGTH_DEFAULT),
     )
 
 
