@@ -74,9 +74,9 @@ PART_WORDS = {"chest": "chest", "waist": "waist", "hips": "hips", "butt": "butt"
 PROMPT_WITH_REF = (
     "Output image 2, edited. Image 2 is a photo of a woman {pose}, wearing {outfit}. Keep the woman from image 2 "
     "with her own face, hair, pose, background, camera angle, framing and lighting, all exactly the same. Keep exactly "
-    "the same clothes: {outfit}, same colors, same cut, same coverage, not more revealing. Image 1 only shows the body "
-    "shape to aim for; do not copy her face, clothes, pose or background. The only change: {body} In this photo you can "
-    "see her {parts}, so reshape only those. Her skin is smooth and clean everywhere: no scars, marks, lines, creases "
+    "the same clothes: {outfit}, same colors, same cut, same coverage, not more revealing. The only change: give the woman "
+    "in image 2 the body proportions of the woman in image 1 — match the size and shape of her {parts} closely: {body} "
+    "Copy nothing else from image 1: not her face, skin tone, clothes, pose or background. Her skin is smooth and clean everywhere: no scars, marks, lines, creases "
     "or blemishes on her arms, legs or body. The body change must be obvious at first glance compared to the original. Realistic anatomy. Her clothes fit her new shape naturally. "
     "Photorealistic smartphone photo."
 )
