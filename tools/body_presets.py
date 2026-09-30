@@ -51,12 +51,12 @@ TRIES = 3                    # attempts per photo before giving up
 TEST_PICKS = [13, 25, 47]    # default --test photos: full body standing, kneeling, bent forward
 
 BODY = {
-    "curvy":     "give her a curvy hourglass figure: fuller bust and hips, a clearly narrower waist, soft fuller thighs.",
-    "thick":     "give her wider hips, a fuller rounder butt and thicker thighs, with a defined waist; her bust stays as it is.",
-    "busty":     "make her bust noticeably fuller and larger; keep her waist slim and her hips and legs as they are.",
-    "slim":      "make her slimmer and more petite overall: slender arms, narrow hips, slim legs, a smaller bust.",
-    "slimthick": "keep a slim toned waist and flat stomach, but give her fuller hips, a rounder butt and fuller thighs.",
-    "plus":      "make her plus-size: a softer, fuller body overall, with fuller arms, stomach, hips and thighs.",
+    "curvy":     "make her clearly curvier, a full hourglass figure: much wider hips, a bigger rounder butt, thick soft thighs and a fuller bust, with a small narrow waist.",
+    "thick":     "make her clearly thick: much wider hips, a big round butt and thick full thighs, with a defined waist; her bust stays as it is.",
+    "busty":     "make her bust clearly much bigger and fuller, at least two cup sizes larger; keep her waist slim and her hips and legs as they are.",
+    "slim":      "make her clearly slimmer and petite: thin arms, a very narrow waist, narrow hips, slender legs and a small bust.",
+    "slimthick": "keep a slim toned waist and flat stomach, but give her much wider hips, a big round butt and thick full thighs.",
+    "plus":      "make her clearly plus-size: a soft, full, heavier body overall, with fuller arms, a soft rounder stomach, wide hips and thick thighs.",
 }
 
 # body parts each type changes. A photo is only sent if it shows at least one of them.
@@ -77,7 +77,7 @@ PROMPT_WITH_REF = (
     "the same clothes: {outfit}, same colors, same cut, same coverage, not more revealing. Image 1 only shows the body "
     "shape to aim for; do not copy her face, clothes, pose or background. The only change: {body} In this photo you can "
     "see her {parts}, so reshape only those. Her skin is smooth and clean everywhere: no scars, marks, lines, creases "
-    "or blemishes on her arms, legs or body. Realistic, natural proportions. Her clothes fit her new shape naturally. "
+    "or blemishes on her arms, legs or body. The body change must be obvious at first glance compared to the original. Realistic anatomy. Her clothes fit her new shape naturally. "
     "Photorealistic smartphone photo."
 )
 # used when body_refs/<type>.* is missing: only the athletic photo is sent
@@ -86,7 +86,7 @@ PROMPT_NO_REF = (
     "framing and lighting, all exactly the same. Keep exactly the same clothes: {outfit}, same colors, same cut, same "
     "coverage, not more revealing. The only change: {body} In this photo you can see her {parts}, so reshape only those. "
     "Her skin is smooth and clean everywhere: no scars, marks, lines, creases or blemishes on her arms, legs or body. "
-    "Realistic, natural proportions. Her clothes fit her new shape naturally. Photorealistic smartphone photo."
+    "The body change must be obvious at first glance compared to the original. Realistic anatomy. Her clothes fit her new shape naturally. Photorealistic smartphone photo."
 )
 
 # ────────────────────────────────────────────────────────────────────────────────
@@ -290,7 +290,7 @@ def make_type(kind, key, info, only=None, test=False):
             (out / (stem + ".txt")).write_text(cap, encoding="utf-8")
         elif p.with_suffix(".txt").exists():
             shutil.copy2(p.with_suffix(".txt"), out / (stem + ".txt"))
-        if target.exists():
+        if target.exists() and not test:
             return p, "skip", 0.0, None
         if meta:
             parts = [x for x in PARTS[kind] if x in meta.get("shows", [])]
