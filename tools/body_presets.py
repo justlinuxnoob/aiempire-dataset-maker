@@ -53,6 +53,7 @@ TEST_PICKS = [13, 25, 47]    # default --test photos: full body standing, kneeli
 BODY = {
     "curvy":     "make her softer and a little curvier instead of athletic: no visible abs or muscle definition, a soft smooth flat stomach, slightly fuller hips and thighs, a slightly fuller bust. Not muscular, not heavy, still slim.",
     "thick":     "make her clearly thick: much wider hips, a big round butt and thick full thighs, with a defined waist; her bust stays as it is.",
+    "petite":    "make her chest clearly smaller, a small A-cup bust, and her butt clearly smaller and flatter, with narrower hips and slimmer thighs. A small, slender, petite figure, the opposite of curvy.",
     "busty":     "make her bust clearly much bigger and fuller, at least two cup sizes larger; keep her waist slim and her hips and legs as they are.",
     "plus":      "a plus-size build, US clothing size 20: heavy soft arms, a big soft belly, very wide hips, very thick thighs, a large bust and a softer, fuller face",
 }
@@ -61,6 +62,7 @@ BODY = {
 PARTS = {
     "curvy":     ["chest", "waist", "hips", "butt", "legs"],
     "thick":     ["hips", "butt", "legs"],
+    "petite":    ["chest", "hips", "butt", "legs"],
     "busty":     ["chest"],
     "plus":      ["chest", "waist", "hips", "butt", "legs", "arms"],
 }
