@@ -54,7 +54,6 @@ BODY = {
     "curvy":     "make her softer and a little curvier instead of athletic: no visible abs or muscle definition, a soft smooth flat stomach, slightly fuller hips and thighs, a slightly fuller bust. Not muscular, not heavy, still slim.",
     "thick":     "make her clearly thick: much wider hips, a big round butt and thick full thighs, with a defined waist; her bust stays as it is.",
     "busty":     "make her bust clearly much bigger and fuller, at least two cup sizes larger; keep her waist slim and her hips and legs as they are.",
-    "slim":      "a very slim, petite build, clothing size XS: thin arms, slender thighs and calves, a tiny waist, narrow hips, a small flat butt and a small bust",
     "plus":      "a plus-size build, US clothing size 20: heavy soft arms, a big soft belly, very wide hips, very thick thighs, a large bust and a softer, fuller face",
 }
 
@@ -63,7 +62,6 @@ PARTS = {
     "curvy":     ["chest", "waist", "hips", "butt", "legs"],
     "thick":     ["hips", "butt", "legs"],
     "busty":     ["chest"],
-    "slim":      ["chest", "waist", "hips", "butt", "legs", "arms"],
     "plus":      ["chest", "waist", "hips", "butt", "legs", "arms"],
 }
 # how big the change should look. Curvy is a gentle step from athletic; the others are clearly different bodies.
