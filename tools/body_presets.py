@@ -344,6 +344,25 @@ def make_type(kind, key, info, only=None, test=False):
     return cost, failed
 
 
+def make_review(kind):
+    """Small copy of a finished set for checking in chat: 1024 px JPEGs, well under 30 MB."""
+    import zipfile
+    from PIL import Image
+    folder = HERE / kind
+    files = photos(folder) if folder.is_dir() else []
+    if not files:
+        sys.exit(f"🛑 {kind}/ has no photos yet — run: python3 body_presets.py {kind}")
+    out = HERE / f"{kind}_review.zip"
+    with zipfile.ZipFile(out, "w", zipfile.ZIP_STORED) as z:
+        for p in files:
+            im = Image.open(p).convert("RGB")
+            im.thumbnail((1024, 1024))
+            buf = io.BytesIO()
+            im.save(buf, "JPEG", quality=85)
+            z.writestr(p.stem + ".jpg", buf.getvalue())
+    say(f"📦 {out.name}: {len(files)} photos, {out.stat().st_size / 1e6:.1f} MB — send this one")
+
+
 def _to_png(src, target):
     from PIL import Image
     Image.open(src).save(target, "PNG")
@@ -368,6 +387,8 @@ def _normalise(tmp, target):
 def main():
     ap = argparse.ArgumentParser(description="Make body-type presets from the athletic set with Nano Banana Pro.")
     ap.add_argument("type", help="one of: " + ", ".join(BODY) + ", or all")
+    ap.add_argument("--review", action="store_true",
+                    help="make <type>_review.zip (small JPEGs, fits in a chat upload) instead of generating")
     ap.add_argument("--test", metavar="NUMS", nargs="?", const="default",
                     help="test run into _test/<type>/: photos 13,25,47, or your own numbers e.g. --test 5,22,41")
     a = ap.parse_args()
@@ -380,6 +401,10 @@ def main():
         sys.exit(f"🛑 put the athletic photos in {HERE / SOURCE}/ first (image_01.png ... image_50.png)")
 
     ensure_pillow()
+    if a.review:
+        for k in kinds:
+            make_review(k)
+        return
     tidy_names(HERE / SOURCE)
     info = load_info()
     if not info:
