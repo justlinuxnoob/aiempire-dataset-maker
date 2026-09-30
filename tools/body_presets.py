@@ -126,6 +126,7 @@ PROMPT_NO_REF = (
 
 MODELS = {
     "nano": "https://api.runpod.ai/v2/nano-banana-pro-edit",   # Nano Banana Pro Edit, $0.14 at 2K
+    "nano2": "https://api.runpod.ai/v2/google-nano-banana-2-edit",  # Nano Banana 2 Edit (newer, cheaper than Pro)
     "seedream": "https://api.runpod.ai/v2/seedream-v4-edit",   # Seedream 4.0 Edit, ~$0.03
 }
 TYPE_MODEL = {}   # which model a type uses by default, e.g. {"petite": "seedream"}; everything else = nano
