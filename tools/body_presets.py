@@ -54,6 +54,7 @@ BODY = {
     "curvy":     "make her softer and a little curvier instead of athletic: no visible abs or muscle definition, a soft smooth flat stomach, slightly fuller hips and thighs, a slightly fuller bust. Not muscular, not heavy, still slim.",
     "thick":     "make her clearly thick: much wider hips, a big round butt and thick full thighs, with a defined waist; her bust stays as it is.",
     "petite":    "make her chest clearly smaller, a small A-cup bust, and her butt clearly smaller and flatter, with narrower hips and slimmer thighs. A small, slender, petite figure, the opposite of curvy.",
+    "petiteb":   "flat-chested, small flat butt, narrow straight hips",
     "busty":     "make her bust clearly much bigger and fuller, at least two cup sizes larger; keep her waist slim and her hips and legs as they are.",
     "plus":      "a plus-size build, US clothing size 20: heavy soft arms, a big soft belly, very wide hips, very thick thighs, a large bust and a softer, fuller face",
 }
@@ -63,6 +64,7 @@ PARTS = {
     "curvy":     ["chest", "waist", "hips", "butt", "legs"],
     "thick":     ["hips", "butt", "legs"],
     "petite":    ["chest", "hips", "butt", "legs"],
+    "petiteb":   ["chest", "hips", "butt", "legs"],
     "busty":     ["chest"],
     "plus":      ["chest", "waist", "hips", "butt", "legs", "arms"],
 }
@@ -98,6 +100,19 @@ PROMPT_REIMAGINE = (
     "the same woman. Her clothes fit this new body naturally. Realistic anatomy, natural realistic skin texture (not airbrushed), no scars or marks. "
     "Photorealistic smartphone photo."
 )
+# short prompts for making her SMALLER: the long "keep everything" prompt made the model do almost nothing.
+SHORT = {
+    "petite": (
+        "Make her breasts much smaller, nearly flat-chested, a small A-cup, and make her butt and hips much smaller "
+        "and flatter, like a skinny petite girl. Keep her face, hair, outfit ({outfit}), pose, background and "
+        "lighting the same. Photorealistic phone photo."
+    ),
+    "petiteb": (
+        "This same girl, but flat-chested, with a small flat butt and narrow boyish hips: a skinny, petite, straight "
+        "figure with almost no curves. Same face, hair, outfit ({outfit}), pose, background and lighting. "
+        "Photorealistic phone photo."
+    ),
+}
 # used when body_refs/<type>.* is missing: only the athletic photo is sent
 PROMPT_NO_REF = (
     "Edit this photo of a woman {pose}, wearing {outfit}. Keep her own face, hair, pose, background, camera angle, "
@@ -200,6 +215,8 @@ def join_words(words):
 
 
 def build_prompt(kind, info, parts, with_ref):
+    if kind in SHORT:
+        return SHORT[kind].format(outfit=info.get("outfit", "her own clothes"))
     if kind in REIMAGINE and not with_ref:
         return PROMPT_REIMAGINE.format(outfit=info.get("outfit", "her own clothes"), body=BODY[kind].rstrip("."))
     tpl = PROMPT_WITH_REF if with_ref else PROMPT_NO_REF
