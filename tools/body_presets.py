@@ -233,15 +233,29 @@ def http(url, key, body=None, timeout=120):
         raise RuntimeError(f"HTTP {e.code}: {msg}")
 
 
-def run_job(key, payload):
-    """runsync, and if RunPod hands back a job id instead, poll /status until it finishes."""
-    res = http(f"{BASE_URL}/runsync", key, {"input": payload}, timeout=300)
-    deadline = time.time() + 600
-    while res.get("status") in ("IN_QUEUE", "IN_PROGRESS"):
-        if time.time() > deadline:
-            raise RuntimeError("timed out after 10 minutes")
-        time.sleep(4)
-        res = http(f"{BASE_URL}/status/{res['id']}", key)
+JOB_TIMEOUT = int(os.environ.get("NB_JOB_TIMEOUT", "240"))  # seconds per photo before cancelling and retrying
+
+
+def run_job(key, payload, label=""):
+    """/run returns a job id at once; poll /status. A job stuck longer than JOB_TIMEOUT is cancelled
+    (so it isn't billed) and the caller retries it."""
+    res = http(f"{BASE_URL}/run", key, {"input": payload}, timeout=60)
+    job = res.get("id")
+    start = time.time()
+    warned = False
+    while res.get("status") in ("IN_QUEUE", "IN_PROGRESS") or (job and not res.get("status")):
+        waited = time.time() - start
+        if waited > JOB_TIMEOUT:
+            try:
+                http(f"{BASE_URL}/cancel/{job}", key, {}, timeout=30)
+            except Exception:  # noqa: BLE001
+                pass
+            raise RuntimeError(f"stuck for {JOB_TIMEOUT // 60} min in RunPod's queue — cancelled, trying again")
+        if waited > 90 and not warned:
+            say(f"  ⏳ {label} is slow ({res.get('status', 'waiting').lower().replace('_', ' ')}) — still waiting, max {JOB_TIMEOUT // 60} min")
+            warned = True
+        time.sleep(3)
+        res = http(f"{BASE_URL}/status/{job}", key, timeout=30)
     if res.get("status") != "COMPLETED":
         raise RuntimeError(f"{res.get('status')}: {res.get('error') or json.dumps(res.get('output'))[:300]}")
     out = res.get("output") or {}
@@ -314,7 +328,7 @@ def make_type(kind, key, info, only=None, test=False):
         err = None
         for attempt in range(1, TRIES + 1):
             try:
-                data, c = run_job(key, payload)
+                data, c = run_job(key, payload, f"image_{n:02d}" if n is not None else p.stem)
                 tmp = target.with_suffix(".part")
                 tmp.write_bytes(data)
                 _normalise(tmp, target)
