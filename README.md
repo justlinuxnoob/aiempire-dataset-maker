@@ -14,7 +14,7 @@ One face photo + one settings box → a 50-photo LoRA dataset with captions. Run
 1. **Your face**: upload a clear, front-facing photo.
 2. **Dataset Maker** box: pick a *body_type*. Built into the pod: `athletic`, `curvy`, `petite`, `busty`, `thick`, `plus`, 50 photos each with captions (`presets/templates/`). The box shows a preview of the photos, and clicking one makes it the test photo.
 3. *mode* = **🧪 Test 1 photo** → Run → check it. Then **🚀 Whole dataset** → Run once. It makes every photo by itself (auto-continue), skips finished ones on re-runs, and zips to `output/datasets/<name>.zip`.
-4. *engine*: **Qwen** (free, on the pod's GPU, Qwen-Image 2.1 + BFS head swap) or **Nano Banana Pro** / **Seedream** through the RunPod public API (pay per photo). For those, click **🔑 RunPod key** once; it's saved on the pod (`/workspace/.runpod_key`, or env `RUNPOD_API_KEY`), never in the workflow file. Photos RunPod refuses are skipped and retried once at the end, so the run never stops halfway.
+4. *engine*: **Qwen** (free, on the pod's GPU, Qwen-Image 2.1 + BFS head swap) or **Nano Banana Pro** / **Seedream** through the RunPod public API (pay per photo). For those, click **🔑 RunPod key** once; it's saved on the pod (`/workspace/.runpod_key`, or env `AIEMPIRE_RUNPOD_KEY`; RunPod's own `RUNPOD_API_KEY` is ignored on purpose), never in the workflow file. Photos RunPod refuses are skipped and retried once at the end, so the run never stops halfway.
 
 Making new body presets: `tools/body_presets.py` (Nano Banana Pro / Seedream through the RunPod API, run on your own PC).
 

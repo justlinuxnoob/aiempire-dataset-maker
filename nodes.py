@@ -826,14 +826,16 @@ def _key_file():
 
 
 def _runpod_key():
-    key = os.environ.get("RUNPOD_API_KEY", "").strip()
-    if key:
-        return key
+    """The key the user saved with the 🔑 button, else env AIEMPIRE_RUNPOD_KEY.
+    NOT env RUNPOD_API_KEY: RunPod puts its own pod-scoped key there in every pod, and that one can't call the public endpoints."""
     try:
         with open(_key_file(), encoding="utf-8") as f:
-            return f.read().strip()
+            key = f.read().strip()
+            if key:
+                return key
     except OSError:
-        return ""
+        pass
+    return os.environ.get("AIEMPIRE_RUNPOD_KEY", "").strip()
 
 
 def _failed_path(folder, stem):
@@ -883,6 +885,8 @@ def _runpod_http(url, key, body=None, timeout=60):
         if e.code in (401, 403):
             raise RuntimeError("RunPod says the API key is wrong. Click '🔑 RunPod key' on the Dataset Maker box and paste it again.")
         raise RuntimeError(f"RunPod HTTP {e.code}: {msg}")
+    except (urllib.error.URLError, OSError) as e:  # network hiccup / timeout: retried like any other failure
+        raise RuntimeError(f"can't reach RunPod ({getattr(e, 'reason', e)})")
 
 
 def _runpod_edit(engine, template, face, prompt, job_timeout=240, tries=3):
@@ -929,8 +933,11 @@ def _runpod_edit(engine, template, face, prompt, job_timeout=240, tries=3):
             url = out.get("image_url") or out.get("result")
             if not url:
                 raise RuntimeError(f"no image in RunPod's answer: {str(out)[:200]}")
-            with urllib.request.urlopen(url, timeout=120) as r:
-                img = Image.open(io.BytesIO(r.read())).convert("RGB")
+            try:
+                with urllib.request.urlopen(url, timeout=120) as r:
+                    img = Image.open(io.BytesIO(r.read())).convert("RGB")
+            except OSError as e:
+                raise RuntimeError(f"couldn't download the result ({e})")
             print(f"[AI Empire] {kind} ✔ (${float(out.get('cost') or 0):.2f})")
             return img
         except RuntimeError as e:
@@ -1011,6 +1018,9 @@ class AIEmpireDatasetMaker:
             use_body_reference=False, dataset_name=name, skip_done=not test, one_per_run=True,
             prompt=QWEN_SWAP_PROMPT, skip_stems=skip)
         imgs, prompts, captions, seeds, _count, name, stems, remaining, progress = out
+        if test:
+            tag = {ENGINE_QWEN: "qwen", ENGINE_NANO: "nanobanana", ENGINE_SEED: "seedream"}.get(engine, "test")
+            stems = [f"{st}_{tag}" for st in stems]
         if not test:
             # keep going after this one while anything is left that may still work (incl. one retry of failed ones)
             remaining = sum(1 for st in pending if st not in stems and _failed_count(out_folder, st, engine) < 2)
@@ -1108,7 +1118,7 @@ def _register_routes():
 
     @routes.get("/aiempire/runpod_key")
     async def key_status(request):
-        return web.json_response({"saved": bool(_runpod_key()), "from_env": bool(os.environ.get("RUNPOD_API_KEY", "").strip())})
+        return web.json_response({"saved": bool(_runpod_key()), "from_env": bool(os.environ.get("AIEMPIRE_RUNPOD_KEY", "").strip())})
 
     @routes.post("/aiempire/runpod_key")
     async def key_save(request):
