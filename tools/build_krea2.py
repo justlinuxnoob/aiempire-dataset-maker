@@ -25,7 +25,6 @@ KREA_LORAS = [  # (file, strength) - same stack as the reference pipeline (candi
     ("candid_krea2_loraholic.safetensors", 2.0),
     ("skindetails_krea2_loraholic.safetensors", 0.6),
     ("real_3d_krea2_loraholic.safetensors", 0.8),
-    ("Krea2_TextFusion_Refusal_Reduction.safetensors", 1.0),
     ("ass_v2_krea2_loraholic.safetensors", 1.4),
     ("breast_size_v2_krea2_loraholic.safetensors", 0.8),
 ]

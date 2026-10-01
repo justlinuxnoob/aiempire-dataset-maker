@@ -216,12 +216,6 @@
         },
         {
           "on": true,
-          "lora": "Krea2_TextFusion_Refusal_Reduction.safetensors",
-          "strength": 1.0,
-          "strengthTwo": null
-        },
-        {
-          "on": true,
           "lora": "ass_v2_krea2_loraholic.safetensors",
           "strength": 1.4,
           "strengthTwo": null

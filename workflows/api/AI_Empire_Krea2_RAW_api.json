@@ -52,15 +52,10 @@
       },
       "lora_4": {
         "on": true,
-        "lora": "Krea2_TextFusion_Refusal_Reduction.safetensors",
-        "strength": 1.0
-      },
-      "lora_5": {
-        "on": true,
         "lora": "ass_v2_krea2_loraholic.safetensors",
         "strength": 1.4
       },
-      "lora_6": {
+      "lora_5": {
         "on": true,
         "lora": "breast_size_v2_krea2_loraholic.safetensors",
         "strength": 0.8

@@ -104,10 +104,10 @@ if [ "${KREA2:-0}" = "1" ]; then
   fetch "$M/upscale_models" "1xSkinContrast-High-SuperUltraCompact.pth" "$D/spicy-sdxl/resolve/main/1xSkinContrast-High-SuperUltraCompact.pth"
   fetch "$M/upscale_models" "1x-ITF-SkinDiffDetail-Lite-v1.pth" "$D/krea2/resolve/main/1x-ITF-SkinDiffDetail-Lite-v1.pth"
   # Krea2 LoRAs
-  for f in candid_krea2_loraholic skindetails_krea2_loraholic real_3d_krea2_loraholic Krea2_TextFusion_Refusal_Reduction \
+  # (no refusal-reduction / NSFW LoRAs: they break the Krea 2 licence, and this image is a public template)
+  for f in candid_krea2_loraholic skindetails_krea2_loraholic real_3d_krea2_loraholic \
            ass_v2_krea2_loraholic breast_size_v2_krea2_loraholic Krea2-realism-V1 RealisticSnapshotKrea2 \
-           bloomgirls-ultrarealism-krea2_4k lenovo_krea2 SummerVibesHM_krea2_epoch8 RawGirlV2_epoch_10 \
-           RawGirlV2Spicy_epoch_10 snofs_krea_v1; do
+           bloomgirls-ultrarealism-krea2_4k lenovo_krea2 SummerVibesHM_krea2_epoch8 RawGirlV2_epoch_10; do
     fetch "$M/loras" "$f.safetensors" "$D/krea2/resolve/main/$f.safetensors"
   done
   fetch "$M/loras" "michelle_krea_2_000003000.safetensors" "$D/krea2/resolve/main/michelle%20krea%202_000003000.safetensors"

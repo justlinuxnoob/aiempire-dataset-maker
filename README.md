@@ -16,6 +16,9 @@ One face photo + one settings box → a 50-photo LoRA dataset with captions. Run
 3. *mode* = **🧪 Test 1 photo** → Run → check it. Then **🚀 Whole dataset** → Run once. It makes every photo by itself (auto-continue), skips finished ones on re-runs, and zips to `output/datasets/<name>.zip`.
 4. *engine*: **Qwen** (free, on the pod's GPU, Qwen-Image 2.1 + BFS head swap) or **Nano Banana Pro** / **Seedream** through the RunPod public API (pay per photo). For those, click **🔑 RunPod key** once; it's saved on the pod (`/workspace/.runpod_key`, or env `AIEMPIRE_RUNPOD_KEY`; RunPod's own `RUNPOD_API_KEY` is ignored on purpose), never in the workflow file. Photos RunPod refuses are skipped and retried once at the end, so the run never stops halfway.
 
+## 🏋️ LoRA Trainer template (Krea 2)
+Second image from this repo: `ghcr.io/justlinuxnoob/aiempire-dataset-maker:lora-trainer`. AI Toolkit + auto Krea 2 jobs: drop the dataset zip, press Start. Setup and student steps: [`trainer/README.md`](trainer/README.md).
+
 Making new body presets: `tools/body_presets.py` (Nano Banana Pro / Seedream through the RunPod API, run on your own PC).
 
 ## Install (RunPod / any ComfyUI)
