@@ -36,6 +36,14 @@ RUN cd /opt/ComfyUI/custom_nodes \
     && git clone https://github.com/aiorbust-jy/comfyui-realism-injector.git && git -C comfyui-realism-injector checkout 84aeb2486919a4355c1687486735da36d0204312 \
     && git clone https://github.com/Elevenheights/ComfyUI-FameGridColorFinish.git && git -C ComfyUI-FameGridColorFinish checkout 944c14e53fffee3e9e6dbedad36ab95b0e1629f7
 
+# Portrait generator (PORTRAIT=1): the KSampler uses scheduler "FlowMatchEulerDiscreteScheduler",
+# which this node adds. diffusers pinned to 0.39.0 (same as our serverless worker: newer needs huggingface-hub>=1.23).
+RUN pip install "diffusers==0.39.0" \
+    && cd /opt/ComfyUI/custom_nodes \
+    && git clone https://github.com/erosDiffusion/ComfyUI-EulerDiscreteScheduler.git \
+    && git -C ComfyUI-EulerDiscreteScheduler checkout eb5bd4dc43ad15becb62e387fa4d07503a4a3737 \
+    && python -c "from diffusers.schedulers.scheduling_flow_match_euler_discrete import FlowMatchEulerDiscreteScheduler"
+
 # our nodes only - NO workflows in the image (members get the .json files from the course)
 COPY __init__.py nodes.py photo_nodes.py /opt/ComfyUI/custom_nodes/aiempire-dataset-maker/
 COPY presets /opt/ComfyUI/custom_nodes/aiempire-dataset-maker/presets
@@ -44,6 +52,10 @@ COPY js /opt/ComfyUI/custom_nodes/aiempire-dataset-maker/js
 COPY docker/extra_model_paths.yaml /opt/ComfyUI/extra_model_paths.yaml
 COPY docker/start.sh /start.sh
 RUN chmod +x /start.sh
+
+# boot ComfyUI once on CPU at build time: a broken node import fails the BUILD, not a student's pod
+RUN cd /opt/ComfyUI && (timeout 300 python main.py --quick-test-for-ci --cpu 2>&1 | tee /tmp/quicktest.log || true) \
+    && ! grep -E "IMPORT FAILED.*(EulerDiscreteScheduler|aiempire)" /tmp/quicktest.log && rm -f /tmp/quicktest.log
 
 EXPOSE 8188
 CMD ["/start.sh"]

@@ -35,6 +35,8 @@ fetch() {
 # EDIT_MODEL = qwen21 (default) | firered | qwen (2511) | both (firered + qwen 2511) | none (Nano Banana only)
 # REALISM = 1 (default: download Z-Image Turbo for the realism pass) | 0
 # QWEN_PRECISION = fp8 (default, 20 GB) | bf16 (41 GB)   -- only used for the Qwen model
+# PORTRAIT = 1 -> portrait generator only (Z-Image Turbo + instagram LoRA, ~20 GB): nothing else downloads
+if [ "${PORTRAIT:-0}" = "1" ]; then EDIT_MODEL="${EDIT_MODEL:-none}"; REALISM="${REALISM:-0}"; fi
 EDIT_MODEL="${EDIT_MODEL:-qwen21}"
 echo "[AI Empire] Checking models for EDIT_MODEL=$EDIT_MODEL (first boot takes a few minutes)..."
 
@@ -115,6 +117,22 @@ if [ "${KREA2:-0}" = "1" ]; then
   for f in f2k_9B_lcs_consist_20260415 Samsung_fluxklein9b Klein_realistic_I2I HighResolution9B; do
     fetch "$M/loras" "$f.safetensors" "$D/flux2-klein-9b/resolve/main/$f.safetensors"
   done
+fi
+
+# PORTRAIT = 1 -> portrait-gen.json: Z-Image Turbo bf16 + qwen_3_4b + ae + instagram_zimageturbo LoRA (file names = the workflow's)
+if [ "${PORTRAIT:-0}" = "1" ]; then
+  ZI="$HF/Comfy-Org/z_image_turbo/resolve/main/split_files"
+  if [ -s "$M/diffusion_models/z_image_turbo_bf16.safetensors" ] && [ ! -e "$M/diffusion_models/z_image_turbo.safetensors" ]; then
+    ln -s z_image_turbo_bf16.safetensors "$M/diffusion_models/z_image_turbo.safetensors"
+  fi
+  # all four at once (faster first boot); a failed download stops the pod with a clear message
+  PIDS=""
+  fetch "$M/diffusion_models" "z_image_turbo.safetensors" "$ZI/diffusion_models/z_image_turbo_bf16.safetensors" & PIDS="$PIDS $!"
+  fetch "$M/text_encoders" "qwen_3_4b.safetensors" "$ZI/text_encoders/qwen_3_4b.safetensors" & PIDS="$PIDS $!"
+  fetch "$M/vae" "ae.safetensors" "$ZI/vae/ae.safetensors" & PIDS="$PIDS $!"
+  fetch "$M/loras" "instagram_zimageturbo.safetensors" "$HF/datasets/pofkeb/instagramification/resolve/main/instagram_zimageturbo.safetensors" & PIDS="$PIDS $!"
+  for p in $PIDS; do wait "$p" || { echo "[AI Empire] 🛑 a portrait model failed to download, restart the pod to retry"; exit 1; }; done
+  echo "[AI Empire] 📸 Portrait generator ready: drag portrait-gen.json into ComfyUI"
 fi
 
 # VIDEO = minimax  -> MiniMax H3 image-to-video + reference-to-video (~75 GB extra, use a 200 GB volume)
