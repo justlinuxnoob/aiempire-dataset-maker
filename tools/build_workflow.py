@@ -38,12 +38,16 @@ M = {
 # BFS Head Swap v1.1 for Qwen-Image 2.1 (MIT) by Alissonerdx: a LoRA trained exactly for "put this head into that photo".
 BFS_LORA = ("bfs_head_v1.1_qwen_2.1.safetensors", f"{HF}/Alissonerdx/BFS-Best-Face-Swap/resolve/main/bfs_head_v1.1_qwen_2.1.safetensors", "loras")
 # the prompt BFS was trained with (verbatim), + {extra} for hair/eyes
-BFS_PROMPT = ("head_swap: start with <image1> as the base image, keeping its lighting, environment, and background. "
-              "remove the head from <image1> completely and replace it with the head from <image2>{extra}, strictly preserving "
-              "the hair, eye color, nose structure from <image2>. copy the direction of the eye, head rotation, micro expressions "
-              "from <image1>, high quality, sharp details, 4k")
+BFS_PROMPT = _node_const("QWEN_SWAP_PROMPT")
+
+Q21_FILES = {
+    "unet": ("qwen_image_2.1_int8_convrot.safetensors", f"{HF}/Comfy-Org/Qwen-Image-2.1/resolve/main/diffusion_models/qwen_image_2.1_int8_convrot.safetensors", "diffusion_models"),
+    "clip": ("qwen3vl_8b_int8_convrot.safetensors", f"{HF}/Comfy-Org/Qwen-Image-2.1/resolve/main/text_encoders/qwen3vl_8b_int8_convrot.safetensors", "text_encoders"),
+    "vae": ("qwen_image_2.1_vae_bf16.safetensors", f"{HF}/Comfy-Org/Qwen-Image-2.1/resolve/main/vae/qwen_image_2.1_vae_bf16.safetensors", "vae"),
+}
 
 CONFIGS = {
+    "Main": {"kind": "maker", "title": "AI Empire · Dataset Maker", **Q21_FILES, "steps": 25},
     "FireRed11": {
         "kind": "edit",
         "title": "FireRed Image Edit 1.1",
@@ -116,6 +120,8 @@ WIDGETS = {
     "KSampler": ["seed", None, "steps", "cfg", "sampler_name", "scheduler", "denoise"],
     "VAEDecode": [], "VAEEncode": [], "CLIPTextEncode": ["text"], "ConditioningZeroOut": [],
     "AIEmpireSaveDataset": ["dataset_name", "make_zip", "suffix", "auto_continue"],
+    "AIEmpireDatasetMaker": ["body_type", "mode", "test_photo", "trigger_word", "hair_and_eyes", "engine", "dataset_name"],
+    "AIEmpireMakeImage": [],
     "QwenImage21Cache": ["device", "dtype"],
     "TextEncodeQwenImage21": ["prompt", "negative_prompt", "resolution"],
     "EmptyLatentImage": ["width", "height", "batch_size"],
@@ -170,6 +176,8 @@ def build(key, cfg):
                   ("seeds", "INT", True), ("count", "INT"), ("realism_prompts", "STRING", True), ("dataset_name", "STRING")]
 
     # ---- shared inputs
+    if cfg["kind"] == "maker":
+        return build_maker(key, cfg, nodes, links, lid, add, node, link, mp, ORANGE, GREEN)
     if cfg["kind"] == "body":
         return build_body(key, cfg, nodes, links, lid, add, node, link, mp, ORANGE, GREEN)
     add(1, "LoadImage", [380, 0], [320, 360], ["your_face.png", "image"], [("IMAGE", "IMAGE"), ("MASK", "MASK")], title="Your face", color=GREEN)
@@ -414,12 +422,12 @@ def write(key, nodes, links, lid, groups, node):
         assert l[0] in node(l[1])["outputs"][l[2]]["links"], l
         assert node(l[3])["inputs"][l[4]]["link"] == l[0], l
 
-    ids = {"FireRed11": "5e0c2f64-7a1b-4c8e-9d3f-f1e3d11a0001", "Qwen2511": "5e0c2f64-7a1b-4c8e-9d3f-a1e3e4e5e6e7", "Qwen21": "5e0c2f64-7a1b-4c8e-9d3f-21e21e210001",
+    ids = {"Main": "5e0c2f64-7a1b-4c8e-9d3f-3a1e3a1e0004", "FireRed11": "5e0c2f64-7a1b-4c8e-9d3f-f1e3d11a0001", "Qwen2511": "5e0c2f64-7a1b-4c8e-9d3f-a1e3e4e5e6e7", "Qwen21": "5e0c2f64-7a1b-4c8e-9d3f-21e21e210001",
            "NanoBanana": "5e0c2f64-7a1b-4c8e-9d3f-0a0ba0a0a0b1", "Qwen21_Templates": "5e0c2f64-7a1b-4c8e-9d3f-7e3a1a7e0002",
            "Qwen21_BodyPresets": "5e0c2f64-7a1b-4c8e-9d3f-b0d1b0d10003"}
     workflow = {"id": ids[key], "revision": 0, "last_node_id": max(n["id"] for n in nodes), "last_link_id": lid[0],
                 "nodes": nodes, "links": links, "groups": groups, "config": {},
-                "extra": {"ds": {"scale": 0.55, "offset": [60, 120]}}, "version": 0.4}
+                "extra": {"ds": {"scale": 0.6, "offset": [110, 100]} if key == "Main" else {"scale": 0.55, "offset": [60, 120]}}, "version": 0.4}
 
     # API format (bypassed nodes and their links dropped)
     bypassed = {n["id"] for n in nodes if n["mode"] == 4}
@@ -439,11 +447,85 @@ def write(key, nodes, links, lid, groups, node):
         api[str(n["id"])] = {"class_type": n["type"], "inputs": inputs, "_meta": {"title": n.get("title", n["type"])}}
 
     os.makedirs(os.path.join(ROOT, "workflows", "api"), exist_ok=True)
-    with open(os.path.join(ROOT, "workflows", f"AI_Empire_Dataset_Maker_{key}.json"), "w", encoding="utf-8") as f:
+    fname = "AI_Empire_Dataset_Maker" + ("" if key == "Main" else f"_{key}")
+    with open(os.path.join(ROOT, "workflows", f"{fname}.json"), "w", encoding="utf-8") as f:
         json.dump(workflow, f, indent=2, ensure_ascii=False)
-    with open(os.path.join(ROOT, "workflows", "api", f"AI_Empire_Dataset_Maker_{key}_api.json"), "w", encoding="utf-8") as f:
+    with open(os.path.join(ROOT, "workflows", "api", f"{fname}_api.json"), "w", encoding="utf-8") as f:
         json.dump(api, f, indent=2, ensure_ascii=False)
     print("ok", key, len(nodes), "nodes", len(links), "links")
+
+
+def build_maker(key, cfg, nodes, links, lid, add, node, link, mp, ORANGE, GREEN):
+    """The student workflow: face + one settings box + save. The Qwen nodes sit below in the machine room."""
+    MODE_TEST, ENGINE_QWEN = _node_const("MODE_TEST"), _node_const("ENGINE_QWEN")
+    note = "\n".join([
+        "## AI Empire · Dataset Maker", "",
+        "**1. Your face** · upload a clear, front-facing photo of her.", "",
+        "**2. Dataset Maker** · pick a *body_type* (its photos show at the bottom of the box). Fill *trigger_word* and *hair_and_eyes*.", "",
+        "**3. Test** · leave *mode* on **🧪 Test 1 photo** and press **Run**. The result shows in the Save box. "
+        "Not happy? Run again, or click another photo in the preview.", "",
+        "**4. Whole dataset** · switch *mode* to **🚀 Whole dataset** and press **Run once**. It makes every photo by itself, "
+        "one after another. Progress shows on the Save box and the browser tab. You can close the tab, it keeps going on the pod.", "",
+        "**5. Download** · `output/datasets/<dataset_name>.zip` (JupyterLab, port 8888). Photos + captions, ready for LoRA training.", "",
+        "---",
+        "**Engine** · *Qwen* = free, runs on this pod. *Nano Banana Pro* / *Seedream* = paid per photo through your RunPod API key: "
+        "click **🔑 RunPod key** once and paste it (saved on the pod, not in the workflow).", "",
+        "**Stop** = X in the queue. **Run** again continues where it stopped (finished photos are skipped).", "",
+        "⚙️ Don't touch the *Machine room* below.",
+    ])
+    add(18, "MarkdownNote", [0, 0], [400, 720], [note], [], title="READ ME")
+    add(1, "LoadImage", [420, 0], [340, 440], ["your_face.png", "image"], [("IMAGE", "IMAGE"), ("MASK", "MASK")], title="1 · Your face", color=GREEN)
+    add(40, "AIEmpireDatasetMaker", [780, 0], [480, 720],
+        ["athletic", MODE_TEST, 1, "zvx woman", "", ENGINE_QWEN, "my_influencer"],
+        [("templates", "IMAGE", True), ("prompts", "STRING", True), ("captions", "STRING", True), ("seeds", "INT", True),
+         ("dataset_name", "STRING"), ("file_names", "STRING", True), ("remaining", "INT"), ("progress", "STRING"),
+         ("job", "AIEMPIRE_JOB")],
+        title="2 · Dataset Maker", color=ORANGE)
+    add(17, "AIEmpireSaveDataset", [1280, 0], [560, 720], ["my_influencer", True, "", True], [], title="3 · Your dataset (saved + zipped)", color=GREEN)
+
+    # machine room
+    Y = 900
+    add(2, "UNETLoader", [0, Y], [340, 82], [cfg["unet"][0], "default"], [("MODEL", "MODEL")], title="Qwen-Image 2.1", props=mp(cfg["unet"]))
+    add(3, "LoraLoaderModelOnly", [0, Y + 120], [340, 82], [BFS_LORA[0], 1.0], [("MODEL", "MODEL")], title="BFS Head Swap LoRA", props=mp(BFS_LORA))
+    add(5, "QwenImage21Cache", [0, Y + 240], [340, 82], ["auto", "default"], [("MODEL", "MODEL")])
+    add(6, "CLIPLoader", [0, Y + 360], [340, 106], [cfg["clip"][0], "qwen_image", "default"], [("CLIP", "CLIP")], props=mp(cfg["clip"]))
+    add(7, "VAELoader", [0, Y + 500], [340, 58], [cfg["vae"][0]], [("VAE", "VAE")], props=mp(cfg["vae"]))
+    add(10, "TextEncodeQwenImage21", [380, Y], [380, 220], ["", "", 2048],
+        [("positive", "CONDITIONING"), ("negative", "CONDITIONING"), ("latent", "LATENT")], title="Qwen 2.1 encoder (1 = preset photo, 2 = face)")
+    add(15, "KSampler", [800, Y], [320, 262], [42, "fixed", cfg["steps"], 1, "euler", "simple", 1], [("LATENT", "LATENT")], title="KSampler")
+    add(16, "VAEDecode", [800, Y + 320], [220, 46], [], [("IMAGE", "IMAGE")])
+    add(41, "AIEmpireMakeImage", [1160, Y], [340, 140], [], [("image", "IMAGE")], title="Make image (Qwen or RunPod API)")
+
+    link(2, 0, 3, "model", "MODEL")
+    link(3, 0, 5, "model", "MODEL")
+    link(6, 0, 10, "clip", "CLIP")
+    link(7, 0, 10, "vae", "VAE", optional=True)
+    link(40, 0, 10, "images.image_1", "IMAGE", optional=True)
+    link(1, 0, 10, "images.image_2", "IMAGE", optional=True)
+    link(40, 1, 10, "prompt", "STRING", widget=True)
+    link(5, 0, 15, "model", "MODEL")
+    link(10, 0, 15, "positive", "CONDITIONING")
+    link(10, 1, 15, "negative", "CONDITIONING")
+    link(10, 2, 15, "latent_image", "LATENT")
+    link(40, 3, 15, "seed", "INT", widget=True)
+    link(15, 0, 16, "samples", "LATENT")
+    link(7, 0, 16, "vae", "VAE")
+    link(40, 8, 41, "job", "AIEMPIRE_JOB")
+    link(40, 0, 41, "template", "IMAGE")
+    link(1, 0, 41, "face", "IMAGE")
+    link(16, 0, 41, "qwen_image", "IMAGE")
+    link(41, 0, 17, "images", "IMAGE")
+    link(40, 2, 17, "captions", "STRING")
+    link(40, 4, 17, "dataset_name", "STRING", widget=True)
+    link(40, 5, 17, "file_names", "STRING", optional=True)
+    link(40, 6, 17, "remaining", "INT", optional=True)
+    link(40, 7, 17, "progress", "STRING", optional=True)
+    groups = [
+        {"id": 1, "title": "Your settings", "bounding": [410, -60, 860, 800], "color": "#b06634", "flags": {}},
+        {"id": 2, "title": "Your dataset", "bounding": [1270, -60, 580, 800], "color": "#6a8f4e", "flags": {}},
+        {"id": 3, "title": "⚙️ Machine room · no need to touch", "bounding": [-20, Y - 60, 1540, 680], "color": "#444", "flags": {}},
+    ]
+    write(key, nodes, links, lid, groups, node)
 
 
 def build_body(key, cfg, nodes, links, lid, add, node, link, mp, ORANGE, GREEN):

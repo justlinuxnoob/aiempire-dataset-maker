@@ -1,0 +1,925 @@
+{
+  "id": "5e0c2f64-7a1b-4c8e-9d3f-3a1e3a1e0004",
+  "revision": 0,
+  "last_node_id": 41,
+  "last_link_id": 24,
+  "nodes": [
+    {
+      "id": 18,
+      "type": "MarkdownNote",
+      "pos": [
+        0,
+        0
+      ],
+      "size": [
+        400,
+        720
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "MarkdownNote"
+      },
+      "widgets_values": [
+        "## AI Empire · Dataset Maker\n\n**1. Your face** · upload a clear, front-facing photo of her.\n\n**2. Dataset Maker** · pick a *body_type* (its photos show at the bottom of the box). Fill *trigger_word* and *hair_and_eyes*.\n\n**3. Test** · leave *mode* on **🧪 Test 1 photo** and press **Run**. The result shows in the Save box. Not happy? Run again, or click another photo in the preview.\n\n**4. Whole dataset** · switch *mode* to **🚀 Whole dataset** and press **Run once**. It makes every photo by itself, one after another. Progress shows on the Save box and the browser tab. You can close the tab, it keeps going on the pod.\n\n**5. Download** · `output/datasets/<dataset_name>.zip` (JupyterLab, port 8888). Photos + captions, ready for LoRA training.\n\n---\n**Engine** · *Qwen* = free, runs on this pod. *Nano Banana Pro* / *Seedream* = paid per photo through your RunPod API key: click **🔑 RunPod key** once and paste it (saved on the pod, not in the workflow).\n\n**Stop** = X in the queue. **Run** again continues where it stopped (finished photos are skipped).\n\n⚙️ Don't touch the *Machine room* below."
+      ],
+      "title": "READ ME"
+    },
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [
+        420,
+        0
+      ],
+      "size": [
+        340,
+        440
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            6,
+            17
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "your_face.png",
+        "image"
+      ],
+      "title": "1 · Your face",
+      "color": "#1f3320",
+      "bgcolor": "#162416"
+    },
+    {
+      "id": 40,
+      "type": "AIEmpireDatasetMaker",
+      "pos": [
+        780,
+        0
+      ],
+      "size": [
+        480,
+        720
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "templates",
+          "type": "IMAGE",
+          "links": [
+            5,
+            16
+          ],
+          "shape": 6
+        },
+        {
+          "name": "prompts",
+          "type": "STRING",
+          "links": [
+            7
+          ],
+          "shape": 6
+        },
+        {
+          "name": "captions",
+          "type": "STRING",
+          "links": [
+            20
+          ],
+          "shape": 6
+        },
+        {
+          "name": "seeds",
+          "type": "INT",
+          "links": [
+            12
+          ],
+          "shape": 6
+        },
+        {
+          "name": "dataset_name",
+          "type": "STRING",
+          "links": [
+            21
+          ]
+        },
+        {
+          "name": "file_names",
+          "type": "STRING",
+          "links": [
+            22
+          ],
+          "shape": 6
+        },
+        {
+          "name": "remaining",
+          "type": "INT",
+          "links": [
+            23
+          ]
+        },
+        {
+          "name": "progress",
+          "type": "STRING",
+          "links": [
+            24
+          ]
+        },
+        {
+          "name": "job",
+          "type": "AIEMPIRE_JOB",
+          "links": [
+            15
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AIEmpireDatasetMaker"
+      },
+      "widgets_values": [
+        "athletic",
+        "🧪 Test 1 photo",
+        1,
+        "zvx woman",
+        "",
+        "Qwen · free, runs on this pod",
+        "my_influencer"
+      ],
+      "title": "2 · Dataset Maker",
+      "color": "#3d2a14",
+      "bgcolor": "#2a1d0e"
+    },
+    {
+      "id": 17,
+      "type": "AIEmpireSaveDataset",
+      "pos": [
+        1280,
+        0
+      ],
+      "size": [
+        560,
+        720
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 19
+        },
+        {
+          "name": "captions",
+          "type": "STRING",
+          "link": 20
+        },
+        {
+          "name": "dataset_name",
+          "type": "STRING",
+          "link": 21,
+          "widget": {
+            "name": "dataset_name"
+          }
+        },
+        {
+          "name": "file_names",
+          "type": "STRING",
+          "link": 22,
+          "shape": 7
+        },
+        {
+          "name": "remaining",
+          "type": "INT",
+          "link": 23,
+          "shape": 7
+        },
+        {
+          "name": "progress",
+          "type": "STRING",
+          "link": 24,
+          "shape": 7
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "AIEmpireSaveDataset"
+      },
+      "widgets_values": [
+        "my_influencer",
+        true,
+        "",
+        true
+      ],
+      "title": "3 · Your dataset (saved + zipped)",
+      "color": "#1f3320",
+      "bgcolor": "#162416"
+    },
+    {
+      "id": 2,
+      "type": "UNETLoader",
+      "pos": [
+        0,
+        900
+      ],
+      "size": [
+        340,
+        82
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            1
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UNETLoader",
+        "models": [
+          {
+            "name": "qwen_image_2.1_int8_convrot.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/diffusion_models/qwen_image_2.1_int8_convrot.safetensors",
+            "directory": "diffusion_models"
+          }
+        ]
+      },
+      "widgets_values": [
+        "qwen_image_2.1_int8_convrot.safetensors",
+        "default"
+      ],
+      "title": "Qwen-Image 2.1"
+    },
+    {
+      "id": 3,
+      "type": "LoraLoaderModelOnly",
+      "pos": [
+        0,
+        1020
+      ],
+      "size": [
+        340,
+        82
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            2
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoraLoaderModelOnly",
+        "models": [
+          {
+            "name": "bfs_head_v1.1_qwen_2.1.safetensors",
+            "url": "https://huggingface.co/Alissonerdx/BFS-Best-Face-Swap/resolve/main/bfs_head_v1.1_qwen_2.1.safetensors",
+            "directory": "loras"
+          }
+        ]
+      },
+      "widgets_values": [
+        "bfs_head_v1.1_qwen_2.1.safetensors",
+        1.0
+      ],
+      "title": "BFS Head Swap LoRA"
+    },
+    {
+      "id": 5,
+      "type": "QwenImage21Cache",
+      "pos": [
+        0,
+        1140
+      ],
+      "size": [
+        340,
+        82
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            8
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "QwenImage21Cache"
+      },
+      "widgets_values": [
+        "auto",
+        "default"
+      ]
+    },
+    {
+      "id": 6,
+      "type": "CLIPLoader",
+      "pos": [
+        0,
+        1260
+      ],
+      "size": [
+        340,
+        106
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            3
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPLoader",
+        "models": [
+          {
+            "name": "qwen3vl_8b_int8_convrot.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/text_encoders/qwen3vl_8b_int8_convrot.safetensors",
+            "directory": "text_encoders"
+          }
+        ]
+      },
+      "widgets_values": [
+        "qwen3vl_8b_int8_convrot.safetensors",
+        "qwen_image",
+        "default"
+      ]
+    },
+    {
+      "id": 7,
+      "type": "VAELoader",
+      "pos": [
+        0,
+        1400
+      ],
+      "size": [
+        340,
+        58
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            4,
+            14
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader",
+        "models": [
+          {
+            "name": "qwen_image_2.1_vae_bf16.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/main/vae/qwen_image_2.1_vae_bf16.safetensors",
+            "directory": "vae"
+          }
+        ]
+      },
+      "widgets_values": [
+        "qwen_image_2.1_vae_bf16.safetensors"
+      ]
+    },
+    {
+      "id": 10,
+      "type": "TextEncodeQwenImage21",
+      "pos": [
+        380,
+        900
+      ],
+      "size": [
+        380,
+        220
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 3
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 4,
+          "shape": 7
+        },
+        {
+          "name": "images.image_1",
+          "type": "IMAGE",
+          "link": 5,
+          "shape": 7
+        },
+        {
+          "name": "images.image_2",
+          "type": "IMAGE",
+          "link": 6,
+          "shape": 7
+        },
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "link": 7,
+          "widget": {
+            "name": "prompt"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "links": [
+            9
+          ]
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "links": [
+            10
+          ]
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "links": [
+            11
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "TextEncodeQwenImage21"
+      },
+      "widgets_values": [
+        "",
+        "",
+        2048
+      ],
+      "title": "Qwen 2.1 encoder (1 = preset photo, 2 = face)"
+    },
+    {
+      "id": 15,
+      "type": "KSampler",
+      "pos": [
+        800,
+        900
+      ],
+      "size": [
+        320,
+        262
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 8
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 9
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 10
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 11
+        },
+        {
+          "name": "seed",
+          "type": "INT",
+          "link": 12,
+          "widget": {
+            "name": "seed"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            13
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        42,
+        "fixed",
+        25,
+        1,
+        "euler",
+        "simple",
+        1
+      ],
+      "title": "KSampler"
+    },
+    {
+      "id": 16,
+      "type": "VAEDecode",
+      "pos": [
+        800,
+        1220
+      ],
+      "size": [
+        220,
+        46
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 13
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 14
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            18
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 41,
+      "type": "AIEmpireMakeImage",
+      "pos": [
+        1160,
+        900
+      ],
+      "size": [
+        340,
+        140
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "job",
+          "type": "AIEMPIRE_JOB",
+          "link": 15
+        },
+        {
+          "name": "template",
+          "type": "IMAGE",
+          "link": 16
+        },
+        {
+          "name": "face",
+          "type": "IMAGE",
+          "link": 17
+        },
+        {
+          "name": "qwen_image",
+          "type": "IMAGE",
+          "link": 18
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            19
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AIEmpireMakeImage"
+      },
+      "widgets_values": [],
+      "title": "Make image (Qwen or RunPod API)"
+    }
+  ],
+  "links": [
+    [
+      1,
+      2,
+      0,
+      3,
+      0,
+      "MODEL"
+    ],
+    [
+      2,
+      3,
+      0,
+      5,
+      0,
+      "MODEL"
+    ],
+    [
+      3,
+      6,
+      0,
+      10,
+      0,
+      "CLIP"
+    ],
+    [
+      4,
+      7,
+      0,
+      10,
+      1,
+      "VAE"
+    ],
+    [
+      5,
+      40,
+      0,
+      10,
+      2,
+      "IMAGE"
+    ],
+    [
+      6,
+      1,
+      0,
+      10,
+      3,
+      "IMAGE"
+    ],
+    [
+      7,
+      40,
+      1,
+      10,
+      4,
+      "STRING"
+    ],
+    [
+      8,
+      5,
+      0,
+      15,
+      0,
+      "MODEL"
+    ],
+    [
+      9,
+      10,
+      0,
+      15,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      10,
+      10,
+      1,
+      15,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      11,
+      10,
+      2,
+      15,
+      3,
+      "LATENT"
+    ],
+    [
+      12,
+      40,
+      3,
+      15,
+      4,
+      "INT"
+    ],
+    [
+      13,
+      15,
+      0,
+      16,
+      0,
+      "LATENT"
+    ],
+    [
+      14,
+      7,
+      0,
+      16,
+      1,
+      "VAE"
+    ],
+    [
+      15,
+      40,
+      8,
+      41,
+      0,
+      "AIEMPIRE_JOB"
+    ],
+    [
+      16,
+      40,
+      0,
+      41,
+      1,
+      "IMAGE"
+    ],
+    [
+      17,
+      1,
+      0,
+      41,
+      2,
+      "IMAGE"
+    ],
+    [
+      18,
+      16,
+      0,
+      41,
+      3,
+      "IMAGE"
+    ],
+    [
+      19,
+      41,
+      0,
+      17,
+      0,
+      "IMAGE"
+    ],
+    [
+      20,
+      40,
+      2,
+      17,
+      1,
+      "STRING"
+    ],
+    [
+      21,
+      40,
+      4,
+      17,
+      2,
+      "STRING"
+    ],
+    [
+      22,
+      40,
+      5,
+      17,
+      3,
+      "STRING"
+    ],
+    [
+      23,
+      40,
+      6,
+      17,
+      4,
+      "INT"
+    ],
+    [
+      24,
+      40,
+      7,
+      17,
+      5,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "Your settings",
+      "bounding": [
+        410,
+        -60,
+        860,
+        800
+      ],
+      "color": "#b06634",
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "Your dataset",
+      "bounding": [
+        1270,
+        -60,
+        580,
+        800
+      ],
+      "color": "#6a8f4e",
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "⚙️ Machine room · no need to touch",
+      "bounding": [
+        -20,
+        840,
+        1540,
+        680
+      ],
+      "color": "#444",
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.6,
+      "offset": [
+        110,
+        100
+      ]
+    }
+  },
+  "version": 0.4
+}

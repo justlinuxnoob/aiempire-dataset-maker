@@ -1,0 +1,222 @@
+{
+  "1": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "your_face.png"
+    },
+    "_meta": {
+      "title": "1 · Your face"
+    }
+  },
+  "40": {
+    "class_type": "AIEmpireDatasetMaker",
+    "inputs": {
+      "body_type": "athletic",
+      "mode": "🧪 Test 1 photo",
+      "test_photo": 1,
+      "trigger_word": "zvx woman",
+      "hair_and_eyes": "",
+      "engine": "Qwen · free, runs on this pod",
+      "dataset_name": "my_influencer"
+    },
+    "_meta": {
+      "title": "2 · Dataset Maker"
+    }
+  },
+  "17": {
+    "class_type": "AIEmpireSaveDataset",
+    "inputs": {
+      "dataset_name": [
+        "40",
+        4
+      ],
+      "make_zip": true,
+      "suffix": "",
+      "auto_continue": true,
+      "images": [
+        "41",
+        0
+      ],
+      "captions": [
+        "40",
+        2
+      ],
+      "file_names": [
+        "40",
+        5
+      ],
+      "remaining": [
+        "40",
+        6
+      ],
+      "progress": [
+        "40",
+        7
+      ]
+    },
+    "_meta": {
+      "title": "3 · Your dataset (saved + zipped)"
+    }
+  },
+  "2": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "qwen_image_2.1_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    },
+    "_meta": {
+      "title": "Qwen-Image 2.1"
+    }
+  },
+  "3": {
+    "class_type": "LoraLoaderModelOnly",
+    "inputs": {
+      "lora_name": "bfs_head_v1.1_qwen_2.1.safetensors",
+      "strength_model": 1.0,
+      "model": [
+        "2",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "BFS Head Swap LoRA"
+    }
+  },
+  "5": {
+    "class_type": "QwenImage21Cache",
+    "inputs": {
+      "device": "auto",
+      "dtype": "default",
+      "model": [
+        "3",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "QwenImage21Cache"
+    }
+  },
+  "6": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen3vl_8b_int8_convrot.safetensors",
+      "type": "qwen_image",
+      "device": "default"
+    },
+    "_meta": {
+      "title": "CLIPLoader"
+    }
+  },
+  "7": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "qwen_image_2.1_vae_bf16.safetensors"
+    },
+    "_meta": {
+      "title": "VAELoader"
+    }
+  },
+  "10": {
+    "class_type": "TextEncodeQwenImage21",
+    "inputs": {
+      "prompt": [
+        "40",
+        1
+      ],
+      "negative_prompt": "",
+      "resolution": 2048,
+      "clip": [
+        "6",
+        0
+      ],
+      "vae": [
+        "7",
+        0
+      ],
+      "images.image_1": [
+        "40",
+        0
+      ],
+      "images.image_2": [
+        "1",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Qwen 2.1 encoder (1 = preset photo, 2 = face)"
+    }
+  },
+  "15": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": [
+        "40",
+        3
+      ],
+      "steps": 25,
+      "cfg": 1,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1,
+      "model": [
+        "5",
+        0
+      ],
+      "positive": [
+        "10",
+        0
+      ],
+      "negative": [
+        "10",
+        1
+      ],
+      "latent_image": [
+        "10",
+        2
+      ]
+    },
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "16": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "15",
+        0
+      ],
+      "vae": [
+        "7",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "VAEDecode"
+    }
+  },
+  "41": {
+    "class_type": "AIEmpireMakeImage",
+    "inputs": {
+      "job": [
+        "40",
+        8
+      ],
+      "template": [
+        "40",
+        0
+      ],
+      "face": [
+        "1",
+        0
+      ],
+      "qwen_image": [
+        "16",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Make image (Qwen or RunPod API)"
+    }
+  }
+}

@@ -156,15 +156,39 @@ TEMPLATE_KEEP_BODY = " Keep her body shape from image 1."
 TEMPLATE_BODY_REF = " Her body shape, figure and proportions are exactly the same as the woman in image 3."
 
 
+# body-type presets that ship inside the pod (presets/templates/<type>/image_XX.jpg + .txt), in this order
+BUILTIN_TEMPLATES = os.path.join(PRESET_DIR, "templates")
+PRESET_ORDER = ["athletic", "curvy", "petite", "busty", "thick", "plus"]
+
+
 def _templates_dir():
     return os.path.join(folder_paths.get_input_directory(), TEMPLATE_ROOT)
 
 
-def _template_sets():
-    root = _templates_dir()
+def _subdirs(root):
     if not os.path.isdir(root):
         return []
-    return sorted(d for d in os.listdir(root) if os.path.isdir(os.path.join(root, d)) and not d.startswith("."))
+    return [d for d in os.listdir(root) if os.path.isdir(os.path.join(root, d)) and not d.startswith(".")]
+
+
+def _template_sets():
+    """Built-in body presets first (in PRESET_ORDER), then any sets uploaded to input/templates/."""
+    names = set(_subdirs(BUILTIN_TEMPLATES)) | set(_subdirs(_templates_dir()))
+    first = [n for n in PRESET_ORDER if n in names]
+    return first + sorted(names - set(first))
+
+
+def _set_folder(name):
+    """input/templates/<name> if the user uploaded one with that name, else the built-in preset."""
+    if name not in _template_sets():
+        raise ValueError(f"Unknown body type / template set: {name}")
+    user = os.path.join(_templates_dir(), name)
+    return user if os.path.isdir(user) else os.path.join(BUILTIN_TEMPLATES, name)
+
+
+def _set_files(name):
+    folder = _set_folder(name)
+    return sorted((f for f in os.listdir(folder) if f.lower().endswith(IMAGE_EXTS) and not f.startswith(".")), key=_natural_key)
 
 
 def _natural_key(s):
@@ -236,18 +260,25 @@ class AIEmpireTemplatePresets:
     def IS_CHANGED(cls, template_set, dataset_name="my_influencer", **kw):
         # re-read when templates are added/changed, or when finished images appear (so skip_done works on re-runs)
         state = []
-        for folder in (os.path.join(_templates_dir(), template_set),
+        try:
+            set_folder = _set_folder(template_set)
+        except ValueError:
+            set_folder = ""
+        for folder in (set_folder,
                        os.path.join(folder_paths.get_output_directory(), "datasets", _safe_name(dataset_name))):
             if os.path.isdir(folder):
                 state += [f"{f}:{os.path.getmtime(os.path.join(folder, f))}" for f in sorted(os.listdir(folder))]
         return "|".join(state)
 
     def build(self, template_set, trigger_word, extra_description, how_many, start_at, seed,
-              use_body_reference=False, dataset_name="my_influencer", skip_done=True, one_per_run=True, prompt=TEMPLATE_PROMPT):
-        folder = os.path.join(_templates_dir(), template_set)
-        if not os.path.isdir(folder):
+              use_body_reference=False, dataset_name="my_influencer", skip_done=True, one_per_run=True, prompt=TEMPLATE_PROMPT,
+              skip_stems=None):
+        try:
+            folder = _set_folder(template_set)
+        except ValueError:
             raise ValueError("No template photos yet: click 'Upload template photos' on the Template Presets box.")
-        _unzip_uploads(folder)
+        if folder.startswith(_templates_dir()):
+            _unzip_uploads(folder)
         files = sorted((f for f in os.listdir(folder) if f.lower().endswith(IMAGE_EXTS) and not f.startswith(".")), key=_natural_key)
         if not files:
             raise ValueError(f"input/templates/{template_set} has no images (.png .jpg .jpeg .webp).")
@@ -272,6 +303,8 @@ class AIEmpireTemplatePresets:
             if skip_done and os.path.exists(os.path.join(out_folder, f"{name}_{stem}.png")):
                 skipped += 1
                 continue
+            if skip_stems and stem in skip_stems:
+                continue
             img = _load_template(os.path.join(folder, f))
             imgs.append(_pil_to_tensor(img))
             prompts.append(prompt)
@@ -292,8 +325,8 @@ class AIEmpireTemplatePresets:
         else:
             print(f"[AI Empire] Templates '{template_set}': {len(imgs)} to make, {skipped} already done")
         if not imgs:
-            raise ValueError(f"✅ All done: every template in this range is already in datasets/{name}. "
-                             "To redo one, delete its image there. To redo all, change 'dataset_name'.")
+            raise ValueError(f"✅ All done: every photo is already in output/datasets/{name} (zip: datasets/{name}.zip). "
+                             "To redo one, delete it there and Run. For a new dataset, change 'dataset_name'.")
         # still to do after this run. With skip_done OFF the next run would pick this same photo again,
         # so auto-continue would loop forever: then it's one image per Run, no auto-continue.
         remaining = max(left - len(imgs), 0) if (one_per_run and skip_done) else 0
@@ -749,6 +782,354 @@ class AIEmpireSaveDataset:
         return {"ui": {"images": gallery or ui_images, "progress": [prog] if prog else []}}
 
 
+# ----------------------------------------------------------------- the simple student workflow
+#
+#   Your face ─┐
+#   Dataset Maker (body type, test / whole dataset, engine) ─► [Qwen machine room] ─► Make image ─► Save Dataset
+#
+# "Make image" takes the Qwen result, or (engine = Nano Banana Pro / Seedream) calls the RunPod API instead
+# and Qwen never runs (lazy input), so those runs don't touch the GPU.
+
+# the prompt BFS Head Swap v1.1 was trained with (verbatim) + {extra} = hair / eyes
+QWEN_SWAP_PROMPT = ("head_swap: start with <image1> as the base image, keeping its lighting, environment, and background. "
+                    "remove the head from <image1> completely and replace it with the head from <image2>{extra}, strictly preserving "
+                    "the hair, eye color, nose structure from <image2>. copy the direction of the eye, head rotation, micro expressions "
+                    "from <image1>, high quality, sharp details, 4k")
+
+# Nano Banana Pro / Seedream: image 1 = the preset photo (the one that gets edited), image 2 = her face
+API_SWAP_PROMPT = (
+    "Output image 1, edited. Image 1 is the photo to edit. Image 2 only shows who the woman is.\n"
+    "Replace the woman's face and hair in image 1 with the woman from image 2{extra}: same face shape, eyes and eye colour, "
+    "eyebrows, nose, lips, skin tone, hair colour and hairstyle.\n"
+    "Do not paste the face photo from image 2. Redraw her face naturally inside image 1: her head angle, gaze, facial "
+    "expression and the light and shadows on her face follow image 1.\n"
+    "Keep everything else in image 1 exactly the same: her body shape, pose, hands, outfit, background, camera angle, "
+    "framing and lighting. Never output the woman from image 2's photo.\n"
+    "Photorealistic smartphone photo, natural skin texture."
+)
+
+MODE_TEST = "🧪 Test 1 photo"
+MODE_ALL = "🚀 Whole dataset (all photos)"
+ENGINE_QWEN = "Qwen · free, runs on this pod"
+ENGINE_NANO = "Nano Banana Pro · RunPod API · ~$0.14/photo"
+ENGINE_SEED = "Seedream · RunPod API · ~$0.03/photo"
+RUNPOD_MODELS = {
+    ENGINE_NANO: ("nano", "https://api.runpod.ai/v2/nano-banana-pro-edit"),
+    ENGINE_SEED: ("seedream", "https://api.runpod.ai/v2/seedream-v4-edit"),
+}
+NANO_RATIOS = ["1:1", "3:2", "2:3", "4:3", "3:4", "4:5", "5:4", "9:16", "16:9", "21:9"]
+
+
+def _key_file():
+    # /workspace/.runpod_key on the pod (next to input/ and output/, survives restarts on a network volume)
+    return os.path.join(os.path.dirname(os.path.abspath(folder_paths.get_input_directory())), ".runpod_key")
+
+
+def _runpod_key():
+    key = os.environ.get("RUNPOD_API_KEY", "").strip()
+    if key:
+        return key
+    try:
+        with open(_key_file(), encoding="utf-8") as f:
+            return f.read().strip()
+    except OSError:
+        return ""
+
+
+def _failed_path(folder, stem):
+    return os.path.join(folder, f".{stem}.failed")
+
+
+def _failed_count(folder, stem, engine):
+    """How often RunPod failed this photo with this engine (switching engine starts fresh)."""
+    try:
+        with open(_failed_path(folder, stem), encoding="utf-8") as f:
+            d = json.load(f)
+        return int(d.get("count", 0)) if d.get("engine") == engine else 0
+    except (OSError, ValueError):
+        return 0
+
+
+def _hair_eyes(text):
+    t = (text or "").strip().rstrip(".")
+    if not t:
+        return ""
+    return t if t.lower().startswith(("with ", ",")) else "with " + t
+
+
+def _jpeg_data_url(img, max_side=2048):
+    import base64
+    img = img.convert("RGB")
+    w, h = img.size
+    if max(w, h) > max_side:
+        k = max_side / max(w, h)
+        img = img.resize((round(w * k), round(h * k)), Image.LANCZOS)
+    buf = io.BytesIO()
+    img.save(buf, "JPEG", quality=95)
+    return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
+
+
+def _runpod_http(url, key, body=None, timeout=60):
+    import urllib.error
+    import urllib.request
+    data = json.dumps(body).encode() if body is not None else None
+    req = urllib.request.Request(url, data=data, method="POST" if data is not None else "GET",
+                                 headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return json.loads(r.read().decode())
+    except urllib.error.HTTPError as e:
+        msg = e.read().decode(errors="replace")[:300]
+        if e.code in (401, 403):
+            raise RuntimeError("RunPod says the API key is wrong. Click '🔑 RunPod key' on the Dataset Maker box and paste it again.")
+        raise RuntimeError(f"RunPod HTTP {e.code}: {msg}")
+
+
+def _runpod_edit(engine, template, face, prompt, job_timeout=240, tries=3):
+    """One edit through a RunPod public endpoint. Returns a PIL image. A job stuck > job_timeout is cancelled and retried."""
+    import urllib.request
+    import comfy.model_management as mm
+    kind, base = RUNPOD_MODELS[engine]
+    base = os.environ.get("AIEMPIRE_RUNPOD_BASE", "") or base  # tests only
+    key = _runpod_key()
+    if not key:
+        raise RuntimeError("No RunPod API key yet: click '🔑 RunPod key' on the Dataset Maker box and paste your key "
+                           "(runpod.io → Settings → API Keys). Or switch engine back to Qwen.")
+    w, h = template.size
+    images = [_jpeg_data_url(template), _jpeg_data_url(face, 1536)]
+    if kind == "seedream":
+        k = 2048 / max(w, h)
+        payload = {"prompt": prompt, "images": images,
+                   "size": f"{max(16, round(w * k / 16) * 16)}*{max(16, round(h * k / 16) * 16)}"}
+    else:
+        import math
+        ratio = min(NANO_RATIOS, key=lambda r: abs(math.log(int(r.split(':')[0]) / int(r.split(':')[1])) - math.log(w / h)))
+        payload = {"prompt": prompt, "images": images, "resolution": "2k", "aspect_ratio": ratio, "output_format": "png"}
+
+    last = ""
+    for attempt in range(1, tries + 1):
+        job = None
+        try:
+            res = _runpod_http(f"{base}/run", key, {"input": payload})
+            job, start = res.get("id"), time.time()
+            while res.get("status") in ("IN_QUEUE", "IN_PROGRESS") or (job and not res.get("status")):
+                try:
+                    mm.throw_exception_if_processing_interrupted()
+                except BaseException:
+                    _runpod_http(f"{base}/cancel/{job}", key, {}, timeout=20)
+                    raise
+                if time.time() - start > job_timeout:
+                    _runpod_http(f"{base}/cancel/{job}", key, {}, timeout=20)
+                    raise RuntimeError(f"stuck in RunPod's queue for {job_timeout // 60} min")
+                time.sleep(3)
+                res = _runpod_http(f"{base}/status/{job}", key, timeout=30)
+            if res.get("status") != "COMPLETED":
+                raise RuntimeError(f"{res.get('status')}: {res.get('error') or str(res.get('output'))[:200]}")
+            out = res.get("output") or {}
+            url = out.get("image_url") or out.get("result")
+            if not url:
+                raise RuntimeError(f"no image in RunPod's answer: {str(out)[:200]}")
+            with urllib.request.urlopen(url, timeout=120) as r:
+                img = Image.open(io.BytesIO(r.read())).convert("RGB")
+            print(f"[AI Empire] {kind} ✔ (${float(out.get('cost') or 0):.2f})")
+            return img
+        except RuntimeError as e:
+            last = str(e)
+            if "API key is wrong" in last:
+                raise
+            print(f"[AI Empire] {kind} try {attempt}/{tries} failed: {last}")
+            time.sleep(3 * attempt)
+    raise RuntimeError(f"{kind} failed 3 times ({last})")
+
+
+class AIEmpireDatasetMaker:
+    """The one box students fill in: body type, test or whole dataset, engine."""
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        sets = _template_sets() or ["no presets found"]
+        return {
+            "required": {
+                "body_type": (sets, {"default": sets[0], "tooltip": "Which preset to use. The photos are shown below this box."}),
+                "mode": ([MODE_TEST, MODE_ALL], {"default": MODE_TEST,
+                         "tooltip": "Test = makes 1 photo (the one picked in test_photo) so you can check quality. "
+                                    "Whole dataset = makes every photo of the body type, one after another, and zips them."}),
+                "test_photo": ("INT", {"default": 1, "min": 1, "max": 999, "tooltip": "Which photo to test with (see the preview below)."}),
+                "trigger_word": ("STRING", {"default": "zvx woman", "tooltip": "Starts every caption. Use the same word when you train the LoRA."}),
+                "hair_and_eyes": ("STRING", {"default": "", "tooltip": "Her hair and eye colour, e.g. 'long straight blonde hair, blue eyes'. Empty = taken from your face photo."}),
+                "engine": ([ENGINE_QWEN, ENGINE_NANO, ENGINE_SEED], {"default": ENGINE_QWEN,
+                           "tooltip": "Qwen = free, runs on this pod's GPU. Nano Banana Pro / Seedream = paid per photo with your RunPod API key (click 🔑 RunPod key)."}),
+                "dataset_name": ("STRING", {"default": "my_influencer", "tooltip": "Folder + zip name in output/datasets/. New name = new dataset."}),
+            },
+        }
+
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING", "INT", "STRING", "STRING", "INT", "STRING", "AIEMPIRE_JOB")
+    RETURN_NAMES = ("templates", "prompts", "captions", "seeds", "dataset_name", "file_names", "remaining", "progress", "job")
+    OUTPUT_IS_LIST = (True, True, True, True, False, True, False, False, False)
+    FUNCTION = "build"
+    CATEGORY = "AI Empire"
+
+    @classmethod
+    def IS_CHANGED(cls, body_type, mode, dataset_name="my_influencer", **kw):
+        if mode == MODE_TEST:
+            return float("nan")  # every test press makes a fresh photo
+        return AIEmpireTemplatePresets.IS_CHANGED(body_type, dataset_name=dataset_name)
+
+    def build(self, body_type, mode, test_photo, trigger_word, hair_and_eyes, engine, dataset_name):
+        files = _set_files(body_type)
+        if not files:
+            raise ValueError(f"The '{body_type}' preset has no photos.")
+        test = mode == MODE_TEST
+        name = _safe_name(dataset_name) + ("_test" if test else "")
+        if test and test_photo > len(files):
+            raise ValueError(f"'{body_type}' has {len(files)} photos: set test_photo between 1 and {len(files)}.")
+        seed = int(time.time() * 1000) % 1_000_000 if test else 42
+        skip = set()
+        retry_note = ""
+        if not test:
+            # photos RunPod refused earlier with this engine: skipped on the first pass, retried once at the end
+            out_folder = os.path.join(folder_paths.get_output_directory(), "datasets", name)
+            stems_all = [_safe_name(os.path.splitext(f)[0]).strip("_") or "img" for f in files]
+            pending = [st for st in stems_all if not os.path.exists(os.path.join(out_folder, f"{name}_{st}.png"))]
+            failed = {st: _failed_count(out_folder, st, engine) for st in pending}
+            given_up = [st for st in pending if failed[st] >= 2]
+            fresh = [st for st in pending if failed[st] == 0]
+            if not fresh:
+                retry = [st for st in pending if failed[st] == 1]
+                if not retry:
+                    if given_up:
+                        raise ValueError(f"✅ Done, except {len(given_up)} photo(s) RunPod refused twice: {', '.join(given_up)}. "
+                                         "Switch engine (e.g. Qwen) and Run to make those, or train without them.")
+                else:
+                    retry_note = f" (retrying {len(retry)} photo(s) that failed earlier)"
+                skip = set(given_up)
+            else:
+                skip = {st for st in pending if failed[st] >= 1}
+        out = AIEmpireTemplatePresets().build(
+            body_type, trigger_word, _hair_eyes(hair_and_eyes),
+            how_many=1 if test else 0, start_at=test_photo if test else 1, seed=seed,
+            use_body_reference=False, dataset_name=name, skip_done=not test, one_per_run=True,
+            prompt=QWEN_SWAP_PROMPT, skip_stems=skip)
+        imgs, prompts, captions, seeds, _count, name, stems, remaining, progress = out
+        if not test:
+            # keep going after this one while anything is left that may still work (incl. one retry of failed ones)
+            remaining = sum(1 for st in pending if st not in stems and _failed_count(out_folder, st, engine) < 2)
+        job = {"engine": engine, "extra": _hair_eyes(hair_and_eyes), "test": test,
+               "dataset": name, "stem": stems[0] if stems else "", "more": remaining}
+        what = f"test photo {test_photo}" if test else f"{progress} of '{body_type}'{retry_note}"
+        print(f"[AI Empire] Dataset Maker: {what} · engine: {engine.split(' ·')[0]}")
+        return (imgs, prompts, captions, seeds, name, stems, remaining, progress, job)
+
+
+class AIEmpireMakeImage:
+    """Picks the result: Qwen's image, or (engine = Nano Banana Pro / Seedream) one made through the RunPod API."""
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "job": ("AIEMPIRE_JOB",),
+                "template": ("IMAGE",),
+                "face": ("IMAGE",),
+                "qwen_image": ("IMAGE", {"lazy": True}),
+            },
+            "hidden": {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
+        }
+
+    RETURN_TYPES = ("IMAGE",)
+    RETURN_NAMES = ("image",)
+    FUNCTION = "make"
+    CATEGORY = "AI Empire"
+
+    def check_lazy_status(self, job, template=None, face=None, qwen_image=None, prompt=None, extra_pnginfo=None):
+        # only run the Qwen part of the graph when Qwen is the engine
+        return ["qwen_image"] if job["engine"] not in RUNPOD_MODELS and qwen_image is None else []
+
+    def make(self, job, template, face, qwen_image=None, prompt=None, extra_pnginfo=None):
+        if job["engine"] not in RUNPOD_MODELS:
+            return (qwen_image,)
+        extra = (" " + job["extra"]) if job["extra"] else ""
+        try:
+            img = _runpod_edit(job["engine"], _tensor_to_pil(template), _tensor_to_pil(face), API_SWAP_PROMPT.format(extra=extra))
+        except RuntimeError as e:
+            if "API key" in str(e) or not job.get("stem"):
+                raise
+            if job.get("test"):
+                raise RuntimeError(f"{e}. Press Run to try again, pick another test photo, or switch engine.")
+            # whole dataset: don't let one refused photo stop the run
+            folder = os.path.join(folder_paths.get_output_directory(), "datasets", job["dataset"])
+            os.makedirs(folder, exist_ok=True)
+            n = _failed_count(folder, job["stem"], job["engine"]) + 1
+            with open(_failed_path(folder, job["stem"]), "w", encoding="utf-8") as f:
+                json.dump({"engine": job["engine"], "count": n, "error": str(e)[:300]}, f)
+            if prompt:
+                _queue_again(prompt, extra_pnginfo)  # next photo (failed ones get one more try at the end)
+            raise RuntimeError(f"Photo {job['stem']} skipped ({e}). The run continues with the next photo; "
+                               "skipped photos get one more try at the end.")
+        return (_pil_to_tensor(img),)
+
+
+def _register_routes():
+    """Preview thumbnails of the presets + saving the RunPod key on the pod (never inside the workflow file)."""
+    try:
+        import server
+        from aiohttp import web
+    except Exception:
+        return
+    routes = server.PromptServer.instance.routes
+    thumbs = {}
+
+    @routes.get("/aiempire/preset_files")
+    async def preset_files(request):
+        name = request.query.get("set", "")
+        try:
+            files = _set_files(name)
+        except ValueError:
+            return web.json_response({"files": [], "count": 0})
+        return web.json_response({"files": files, "count": len(files)})
+
+    @routes.get("/aiempire/preset_thumb")
+    async def preset_thumb(request):
+        name, fname = request.query.get("set", ""), os.path.basename(request.query.get("file", ""))
+        try:
+            files = _set_files(name)
+        except ValueError:
+            return web.Response(status=404)
+        if fname not in files:
+            return web.Response(status=404)
+        path = os.path.join(_set_folder(name), fname)
+        ck = (path, os.path.getmtime(path))
+        if ck not in thumbs:
+            img = _load_template(path, max_side=512)
+            buf = io.BytesIO()
+            img.save(buf, "JPEG", quality=85)
+            thumbs[ck] = buf.getvalue()
+        return web.Response(body=thumbs[ck], content_type="image/jpeg", headers={"Cache-Control": "max-age=3600"})
+
+    @routes.get("/aiempire/runpod_key")
+    async def key_status(request):
+        return web.json_response({"saved": bool(_runpod_key()), "from_env": bool(os.environ.get("RUNPOD_API_KEY", "").strip())})
+
+    @routes.post("/aiempire/runpod_key")
+    async def key_save(request):
+        data = await request.json()
+        key = str(data.get("key", "")).strip()
+        path = _key_file()
+        if key:
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(key)
+            try:
+                os.chmod(path, 0o600)
+            except OSError:
+                pass
+        elif os.path.exists(path):
+            os.remove(path)
+        return web.json_response({"saved": bool(_runpod_key())})
+
+
+_register_routes()
+
+
 NODE_CLASS_MAPPINGS = {
     "AIEmpireDatasetPresets": AIEmpireDatasetPresets,
     "AIEmpireTemplatePresets": AIEmpireTemplatePresets,
@@ -756,6 +1137,8 @@ NODE_CLASS_MAPPINGS = {
     "AIEmpireSaveTemplateSet": AIEmpireSaveTemplateSet,
     "AIEmpireNanoBanana": AIEmpireNanoBanana,
     "AIEmpireSaveDataset": AIEmpireSaveDataset,
+    "AIEmpireDatasetMaker": AIEmpireDatasetMaker,
+    "AIEmpireMakeImage": AIEmpireMakeImage,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -765,4 +1148,6 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "AIEmpireSaveTemplateSet": "AI Empire · Save Template Set (new preset)",
     "AIEmpireNanoBanana": "AI Empire · Nano Banana (your Google key)",
     "AIEmpireSaveDataset": "AI Empire · Save Dataset (images + captions)",
+    "AIEmpireDatasetMaker": "AI Empire · Dataset Maker",
+    "AIEmpireMakeImage": "AI Empire · Make image (Qwen or RunPod API)",
 }
