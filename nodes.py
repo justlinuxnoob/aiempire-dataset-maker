@@ -797,14 +797,17 @@ QWEN_SWAP_PROMPT = ("head_swap: start with <image1> as the base image, keeping i
                     "from <image1>, high quality, sharp details, 4k")
 
 # Nano Banana Pro / Seedream: image 1 = the preset photo (the one that gets edited), image 2 = her face
+# Image order = the one that worked for all 300 body-preset photos: image 1 = reference, image 2 = the photo to edit
+# (Nano Banana tends to output the LAST image it gets; with the photo first it sometimes just returned the face photo).
 API_SWAP_PROMPT = (
-    "Output image 1, edited. Image 1 is the photo to edit. Image 2 only shows who the woman is.\n"
-    "Replace the woman's face and hair in image 1 with the woman from image 2{extra}: same face shape, eyes and eye colour, "
+    "Edit image 2. Image 2 is the photo to keep{scene}. Image 1 only shows who the woman is: it is NOT the photo to output.\n"
+    "Replace the woman's face and hair in image 2 with the woman from image 1{extra}: same face shape, eyes and eye colour, "
     "eyebrows, nose, lips, skin tone, hair colour and hairstyle.\n"
-    "Do not paste the face photo from image 2. Redraw her face naturally inside image 1: her head angle, gaze, facial "
-    "expression and the light and shadows on her face follow image 1.\n"
-    "Keep everything else in image 1 exactly the same: her body shape, pose, hands, outfit, background, camera angle, "
-    "framing and lighting. Never output the woman from image 2's photo.\n"
+    "Do not paste the face photo from image 1. Redraw her face naturally inside image 2: her head angle, gaze, facial "
+    "expression and the light and shadows on her face follow image 2.\n"
+    "Keep everything else in image 2 exactly the same: her body shape, pose, hands, outfit, background, camera angle, "
+    "framing and lighting. The result must look like image 2 with a different woman in it, never like image 1's photo "
+    "(image 1's clothes and background must not appear).\n"
     "Photorealistic smartphone photo, natural skin texture."
 )
 
@@ -900,7 +903,7 @@ def _runpod_edit(engine, template, face, prompt, job_timeout=240, tries=3):
         raise RuntimeError("No RunPod API key yet: click '🔑 RunPod key' on the Dataset Maker box and paste your key "
                            "(runpod.io → Settings → API Keys). Or switch engine back to Qwen.")
     w, h = template.size
-    images = [_jpeg_data_url(template), _jpeg_data_url(face, 1536)]
+    images = [_jpeg_data_url(face, 1536), _jpeg_data_url(template)]  # 1 = who she is, 2 = the photo to edit
     if kind == "seedream":
         k = 2048 / max(w, h)
         payload = {"prompt": prompt, "images": images,
@@ -1024,7 +1027,11 @@ class AIEmpireDatasetMaker:
         if not test:
             # keep going after this one while anything is left that may still work (incl. one retry of failed ones)
             remaining = sum(1 for st in pending if st not in stems and _failed_count(out_folder, st, engine) < 2)
-        job = {"engine": engine, "extra": _hair_eyes(hair_and_eyes), "test": test,
+        scene = captions[0] if captions else ""
+        tw = (trigger_word or "").strip()
+        if tw and scene.lower().startswith(tw.lower()):
+            scene = scene[len(tw):].lstrip(" ,")
+        job = {"engine": engine, "extra": _hair_eyes(hair_and_eyes), "test": test, "scene": scene,
                "dataset": name, "stem": stems[0] if stems else "", "more": remaining}
         what = f"test photo {test_photo}" if test else f"{progress} of '{body_type}'{retry_note}"
         print(f"[AI Empire] Dataset Maker: {what} · engine: {engine.split(' ·')[0]}")
@@ -1060,7 +1067,7 @@ class AIEmpireMakeImage:
             return (qwen_image,)
         extra = (" " + job["extra"]) if job["extra"] else ""
         try:
-            img = _runpod_edit(job["engine"], _tensor_to_pil(template), _tensor_to_pil(face), API_SWAP_PROMPT.format(extra=extra))
+            img = _runpod_edit(job["engine"], _tensor_to_pil(template), _tensor_to_pil(face), API_SWAP_PROMPT.format(extra=extra, scene=(": " + job["scene"]) if job.get("scene") else ""))
         except RuntimeError as e:
             if "API key" in str(e) or not job.get("stem"):
                 raise
