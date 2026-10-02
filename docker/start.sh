@@ -37,6 +37,8 @@ fetch() {
 # QWEN_PRECISION = fp8 (default, 20 GB) | bf16 (41 GB)   -- only used for the Qwen model
 # PORTRAIT = 1 -> portrait generator only (Z-Image Turbo + instagram LoRA, ~20 GB): nothing else downloads
 if [ "${PORTRAIT:-0}" = "1" ]; then EDIT_MODEL="${EDIT_MODEL:-none}"; REALISM="${REALISM:-0}"; fi
+# KREA_TURBO = 1 -> Krea 2 Turbo + your LoRA generator only (~20 GB): nothing else downloads
+if [ "${KREA_TURBO:-0}" = "1" ]; then EDIT_MODEL="${EDIT_MODEL:-none}"; REALISM="${REALISM:-0}"; fi
 EDIT_MODEL="${EDIT_MODEL:-qwen21}"
 echo "[AI Empire] Checking models for EDIT_MODEL=$EDIT_MODEL (first boot takes a few minutes)..."
 
@@ -133,6 +135,17 @@ if [ "${PORTRAIT:-0}" = "1" ]; then
   fetch "$M/loras" "instagram_zimageturbo.safetensors" "$HF/datasets/pofkeb/instagramification/resolve/main/instagram_zimageturbo.safetensors" & PIDS="$PIDS $!"
   for p in $PIDS; do wait "$p" || { echo "[AI Empire] 🛑 a portrait model failed to download, restart the pod to retry"; exit 1; }; done
   echo "[AI Empire] 📸 Portrait generator ready: drag portrait-gen.json into ComfyUI"
+fi
+
+# KREA_TURBO = 1 -> AI_Empire_Krea2_Turbo_LoRA.json: Krea 2 Turbo fp8 + Qwen3-VL 4B fp8 + Qwen-Image VAE (open Comfy-Org repack)
+if [ "${KREA_TURBO:-0}" = "1" ]; then
+  K2="$HF/Comfy-Org/Krea-2/resolve/main"
+  PIDS=""
+  fetch "$M/diffusion_models" "krea2_turbo_fp8_scaled.safetensors" "$K2/diffusion_models/krea2_turbo_fp8_scaled.safetensors" & PIDS="$PIDS $!"
+  fetch "$M/text_encoders" "qwen3vl_4b_fp8_scaled.safetensors" "$K2/text_encoders/qwen3vl_4b_fp8_scaled.safetensors" & PIDS="$PIDS $!"
+  fetch "$M/vae" "qwen_image_vae.safetensors" "$K2/vae/qwen_image_vae.safetensors" & PIDS="$PIDS $!"
+  for p in $PIDS; do wait "$p" || { echo "[AI Empire] 🛑 a Krea 2 Turbo model failed to download, restart the pod to retry"; exit 1; }; done
+  echo "[AI Empire] 🎨 Krea 2 Turbo ready: upload your LoRA to models/loras (JupyterLab, port 8888), drag in AI_Empire_Krea2_Turbo_LoRA.json"
 fi
 
 # VIDEO = minimax  -> MiniMax H3 image-to-video + reference-to-video (~75 GB extra, use a 200 GB volume)

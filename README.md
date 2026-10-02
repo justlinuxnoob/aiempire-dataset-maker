@@ -71,6 +71,7 @@ RunPod → **My Templates → New Template**:
   - `EDIT_MODEL` = `qwen21` (default) / `firered` / `qwen` (2511) / `both` / `none` (Nano Banana only)
   - `REALISM` = `1` downloads Z-Image Turbo for the realism pass (default on for FireRed / Qwen 2511, off for Qwen 2.1)
   - `QWEN_PRECISION=bf16` for the full Qwen model
+  - `KREA_TURBO=1` = Krea 2 Turbo + your LoRA generator only (`AI_Empire_Krea2_Turbo_LoRA.json`, ~20 GB from the open Comfy-Org repack, nothing else downloads; any 24 GB+ GPU)
   - `PORTRAIT=1` = portrait generator only (Z-Image Turbo + instagram LoRA for `portrait-gen.json`, ~20 GB, nothing else downloads; any 24 GB+ GPU)
   - `QWEN21=1` adds the Qwen-Image 2.1 edit test workflow (~30 GB)
   - `KREA2=1` adds the Krea2 RAW workflow: RawGirl Krea2 + Flux 2 Klein 9B realism pass + skin detailer + phone-look finish (~60 GB, 48 GB+ GPU). Set `EDIT_MODEL=none` + `REALISM=0` for a Krea2-only pod (100 GB volume is enough)
