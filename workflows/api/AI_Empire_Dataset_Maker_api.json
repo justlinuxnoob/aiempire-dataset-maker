@@ -124,7 +124,7 @@
         1
       ],
       "negative_prompt": "",
-      "resolution": 2048,
+      "resolution": 1536,
       "clip": [
         "6",
         0

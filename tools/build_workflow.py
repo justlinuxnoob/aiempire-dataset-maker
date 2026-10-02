@@ -490,7 +490,7 @@ def build_maker(key, cfg, nodes, links, lid, add, node, link, mp, ORANGE, GREEN)
     add(5, "QwenImage21Cache", [0, Y + 240], [340, 82], ["auto", "default"], [("MODEL", "MODEL")])
     add(6, "CLIPLoader", [0, Y + 360], [340, 106], [cfg["clip"][0], "qwen_image", "default"], [("CLIP", "CLIP")], props=mp(cfg["clip"]))
     add(7, "VAELoader", [0, Y + 500], [340, 58], [cfg["vae"][0]], [("VAE", "VAE")], props=mp(cfg["vae"]))
-    add(10, "TextEncodeQwenImage21", [380, Y], [380, 220], ["", "", 2048],
+    add(10, "TextEncodeQwenImage21", [380, Y], [380, 220], ["", "", 1536],
         [("positive", "CONDITIONING"), ("negative", "CONDITIONING"), ("latent", "LATENT")], title="Qwen 2.1 encoder (1 = preset photo, 2 = face)")
     add(15, "KSampler", [800, Y], [320, 262], [42, "fixed", cfg["steps"], 1, "euler", "simple", 1], [("LATENT", "LATENT")], title="KSampler")
     add(16, "VAEDecode", [800, Y + 320], [220, 46], [], [("IMAGE", "IMAGE")])
