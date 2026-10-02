@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths: ["trainer/**", "!trainer/**.md", ".github/workflows/trainer.yml"]
   workflow_dispatch:
+  schedule:
+    - cron: "17 4 * * 1"   # every Monday: rebuild on the newest AI Toolkit
 
 permissions:
   contents: read
@@ -38,6 +40,8 @@ jobs:
       # same package as the dataset maker (already public), different tag
       - uses: docker/build-push-action@v6
         with:
+          pull: true   # always start from the newest ostris/aitoolkit:latest
+          no-cache: true
           context: trainer
           file: trainer/Dockerfile
           push: true
