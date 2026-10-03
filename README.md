@@ -1,5 +1,6 @@
 # AI Empire · Dataset Maker
 
+**▶ New here? Start with the free video series: [joinaiempire.com/video](https://joinaiempire.com/video)** (video 1: make your first AI face).
 Guides and the full course: https://joinaiempire.com
 
 ComfyUI nodes and workflows that turn **one face photo** into a **character LoRA training dataset**: 50 photos (close-ups, half-body and full-body shots in different poses, outfits, places and light), each saved with a matching `.txt` caption. It runs in ComfyUI on a RunPod pod.
