@@ -38,6 +38,20 @@ Qwen-Image 2.1 + BFS head swap, 25 steps, CFG 1, euler / simple. Encoder *resolu
 - In test mode a failure just shows the error: Run again, pick another test photo, or switch engine.
 - A wrong key stops the run and asks you to paste it again.
 
+## Krea 2 Turbo + Grok prompts: `workflows/AI_Empire_Krea2_Turbo_Grok.json`
+Your character LoRA on Krea 2 Turbo, with Grok writing the prompt. Pod: `KREA_TURBO=1`.
+- **Models:** Krea 2 Turbo fp8, Qwen3-VL 4B fp8, Wan 2.1 VAE, skin detail LoRA 0.5, RawGirl V2 LoRA 0.75, your LoRA 0.9.
+- **Sampling:** shift 6, 8 steps, CFG 1, euler_ancestral, beta57 (core *BetaSamplingScheduler* at alpha 0.5 / beta 0.7, the same curve as RES4LYF's beta57, so no extra node pack).
+- **Grok Prompt box** (your own xAI key, saved on the pod with **🔑 xAI key**, or env `XAI_API_KEY`):
+  - 📷 *photo → prompt*: copies a reference photo's shot (pose, outfit, place, light, camera).
+  - 💡 *idea → prompt*: a short idea becomes a full prompt.
+  - ✍️ *my prompt*: no Grok.
+  - The trigger word always goes first, then the optional *hair_and_eyes* line. Grok never describes her face, hair, eyes or body.
+  - Prompts always describe an adult woman: "girl" becomes "woman", and youth words or a reference photo of someone who could be under 18 stop the run.
+  - *variation* on **fixed** = Grok is asked once, every Run reuses that prompt with a new image seed.
+- **Finish:** Photo Finish (phone look) + Save Image with no workflow inside. *Before the phone look* shows the raw render.
+- Rebuild the file with `python tools/build_krea2_grok.py`.
+
 ## Next step: train the LoRA
 Use the LoRA Trainer template: [justlinuxnoob/lora-training](https://github.com/justlinuxnoob/lora-training), image `ghcr.io/justlinuxnoob/lora-training:latest`. Drop the dataset `.zip` into `datasets/` in JupyterLab and it unzips itself.
 
@@ -107,7 +121,7 @@ RunPod → **My Templates → New Template**:
   - `EDIT_MODEL` = `qwen21` (default) / `firered` / `qwen` (2511) / `both` / `none` (Nano Banana only)
   - `REALISM` = `1` downloads Z-Image Turbo for the realism pass (default on for FireRed / Qwen 2511, off for Qwen 2.1)
   - `QWEN_PRECISION=bf16` for the full Qwen Image Edit 2511 model
-  - `KREA_TURBO=1` = Krea 2 Turbo + your LoRA generator only (`AI_Empire_Krea2_Turbo_LoRA.json`, ~20 GB from the open Comfy-Org repack, nothing else downloads; any 24 GB+ GPU)
+  - `KREA_TURBO=1` = Krea 2 Turbo + your LoRA generator only (`AI_Empire_Krea2_Turbo_LoRA.json` and `AI_Empire_Krea2_Turbo_Grok.json`, ~21 GB, nothing else downloads; any 24 GB+ GPU)
   - `PORTRAIT=1` = portrait generator only (Z-Image Turbo + instagram LoRA for `portrait-gen.json`, ~20 GB, nothing else downloads; any 24 GB+ GPU)
   - `QWEN21=1` also downloads the prompt-enhancer text encoder for the Qwen-Image 2.1 edit test workflow (`AI_Empire_Qwen_Image_2.1_Edit_TEST.json`)
   - `KREA2=1` adds the Krea2 RAW workflow: RawGirl Krea2 + Flux 2 Klein 9B realism pass + skin detailer + phone-look finish (~60 GB, 48 GB+ GPU). Set `EDIT_MODEL=none` + `REALISM=0` for a Krea2-only pod (100 GB volume is enough)
