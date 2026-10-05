@@ -23,22 +23,25 @@
     }
   },
   "21": {
-    "class_type": "AIEmpireGrokPrompt",
+    "class_type": "AIEmpirePromptWriter",
     "inputs": {
       "mode": "💡 idea → prompt",
       "trigger_word": "zvx woman",
       "hair_and_eyes": "",
       "idea": "mirror selfie in a bright bathroom, holding a gold iPhone, oversized grey hoodie, morning light",
-      "model": "grok-4.20-0309-non-reasoning",
-      "temperature": 0.7,
+      "creativity": 0.7,
       "variation": 0,
+      "clip": [
+        "3",
+        0
+      ],
       "image": [
         "20",
         0
       ]
     },
     "_meta": {
-      "title": "Grok Prompt"
+      "title": "Prompt Writer (local)"
     }
   },
   "8": {
@@ -135,7 +138,7 @@
       ]
     },
     "_meta": {
-      "title": "Prompt (from Grok)"
+      "title": "Prompt (from the writer)"
     }
   },
   "15": {

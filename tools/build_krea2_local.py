@@ -1,15 +1,15 @@
-"""Builds the AI Empire Krea 2 Turbo + Grok prompt workflow (UI + API format).
+"""Builds the AI Empire Krea 2 Turbo + local prompt writer workflow (UI + API format).
 
 Same models and settings as the Krea 2 Turbo realism setup we studied, rebuilt with open nodes only:
   - Krea 2 Turbo fp8 + Qwen3-VL 4B fp8 + Wan 2.1 VAE
   - your character LoRA only (no extra style LoRAs)
   - ModelSamplingAuraFlow shift 6, 8 steps, CFG 1 (BasicGuider), euler_ancestral,
     beta57 = core BetaSamplingScheduler alpha 0.5 / beta 0.7 (identical to RES4LYF's beta57, no extra node pack)
-  - AI Empire Grok Prompt (photo → prompt / idea → prompt / your own prompt)
+  - AI Empire Prompt Writer (local, uses the Krea 2 text encoder): photo → prompt / idea → prompt / your own prompt
   - AI Empire Photo Finish (phone look) + Save Image (no workflow inside)
 The pod downloads the models with KREA_TURBO=1.
 
-Run:  python tools/build_krea2_grok.py
+Run:  python tools/build_krea2_local.py
 """
 import json
 import os
@@ -33,7 +33,7 @@ WIDGETS = {
     "LoraLoaderModelOnly": ["lora_name", "strength_model"],
     "ModelSamplingAuraFlow": ["shift"],
     "LoadImage": ["image", None],
-    "AIEmpireGrokPrompt": ["mode", "trigger_word", "hair_and_eyes", "idea", "model", "temperature", "variation", None],
+    "AIEmpirePromptWriter": ["mode", "trigger_word", "hair_and_eyes", "idea", "creativity", "variation", None],
     "CLIPTextEncode": ["text"],
     "EmptyLatentImage": ["width", "height", "batch_size"],
     "BetaSamplingScheduler": ["steps", "alpha", "beta"],
@@ -50,27 +50,24 @@ WIDGETS = {
 }
 
 NOTE = "\n".join([
-    "## AI Empire · Krea 2 Turbo + Grok prompts",
+    "## AI Empire · Krea 2 Turbo + prompt writer (100% local)",
     "",
     "**1 · Your LoRA** (once): JupyterLab (port 8888) → `models/loras/` → upload your `.safetensors`, press **R** in ComfyUI.",
     "Pick it in **Your LoRA**. Strength **0.9** (1.0 = strongest likeness).",
     "",
-    "**2 · 🔑 xAI key** (once): click the button on the **Grok Prompt** box, paste your key from console.x.ai.",
-    "It's saved on the pod, never inside this workflow.",
-    "",
-    "**3 · Grok Prompt** box → *mode*:",
-    "- 📷 **photo → prompt**: upload a photo in **Reference photo**. Grok copies its pose, outfit, place and light.",
+    "**2 · Prompt Writer** box → *mode* (runs on the pod, no API key):",
+    "- 📷 **photo → prompt**: upload a photo in **Reference photo**. It copies the pose, outfit, place and light.",
     "  Optional *idea* = changes (\"make the outfit black\").",
-    "- 💡 **idea → prompt**: type a short idea, Grok writes the full prompt.",
-    "- ✍️ **my prompt**: no Grok, your *idea* text is the prompt.",
+    "- 💡 **idea → prompt**: type a short idea, it writes the full prompt.",
+    "- ✍️ **my prompt**: your *idea* text is the prompt.",
     "*trigger_word* always goes first. *hair_and_eyes* (optional) goes right after it.",
-    "Grok never describes her face, hair, eyes or body: your LoRA knows them.",
+    "It never describes her face, hair, eyes or body: your LoRA knows them.",
     "",
-    "**4 · Run.** The prompt Grok wrote shows in the Grok box. *variation* on **fixed** = Grok is asked once",
-    "and every Run makes a new image from the same prompt. Change *variation* (or set randomize) for a new prompt.",
+    "**3 · Run.** The prompt shows in the Prompt Writer box. *variation* on **fixed** = written once,",
+    "every Run makes a new image from the same prompt. Change *variation* (or set randomize) for a new prompt.",
     "",
     "**Size:** 1088 × 1920 (9:16). 2:3 = 1024 × 1536. Square = 1280 × 1280.",
-    "**GPU:** 24 GB+ (4090, 3090, 5090, A5000 and up). Grok costs well under 1 cent per prompt.",
+    "**GPU:** 24 GB+ (4090, 3090, 5090, A5000 and up).",
     "",
     "**Models** (the pod downloads them with `KREA_TURBO=1`)",
     *[f"- {m[2]}: [{m[0]}]({m[1]})" for m in MODELS.values()],
@@ -101,7 +98,7 @@ def build():
         lid[0] += 1
         node(src)["outputs"][slot]["links"].append(lid[0])
         inp = {"name": name, "type": typ, "link": lid[0]}
-        if widget:  # a widget turned into an input (e.g. the prompt text coming from Grok)
+        if widget:  # a widget turned into an input (e.g. the prompt text coming from the writer)
             inp["widget"] = {"name": name}
         node(dst)["inputs"].append(inp)
         links.append([lid[0], src, slot, dst, len(node(dst)["inputs"]) - 1, typ])
@@ -114,9 +111,9 @@ def build():
         title="Your LoRA", color=ORANGE)
     add(20, "LoadImage", [0, 120], [420, 360], ["your_reference_photo.png", "image"],
         [("IMAGE", "IMAGE"), ("MASK", "MASK")], title="Reference photo (📷 mode)")
-    add(21, "AIEmpireGrokPrompt", [0, 520], [420, 520],
-        ["💡 idea → prompt", "zvx woman", "", IDEA, "grok-4.20-0309-non-reasoning", 0.7, 0, "fixed"],
-        [("prompt", "STRING")], title="Grok Prompt", color=BLUE)
+    add(21, "AIEmpirePromptWriter", [0, 520], [420, 520],
+        ["💡 idea → prompt", "zvx woman", "", IDEA, 0.7, 0, "fixed"],
+        [("prompt", "STRING")], title="Prompt Writer (local)", color=BLUE)
     add(8, "EmptyLatentImage", [0, 1080], [420, 106], [1088, 1920, 1], [("LATENT", "LATENT")], title="Size")
     # result
     add(11, "AIEmpireSaveClean", [460, 0], [560, 900], ["aiempire_krea", "JPEG", 95], [], title="Your image", color=GREEN)
@@ -127,7 +124,7 @@ def build():
     add(3, "CLIPLoader", [1060, 120], [380, 106], [MODELS["clip"][0], "krea2", "default"], [("CLIP", "CLIP")], props=mp("clip"))
     add(4, "VAELoader", [1060, 260], [380, 58], [MODELS["vae"][0]], [("VAE", "VAE")], props=mp("vae"))
     add(14, "ModelSamplingAuraFlow", [1060, 600], [380, 58], [6], [("MODEL", "MODEL")])
-    add(6, "CLIPTextEncode", [1060, 700], [380, 120], [""], [("CONDITIONING", "CONDITIONING")], title="Prompt (from Grok)")
+    add(6, "CLIPTextEncode", [1060, 700], [380, 120], [""], [("CONDITIONING", "CONDITIONING")], title="Prompt (from the writer)")
     add(15, "BasicGuider", [1060, 860], [240, 46], [], [("GUIDER", "GUIDER")])
     add(16, "BetaSamplingScheduler", [1060, 940], [300, 106], [8, 0.5, 0.7], [("SIGMAS", "SIGMAS")], title="beta57 scheduler")
     add(17, "KSamplerSelect", [1060, 1080], [300, 58], ["euler_ancestral"], [("SAMPLER", "SAMPLER")])
@@ -141,7 +138,8 @@ def build():
     # model chain: Krea 2 → your LoRA → shift 6
     link(2, 0, 5, "model", "MODEL")
     link(5, 0, 14, "model", "MODEL")
-    # prompt: reference photo → Grok → text encoder
+    # prompt: Krea 2 text encoder writes it (from the reference photo or your idea) → text encoder
+    link(3, 0, 21, "clip", "CLIP")
     link(20, 0, 21, "image", "IMAGE")
     link(3, 0, 6, "clip", "CLIP")
     link(21, 0, 6, "text", "STRING", widget=True)
@@ -189,11 +187,11 @@ def build():
         api[str(n["id"])] = {"class_type": n["type"], "inputs": inputs, "_meta": {"title": n.get("title", n["type"])}}
 
     os.makedirs(os.path.join(ROOT, "workflows", "api"), exist_ok=True)
-    with open(os.path.join(ROOT, "workflows", "AI_Empire_Krea2_Turbo_Grok.json"), "w", encoding="utf-8") as f:
+    with open(os.path.join(ROOT, "workflows", "AI_Empire_Krea2_Turbo_PromptWriter.json"), "w", encoding="utf-8") as f:
         json.dump(workflow, f, indent=2, ensure_ascii=False)
-    with open(os.path.join(ROOT, "workflows", "api", "AI_Empire_Krea2_Turbo_Grok_api.json"), "w", encoding="utf-8") as f:
+    with open(os.path.join(ROOT, "workflows", "api", "AI_Empire_Krea2_Turbo_PromptWriter_api.json"), "w", encoding="utf-8") as f:
         json.dump(api, f, indent=2, ensure_ascii=False)
-    print("ok Krea2_Turbo_Grok", len(nodes), "nodes", len(links), "links")
+    print("ok Krea2_Turbo_PromptWriter", len(nodes), "nodes", len(links), "links")
 
 
 if __name__ == "__main__":

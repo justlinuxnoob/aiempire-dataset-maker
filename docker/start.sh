@@ -13,7 +13,7 @@ HF=https://huggingface.co
 # JupyterLab on port 8888 (starts first, so you can upload photos while the models download)
 # Set JUPYTER_PASSWORD on the template to protect it (RunPod convention); empty = no password.
 mkdir -p "$WS/input/templates"
-# placeholder for the Grok workflow's 'Reference photo' box (replaced as soon as you upload a photo)
+# placeholder for the Krea 2 prompt-writer workflow's 'Reference photo' box (replaced as soon as you upload a photo)
 [ -f /opt/your_reference_photo.png ] && cp -n /opt/your_reference_photo.png "$WS/input/your_reference_photo.png" 2>/dev/null || true
 nohup jupyter lab --allow-root --no-browser --ip=0.0.0.0 --port=8888 \
   --ServerApp.token="${JUPYTER_PASSWORD:-}" --ServerApp.password="" \
@@ -146,10 +146,10 @@ if [ "${KREA_TURBO:-0}" = "1" ]; then
   fetch "$M/diffusion_models" "krea2_turbo_fp8_scaled.safetensors" "$K2/diffusion_models/krea2_turbo_fp8_scaled.safetensors" & PIDS="$PIDS $!"
   fetch "$M/text_encoders" "qwen3vl_4b_fp8_scaled.safetensors" "$K2/text_encoders/qwen3vl_4b_fp8_scaled.safetensors" & PIDS="$PIDS $!"
   fetch "$M/vae" "qwen_image_vae.safetensors" "$K2/vae/qwen_image_vae.safetensors" & PIDS="$PIDS $!"
-  # AI_Empire_Krea2_Turbo_Grok.json uses the Wan 2.1 VAE (official Comfy-Org repack)
+  # AI_Empire_Krea2_Turbo_PromptWriter.json uses the Wan 2.1 VAE (official Comfy-Org repack)
   fetch "$M/vae" "wan_2.1_vae.safetensors" "$HF/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors" & PIDS="$PIDS $!"
   for p in $PIDS; do wait "$p" || { echo "[AI Empire] 🛑 a Krea 2 Turbo model failed to download, restart the pod to retry"; exit 1; }; done
-  echo "[AI Empire] 🎨 Krea 2 Turbo ready: upload your LoRA to models/loras (JupyterLab, port 8888), drag in AI_Empire_Krea2_Turbo_LoRA.json or AI_Empire_Krea2_Turbo_Grok.json"
+  echo "[AI Empire] 🎨 Krea 2 Turbo ready: upload your LoRA to models/loras (JupyterLab, port 8888), drag in AI_Empire_Krea2_Turbo_LoRA.json or AI_Empire_Krea2_Turbo_PromptWriter.json"
 fi
 
 # VIDEO = minimax  -> MiniMax H3 image-to-video + reference-to-video (~75 GB extra, use a 200 GB volume)
