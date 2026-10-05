@@ -45,12 +45,9 @@ RUN pip install "diffusers==0.39.0" \
     && python -c "from diffusers.schedulers.scheduling_flow_match_euler_discrete import FlowMatchEulerDiscreteScheduler"
 
 # our nodes only - NO workflows in the image (members get the .json files from the course)
-COPY __init__.py nodes.py photo_nodes.py grok_nodes.py /opt/ComfyUI/custom_nodes/aiempire-dataset-maker/
+COPY __init__.py nodes.py photo_nodes.py /opt/ComfyUI/custom_nodes/aiempire-dataset-maker/
 COPY presets /opt/ComfyUI/custom_nodes/aiempire-dataset-maker/presets
 COPY js /opt/ComfyUI/custom_nodes/aiempire-dataset-maker/js
-
-# tiny grey placeholder: start.sh copies it to input/ so the Krea 2 Grok workflow's 'Reference photo' box never errors
-RUN python -c "from PIL import Image; Image.new('RGB', (64, 64), (60, 60, 60)).save('/opt/your_reference_photo.png')"
 
 COPY docker/extra_model_paths.yaml /opt/ComfyUI/extra_model_paths.yaml
 COPY docker/start.sh /start.sh

@@ -1,8 +1,8 @@
 {
-  "id": "5e0c2f64-7a1b-4c8e-9d3f-4b2ea2000003",
+  "id": "5e0c2f64-7a1b-4c8e-9d3f-4b2ea2000004",
   "revision": 0,
   "last_node_id": 23,
-  "last_link_id": 18,
+  "last_link_id": 24,
   "nodes": [
     {
       "id": 1,
@@ -13,7 +13,7 @@
       ],
       "size": [
         460,
-        760
+        700
       ],
       "flags": {},
       "order": 0,
@@ -24,20 +24,20 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "## AI Empire · Krea 2 Turbo + Grok prompts\n\n**1 · Your LoRA** (once): JupyterLab (port 8888) → `models/loras/` → upload your `.safetensors`, press **R** in ComfyUI.\nPick it in **Your LoRA**. Strength **0.9** (1.0 = strongest likeness).\n\n**2 · 🔑 xAI key** (once): click the button on the **Grok Prompt** box, paste your key from console.x.ai.\nIt's saved on the pod, never inside this workflow.\n\n**3 · Grok Prompt** box → *mode*:\n- 📷 **photo → prompt**: upload a photo in **Reference photo**. Grok copies its pose, outfit, place and light.\n  Optional *idea* = changes (\"make the outfit black\").\n- 💡 **idea → prompt**: type a short idea, Grok writes the full prompt.\n- ✍️ **my prompt**: no Grok, your *idea* text is the prompt.\n*trigger_word* always goes first. *hair_and_eyes* (optional) goes right after it.\nGrok never describes her face, hair, eyes or body: your LoRA knows them.\n\n**4 · Run.** The prompt Grok wrote shows in the Grok box. *variation* on **fixed** = Grok is asked once\nand every Run makes a new image from the same prompt. Change *variation* (or set randomize) for a new prompt.\n\n**Size:** 1088 × 1920 (9:16). 2:3 = 1024 × 1536. Square = 1280 × 1280.\n**GPU:** 24 GB+ (4090, 3090, 5090, A5000 and up). Grok costs well under 1 cent per prompt.\n\n**Models** (the pod downloads them with `KREA_TURBO=1`)\n- diffusion_models: [krea2_turbo_fp8_scaled.safetensors](https://huggingface.co/Comfy-Org/Krea-2/resolve/main/diffusion_models/krea2_turbo_fp8_scaled.safetensors)\n- text_encoders: [qwen3vl_4b_fp8_scaled.safetensors](https://huggingface.co/Comfy-Org/Krea-2/resolve/main/text_encoders/qwen3vl_4b_fp8_scaled.safetensors)\n- vae: [wan_2.1_vae.safetensors](https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors)"
+        "## AI Empire · Krea 2 Turbo realism\n\n**1 · LoRAs** (once): JupyterLab (port 8888) → `models/loras/` → upload:\n- your character LoRA, plus `skindetails_krea2_loraholic.safetensors` and `RawGirlV2_epoch_10.safetensors`.\nPress **R** in ComfyUI, then pick your file in **Your LoRA** (strength **1.0**).\n\n**2 · Prompt**, 3 blocks:\n- **who:** trigger word + hair and eyes (`zvx woman, long straight red hair, green eyes`)\n- **the shot:** pose, outfit, props, place, light, where she looks. Plain sentences, like describing a photo.\n- **the look:** `casual amateur shot iphone`\n\n**3 · Run.** Saved to `output/` as JPEG with no workflow inside. The slider shows raw vs finished.\n\n**Size:** 9:16 at 2 MP. Change the ratio in **Resolution**.\n**GPU:** 24 GB+ (4090, 3090, 5090, A5000 and up).\n\n**Models** (the pod downloads them with `KREA_TURBO=1`)\n- diffusion_models: [krea2_turbo_fp8_scaled.safetensors](https://huggingface.co/Comfy-Org/Krea-2/resolve/main/diffusion_models/krea2_turbo_fp8_scaled.safetensors)\n- text_encoders: [qwen3vl_4b_fp8_scaled.safetensors](https://huggingface.co/Comfy-Org/Krea-2/resolve/main/text_encoders/qwen3vl_4b_fp8_scaled.safetensors)\n- vae: [wan_2.1_vae.safetensors](https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors)"
       ],
       "title": "READ ME"
     },
     {
       "id": 5,
-      "type": "LoraLoaderModelOnly",
+      "type": "LoraLoader",
       "pos": [
         0,
         0
       ],
       "size": [
         420,
-        82
+        126
       ],
       "flags": {},
       "order": 1,
@@ -46,7 +46,12 @@
         {
           "name": "model",
           "type": "MODEL",
-          "link": 1
+          "link": 5
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 6
         }
       ],
       "outputs": [
@@ -54,139 +59,109 @@
           "name": "MODEL",
           "type": "MODEL",
           "links": [
-            2
+            7
+          ]
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            8
           ]
         }
       ],
       "properties": {
-        "Node name for S&R": "LoraLoaderModelOnly"
+        "Node name for S&R": "LoraLoader"
       },
       "widgets_values": [
         "my_lora.safetensors",
-        0.9
+        1.0,
+        1.0
       ],
       "title": "Your LoRA",
       "color": "#3d2a14",
       "bgcolor": "#2a1d0e"
     },
     {
-      "id": 20,
-      "type": "LoadImage",
+      "id": 6,
+      "type": "CLIPTextEncode",
       "pos": [
         0,
-        120
+        160
       ],
       "size": [
         420,
-        360
+        380
       ],
       "flags": {},
       "order": 2,
       "mode": 0,
-      "inputs": [],
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 8
+        }
+      ],
       "outputs": [
         {
-          "name": "IMAGE",
-          "type": "IMAGE",
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
           "links": [
-            3
+            12
           ]
-        },
-        {
-          "name": "MASK",
-          "type": "MASK",
-          "links": []
         }
       ],
       "properties": {
-        "Node name for S&R": "LoadImage"
+        "Node name for S&R": "CLIPTextEncode"
       },
       "widgets_values": [
-        "your_reference_photo.png",
-        "image"
+        "zvx woman, long straight red hair, green eyes,\n\nshe sits cross-legged on a white bed with rumpled sheets, wearing an oversized grey hoodie, holding a gold iPhone in one hand, head turned towards the camera, soft morning window light.\n\ncasual amateur shot iphone, "
       ],
-      "title": "Reference photo (📷 mode)"
+      "title": "Prompt",
+      "color": "#1f3320",
+      "bgcolor": "#162416"
     },
     {
-      "id": 21,
-      "type": "AIEmpireGrokPrompt",
+      "id": 7,
+      "type": "ResolutionSelector",
       "pos": [
         0,
-        520
+        580
       ],
       "size": [
         420,
-        520
+        126
       ],
       "flags": {},
       "order": 3,
       "mode": 0,
-      "inputs": [
-        {
-          "name": "image",
-          "type": "IMAGE",
-          "link": 3
-        }
-      ],
-      "outputs": [
-        {
-          "name": "prompt",
-          "type": "STRING",
-          "links": [
-            5
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "AIEmpireGrokPrompt"
-      },
-      "widgets_values": [
-        "💡 idea → prompt",
-        "zvx woman",
-        "",
-        "mirror selfie in a bright bathroom, holding a gold iPhone, oversized grey hoodie, morning light",
-        "grok-4.20-0309-non-reasoning",
-        0.7,
-        0,
-        "fixed"
-      ],
-      "title": "Grok Prompt",
-      "color": "#1d2a3d",
-      "bgcolor": "#141d2a"
-    },
-    {
-      "id": 8,
-      "type": "EmptyLatentImage",
-      "pos": [
-        0,
-        1080
-      ],
-      "size": [
-        420,
-        106
-      ],
-      "flags": {},
-      "order": 4,
-      "mode": 0,
       "inputs": [],
       "outputs": [
         {
-          "name": "LATENT",
-          "type": "LATENT",
+          "name": "width",
+          "type": "INT",
           "links": [
-            13
+            9
+          ]
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": [
+            10
           ]
         }
       ],
       "properties": {
-        "Node name for S&R": "EmptyLatentImage"
+        "Node name for S&R": "ResolutionSelector"
       },
       "widgets_values": [
-        1088,
-        1920,
-        1
+        "9:16 (Portrait Widescreen)",
+        2,
+        32
       ],
-      "title": "Size"
+      "title": "Resolution"
     },
     {
       "id": 11,
@@ -200,13 +175,13 @@
         900
       ],
       "flags": {},
-      "order": 5,
+      "order": 4,
       "mode": 0,
       "inputs": [
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 18
+          "link": 22
         }
       ],
       "outputs": [],
@@ -214,9 +189,9 @@
         "Node name for S&R": "AIEmpireSaveClean"
       },
       "widgets_values": [
-        "aiempire_krea",
+        "clean",
         "JPEG",
-        95
+        100
       ],
       "title": "Your image",
       "color": "#1f3320",
@@ -224,31 +199,45 @@
     },
     {
       "id": 23,
-      "type": "PreviewImage",
+      "type": "Image Comparer (rgthree)",
       "pos": [
         460,
         940
       ],
       "size": [
         560,
-        420
+        900
       ],
       "flags": {},
-      "order": 6,
+      "order": 5,
       "mode": 0,
       "inputs": [
         {
-          "name": "images",
+          "name": "image_a",
           "type": "IMAGE",
-          "link": 16
+          "link": 23
+        },
+        {
+          "name": "image_b",
+          "type": "IMAGE",
+          "link": 24
         }
       ],
-      "outputs": [],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": []
+        }
+      ],
       "properties": {
-        "Node name for S&R": "PreviewImage"
+        "Node name for S&R": "Image Comparer (rgthree)",
+        "comparer_mode": "Slide"
       },
-      "widgets_values": [],
-      "title": "Before the phone look"
+      "widgets_values": [
+        []
+      ],
+      "title": "Raw vs finished"
     },
     {
       "id": 2,
@@ -262,7 +251,7 @@
         82
       ],
       "flags": {},
-      "order": 7,
+      "order": 6,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -302,7 +291,7 @@
         106
       ],
       "flags": {},
-      "order": 8,
+      "order": 7,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -310,7 +299,7 @@
           "name": "CLIP",
           "type": "CLIP",
           "links": [
-            4
+            2
           ]
         }
       ],
@@ -342,7 +331,7 @@
         58
       ],
       "flags": {},
-      "order": 9,
+      "order": 8,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -350,7 +339,7 @@
           "name": "VAE",
           "type": "VAE",
           "links": [
-            15
+            20
           ]
         }
       ],
@@ -369,23 +358,28 @@
       ]
     },
     {
-      "id": 14,
-      "type": "ModelSamplingAuraFlow",
+      "id": 12,
+      "type": "LoraLoader",
       "pos": [
         1060,
-        600
+        360
       ],
       "size": [
         380,
-        58
+        126
       ],
       "flags": {},
-      "order": 10,
+      "order": 9,
       "mode": 0,
       "inputs": [
         {
           "name": "model",
           "type": "MODEL",
+          "link": 1
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
           "link": 2
         }
       ],
@@ -394,8 +388,107 @@
           "name": "MODEL",
           "type": "MODEL",
           "links": [
-            6,
-            8
+            3
+          ]
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            4
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoraLoader"
+      },
+      "widgets_values": [
+        "skindetails_krea2_loraholic.safetensors",
+        0.5,
+        0.5
+      ],
+      "title": "Skin detail LoRA"
+    },
+    {
+      "id": 13,
+      "type": "LoraLoader",
+      "pos": [
+        1060,
+        520
+      ],
+      "size": [
+        380,
+        126
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 3
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            5
+          ]
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            6
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoraLoader"
+      },
+      "widgets_values": [
+        "RawGirlV2_epoch_10.safetensors",
+        0.75,
+        0.75
+      ],
+      "title": "RawGirl V2 LoRA"
+    },
+    {
+      "id": 14,
+      "type": "ModelSamplingAuraFlow",
+      "pos": [
+        1060,
+        680
+      ],
+      "size": [
+        380,
+        58
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            11,
+            13
           ]
         }
       ],
@@ -407,101 +500,65 @@
       ]
     },
     {
-      "id": 6,
-      "type": "CLIPTextEncode",
+      "id": 8,
+      "type": "EmptyLatentImage",
       "pos": [
         1060,
-        700
+        780
       ],
       "size": [
-        380,
-        120
-      ],
-      "flags": {},
-      "order": 11,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "clip",
-          "type": "CLIP",
-          "link": 4
-        },
-        {
-          "name": "text",
-          "type": "STRING",
-          "link": 5,
-          "widget": {
-            "name": "text"
-          }
-        }
-      ],
-      "outputs": [
-        {
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
-          "links": [
-            7
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "CLIPTextEncode"
-      },
-      "widgets_values": [
-        ""
-      ],
-      "title": "Prompt (from Grok)"
-    },
-    {
-      "id": 15,
-      "type": "BasicGuider",
-      "pos": [
-        1060,
-        860
-      ],
-      "size": [
-        240,
-        46
+        300,
+        106
       ],
       "flags": {},
       "order": 12,
       "mode": 0,
       "inputs": [
         {
-          "name": "model",
-          "type": "MODEL",
-          "link": 6
+          "name": "width",
+          "type": "INT",
+          "link": 9,
+          "widget": {
+            "name": "width"
+          }
         },
         {
-          "name": "conditioning",
-          "type": "CONDITIONING",
-          "link": 7
+          "name": "height",
+          "type": "INT",
+          "link": 10,
+          "widget": {
+            "name": "height"
+          }
         }
       ],
       "outputs": [
         {
-          "name": "GUIDER",
-          "type": "GUIDER",
+          "name": "LATENT",
+          "type": "LATENT",
           "links": [
-            10
+            18
           ]
         }
       ],
       "properties": {
-        "Node name for S&R": "BasicGuider"
+        "Node name for S&R": "EmptyLatentImage"
       },
-      "widgets_values": []
+      "widgets_values": [
+        1088,
+        1920,
+        1
+      ]
     },
     {
-      "id": 16,
-      "type": "BetaSamplingScheduler",
+      "id": 15,
+      "type": "BasicGuider",
       "pos": [
         1060,
-        940
+        920
       ],
       "size": [
-        300,
-        106
+        240,
+        46
       ],
       "flags": {},
       "order": 13,
@@ -510,7 +567,48 @@
         {
           "name": "model",
           "type": "MODEL",
-          "link": 8
+          "link": 11
+        },
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "name": "GUIDER",
+          "type": "GUIDER",
+          "links": [
+            15
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "BasicGuider"
+      },
+      "widgets_values": [],
+      "title": "CFG 1 guider"
+    },
+    {
+      "id": 16,
+      "type": "BetaSamplingScheduler",
+      "pos": [
+        1060,
+        1000
+      ],
+      "size": [
+        300,
+        106
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 13
         }
       ],
       "outputs": [
@@ -518,7 +616,7 @@
           "name": "SIGMAS",
           "type": "SIGMAS",
           "links": [
-            12
+            17
           ]
         }
       ],
@@ -537,14 +635,14 @@
       "type": "KSamplerSelect",
       "pos": [
         1060,
-        1080
+        1140
       ],
       "size": [
         300,
         58
       ],
       "flags": {},
-      "order": 14,
+      "order": 15,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -552,7 +650,7 @@
           "name": "SAMPLER",
           "type": "SAMPLER",
           "links": [
-            11
+            16
           ]
         }
       ],
@@ -568,14 +666,14 @@
       "type": "RandomNoise",
       "pos": [
         1060,
-        1180
+        1240
       ],
       "size": [
         300,
         82
       ],
       "flags": {},
-      "order": 15,
+      "order": 16,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -583,7 +681,7 @@
           "name": "NOISE",
           "type": "NOISE",
           "links": [
-            9
+            14
           ]
         }
       ],
@@ -608,33 +706,33 @@
         106
       ],
       "flags": {},
-      "order": 16,
+      "order": 17,
       "mode": 0,
       "inputs": [
         {
           "name": "noise",
           "type": "NOISE",
-          "link": 9
+          "link": 14
         },
         {
           "name": "guider",
           "type": "GUIDER",
-          "link": 10
+          "link": 15
         },
         {
           "name": "sampler",
           "type": "SAMPLER",
-          "link": 11
+          "link": 16
         },
         {
           "name": "sigmas",
           "type": "SIGMAS",
-          "link": 12
+          "link": 17
         },
         {
           "name": "latent_image",
           "type": "LATENT",
-          "link": 13
+          "link": 18
         }
       ],
       "outputs": [
@@ -642,7 +740,7 @@
           "name": "output",
           "type": "LATENT",
           "links": [
-            14
+            19
           ]
         },
         {
@@ -668,18 +766,18 @@
         46
       ],
       "flags": {},
-      "order": 17,
+      "order": 18,
       "mode": 0,
       "inputs": [
         {
           "name": "samples",
           "type": "LATENT",
-          "link": 14
+          "link": 19
         },
         {
           "name": "vae",
           "type": "VAE",
-          "link": 15
+          "link": 20
         }
       ],
       "outputs": [
@@ -687,8 +785,8 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            16,
-            17
+            21,
+            23
           ]
         }
       ],
@@ -709,13 +807,13 @@
         440
       ],
       "flags": {},
-      "order": 18,
+      "order": 19,
       "mode": 0,
       "inputs": [
         {
           "name": "image",
           "type": "IMAGE",
-          "link": 17
+          "link": 21
         }
       ],
       "outputs": [
@@ -723,7 +821,8 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            18
+            22,
+            24
           ]
         }
       ],
@@ -741,14 +840,14 @@
         0.3,
         0.35,
         1.9,
-        "ISO 800",
+        "ISO 400",
         0.5,
-        1.1,
+        1.0,
         98,
         42,
         "randomize"
       ],
-      "title": "Photo Finish (phone look)"
+      "title": "Photo Finish (camera look + grain + grade)"
     }
   ],
   "links": [
@@ -756,12 +855,52 @@
       1,
       2,
       0,
-      5,
+      12,
       0,
       "MODEL"
     ],
     [
       2,
+      3,
+      0,
+      12,
+      1,
+      "CLIP"
+    ],
+    [
+      3,
+      12,
+      0,
+      13,
+      0,
+      "MODEL"
+    ],
+    [
+      4,
+      12,
+      1,
+      13,
+      1,
+      "CLIP"
+    ],
+    [
+      5,
+      13,
+      0,
+      5,
+      0,
+      "MODEL"
+    ],
+    [
+      6,
+      13,
+      1,
+      5,
+      1,
+      "CLIP"
+    ],
+    [
+      7,
       5,
       0,
       14,
@@ -769,31 +908,31 @@
       "MODEL"
     ],
     [
-      3,
-      20,
-      0,
-      21,
-      0,
-      "IMAGE"
-    ],
-    [
-      4,
-      3,
-      0,
+      8,
+      5,
+      1,
       6,
       0,
       "CLIP"
     ],
     [
-      5,
-      21,
+      9,
+      7,
       0,
-      6,
-      1,
-      "STRING"
+      8,
+      0,
+      "INT"
     ],
     [
-      6,
+      10,
+      7,
+      1,
+      8,
+      1,
+      "INT"
+    ],
+    [
+      11,
       14,
       0,
       15,
@@ -801,7 +940,7 @@
       "MODEL"
     ],
     [
-      7,
+      12,
       6,
       0,
       15,
@@ -809,7 +948,7 @@
       "CONDITIONING"
     ],
     [
-      8,
+      13,
       14,
       0,
       16,
@@ -817,7 +956,7 @@
       "MODEL"
     ],
     [
-      9,
+      14,
       18,
       0,
       9,
@@ -825,7 +964,7 @@
       "NOISE"
     ],
     [
-      10,
+      15,
       15,
       0,
       9,
@@ -833,7 +972,7 @@
       "GUIDER"
     ],
     [
-      11,
+      16,
       17,
       0,
       9,
@@ -841,7 +980,7 @@
       "SAMPLER"
     ],
     [
-      12,
+      17,
       16,
       0,
       9,
@@ -849,7 +988,7 @@
       "SIGMAS"
     ],
     [
-      13,
+      18,
       8,
       0,
       9,
@@ -857,7 +996,7 @@
       "LATENT"
     ],
     [
-      14,
+      19,
       9,
       0,
       10,
@@ -865,7 +1004,7 @@
       "LATENT"
     ],
     [
-      15,
+      20,
       4,
       0,
       10,
@@ -873,7 +1012,23 @@
       "VAE"
     ],
     [
-      16,
+      21,
+      10,
+      0,
+      22,
+      0,
+      "IMAGE"
+    ],
+    [
+      22,
+      22,
+      0,
+      11,
+      0,
+      "IMAGE"
+    ],
+    [
+      23,
       10,
       0,
       23,
@@ -881,19 +1036,11 @@
       "IMAGE"
     ],
     [
-      17,
-      10,
-      0,
+      24,
       22,
       0,
-      "IMAGE"
-    ],
-    [
-      18,
-      22,
-      0,
-      11,
-      0,
+      23,
+      1,
       "IMAGE"
     ]
   ],
@@ -905,7 +1052,7 @@
         -20,
         -60,
         460,
-        1270
+        780
       ],
       "color": "#a1612c",
       "flags": {}
@@ -917,7 +1064,7 @@
         440,
         -60,
         600,
-        1440
+        1920
       ],
       "color": "#3f8f4e",
       "flags": {}
@@ -929,7 +1076,7 @@
         1040,
         -60,
         800,
-        1340
+        1400
       ],
       "color": "#555555",
       "flags": {}

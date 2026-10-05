@@ -1,63 +1,53 @@
 {
   "5": {
-    "class_type": "LoraLoaderModelOnly",
+    "class_type": "LoraLoader",
     "inputs": {
       "lora_name": "my_lora.safetensors",
-      "strength_model": 0.9,
+      "strength_model": 1.0,
+      "strength_clip": 1.0,
       "model": [
-        "2",
+        "13",
         0
+      ],
+      "clip": [
+        "13",
+        1
       ]
     },
     "_meta": {
       "title": "Your LoRA"
     }
   },
-  "20": {
-    "class_type": "LoadImage",
+  "6": {
+    "class_type": "CLIPTextEncode",
     "inputs": {
-      "image": "your_reference_photo.png"
-    },
-    "_meta": {
-      "title": "Reference photo (📷 mode)"
-    }
-  },
-  "21": {
-    "class_type": "AIEmpireGrokPrompt",
-    "inputs": {
-      "mode": "💡 idea → prompt",
-      "trigger_word": "zvx woman",
-      "hair_and_eyes": "",
-      "idea": "mirror selfie in a bright bathroom, holding a gold iPhone, oversized grey hoodie, morning light",
-      "model": "grok-4.20-0309-non-reasoning",
-      "temperature": 0.7,
-      "variation": 0,
-      "image": [
-        "20",
-        0
+      "text": "zvx woman, long straight red hair, green eyes,\n\nshe sits cross-legged on a white bed with rumpled sheets, wearing an oversized grey hoodie, holding a gold iPhone in one hand, head turned towards the camera, soft morning window light.\n\ncasual amateur shot iphone, ",
+      "clip": [
+        "5",
+        1
       ]
     },
     "_meta": {
-      "title": "Grok Prompt"
+      "title": "Prompt"
     }
   },
-  "8": {
-    "class_type": "EmptyLatentImage",
+  "7": {
+    "class_type": "ResolutionSelector",
     "inputs": {
-      "width": 1088,
-      "height": 1920,
-      "batch_size": 1
+      "aspect_ratio": "9:16 (Portrait Widescreen)",
+      "megapixels": 2,
+      "multiple": 32
     },
     "_meta": {
-      "title": "Size"
+      "title": "Resolution"
     }
   },
   "11": {
     "class_type": "AIEmpireSaveClean",
     "inputs": {
-      "filename_prefix": "aiempire_krea",
+      "filename_prefix": "clean",
       "format": "JPEG",
-      "quality": 95,
+      "quality": 100,
       "images": [
         "22",
         0
@@ -68,15 +58,19 @@
     }
   },
   "23": {
-    "class_type": "PreviewImage",
+    "class_type": "Image Comparer (rgthree)",
     "inputs": {
-      "images": [
+      "image_a": [
         "10",
+        0
+      ],
+      "image_b": [
+        "22",
         0
       ]
     },
     "_meta": {
-      "title": "Before the phone look"
+      "title": "Raw vs finished"
     }
   },
   "2": {
@@ -109,6 +103,44 @@
       "title": "VAELoader"
     }
   },
+  "12": {
+    "class_type": "LoraLoader",
+    "inputs": {
+      "lora_name": "skindetails_krea2_loraholic.safetensors",
+      "strength_model": 0.5,
+      "strength_clip": 0.5,
+      "model": [
+        "2",
+        0
+      ],
+      "clip": [
+        "3",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Skin detail LoRA"
+    }
+  },
+  "13": {
+    "class_type": "LoraLoader",
+    "inputs": {
+      "lora_name": "RawGirlV2_epoch_10.safetensors",
+      "strength_model": 0.75,
+      "strength_clip": 0.75,
+      "model": [
+        "12",
+        0
+      ],
+      "clip": [
+        "12",
+        1
+      ]
+    },
+    "_meta": {
+      "title": "RawGirl V2 LoRA"
+    }
+  },
   "14": {
     "class_type": "ModelSamplingAuraFlow",
     "inputs": {
@@ -122,20 +154,21 @@
       "title": "ModelSamplingAuraFlow"
     }
   },
-  "6": {
-    "class_type": "CLIPTextEncode",
+  "8": {
+    "class_type": "EmptyLatentImage",
     "inputs": {
-      "text": [
-        "21",
+      "width": [
+        "7",
         0
       ],
-      "clip": [
-        "3",
-        0
-      ]
+      "height": [
+        "7",
+        1
+      ],
+      "batch_size": 1
     },
     "_meta": {
-      "title": "Prompt (from Grok)"
+      "title": "EmptyLatentImage"
     }
   },
   "15": {
@@ -151,7 +184,7 @@
       ]
     },
     "_meta": {
-      "title": "BasicGuider"
+      "title": "CFG 1 guider"
     }
   },
   "16": {
@@ -244,9 +277,9 @@
       "glow_threshold": 0.3,
       "lens_softness": 0.35,
       "hand_shake": 1.9,
-      "iso": "ISO 800",
+      "iso": "ISO 400",
       "grain_size": 0.5,
-      "final_contrast": 1.1,
+      "final_contrast": 1.0,
       "jpeg_quality": 98,
       "seed": 42,
       "image": [
@@ -255,7 +288,7 @@
       ]
     },
     "_meta": {
-      "title": "Photo Finish (phone look)"
+      "title": "Photo Finish (camera look + grain + grade)"
     }
   }
 }
