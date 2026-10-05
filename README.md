@@ -40,7 +40,7 @@ Qwen-Image 2.1 + BFS head swap, 25 steps, CFG 1, euler / simple. Encoder *resolu
 
 ## Krea 2 Turbo + Grok prompts: `workflows/AI_Empire_Krea2_Turbo_Grok.json`
 Your character LoRA on Krea 2 Turbo, with Grok writing the prompt. Pod: `KREA_TURBO=1`.
-- **Models:** Krea 2 Turbo fp8, Qwen3-VL 4B fp8, Wan 2.1 VAE, skin detail LoRA 0.5, RawGirl V2 LoRA 0.75, your LoRA 0.9.
+- **Models:** Krea 2 Turbo fp8, Qwen3-VL 4B fp8, Wan 2.1 VAE + your LoRA 0.9. No extra LoRAs.
 - **Sampling:** shift 6, 8 steps, CFG 1, euler_ancestral, beta57 (core *BetaSamplingScheduler* at alpha 0.5 / beta 0.7, the same curve as RES4LYF's beta57, so no extra node pack).
 - **Grok Prompt box** (your own xAI key, saved on the pod with **🔑 xAI key**, or env `XAI_API_KEY`):
   - 📷 *photo → prompt*: copies a reference photo's shot (pose, outfit, place, light, camera).

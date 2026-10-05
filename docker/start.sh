@@ -146,11 +146,8 @@ if [ "${KREA_TURBO:-0}" = "1" ]; then
   fetch "$M/diffusion_models" "krea2_turbo_fp8_scaled.safetensors" "$K2/diffusion_models/krea2_turbo_fp8_scaled.safetensors" & PIDS="$PIDS $!"
   fetch "$M/text_encoders" "qwen3vl_4b_fp8_scaled.safetensors" "$K2/text_encoders/qwen3vl_4b_fp8_scaled.safetensors" & PIDS="$PIDS $!"
   fetch "$M/vae" "qwen_image_vae.safetensors" "$K2/vae/qwen_image_vae.safetensors" & PIDS="$PIDS $!"
-  # AI_Empire_Krea2_Turbo_Grok.json: Wan 2.1 VAE (official Comfy-Org repack) + skin detail + RawGirl V2 realism LoRAs
+  # AI_Empire_Krea2_Turbo_Grok.json uses the Wan 2.1 VAE (official Comfy-Org repack)
   fetch "$M/vae" "wan_2.1_vae.safetensors" "$HF/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors" & PIDS="$PIDS $!"
-  KL="${KREA_LORA_BASE:-$HF/dci05049/krea2/resolve/main}"   # TODO: move these two to our own public HF repo
-  fetch "$M/loras" "skindetails_krea2_loraholic.safetensors" "$KL/skindetails_krea2_loraholic.safetensors" & PIDS="$PIDS $!"
-  fetch "$M/loras" "RawGirlV2_epoch_10.safetensors" "$KL/RawGirlV2_epoch_10.safetensors" & PIDS="$PIDS $!"
   for p in $PIDS; do wait "$p" || { echo "[AI Empire] 🛑 a Krea 2 Turbo model failed to download, restart the pod to retry"; exit 1; }; done
   echo "[AI Empire] 🎨 Krea 2 Turbo ready: upload your LoRA to models/loras (JupyterLab, port 8888), drag in AI_Empire_Krea2_Turbo_LoRA.json or AI_Empire_Krea2_Turbo_Grok.json"
 fi

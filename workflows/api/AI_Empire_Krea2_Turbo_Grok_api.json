@@ -5,7 +5,7 @@
       "lora_name": "my_lora.safetensors",
       "strength_model": 0.9,
       "model": [
-        "13",
+        "2",
         0
       ]
     },
@@ -107,34 +107,6 @@
     },
     "_meta": {
       "title": "VAELoader"
-    }
-  },
-  "12": {
-    "class_type": "LoraLoaderModelOnly",
-    "inputs": {
-      "lora_name": "skindetails_krea2_loraholic.safetensors",
-      "strength_model": 0.5,
-      "model": [
-        "2",
-        0
-      ]
-    },
-    "_meta": {
-      "title": "Skin detail LoRA"
-    }
-  },
-  "13": {
-    "class_type": "LoraLoaderModelOnly",
-    "inputs": {
-      "lora_name": "RawGirlV2_epoch_10.safetensors",
-      "strength_model": 0.75,
-      "model": [
-        "12",
-        0
-      ]
-    },
-    "_meta": {
-      "title": "RawGirl V2 LoRA (phone-photo realism)"
     }
   },
   "14": {

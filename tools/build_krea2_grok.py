@@ -2,7 +2,7 @@
 
 Same models and settings as the Krea 2 Turbo realism setup we studied, rebuilt with open nodes only:
   - Krea 2 Turbo fp8 + Qwen3-VL 4B fp8 + Wan 2.1 VAE
-  - LoRAs: skin detail 0.5, RawGirl V2 0.75, your character LoRA
+  - your character LoRA only (no extra style LoRAs)
   - ModelSamplingAuraFlow shift 6, 8 steps, CFG 1 (BasicGuider), euler_ancestral,
     beta57 = core BetaSamplingScheduler alpha 0.5 / beta 0.7 (identical to RES4LYF's beta57, no extra node pack)
   - AI Empire Grok Prompt (photo → prompt / idea → prompt / your own prompt)
@@ -17,14 +17,11 @@ import os
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HF = "https://huggingface.co"
 K2 = f"{HF}/Comfy-Org/Krea-2/resolve/main"
-KL = f"{HF}/dci05049/krea2/resolve/main"
 
 MODELS = {
     "unet": ("krea2_turbo_fp8_scaled.safetensors", f"{K2}/diffusion_models/krea2_turbo_fp8_scaled.safetensors", "diffusion_models"),
     "clip": ("qwen3vl_4b_fp8_scaled.safetensors", f"{K2}/text_encoders/qwen3vl_4b_fp8_scaled.safetensors", "text_encoders"),
     "vae": ("wan_2.1_vae.safetensors", f"{HF}/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors", "vae"),
-    "skin": ("skindetails_krea2_loraholic.safetensors", f"{KL}/skindetails_krea2_loraholic.safetensors", "loras"),
-    "raw": ("RawGirlV2_epoch_10.safetensors", f"{KL}/RawGirlV2_epoch_10.safetensors", "loras"),
 }
 
 IDEA = "mirror selfie in a bright bathroom, holding a gold iPhone, oversized grey hoodie, morning light"
@@ -129,10 +126,6 @@ def build():
         title="Krea 2 Turbo", props=mp("unet"))
     add(3, "CLIPLoader", [1060, 120], [380, 106], [MODELS["clip"][0], "krea2", "default"], [("CLIP", "CLIP")], props=mp("clip"))
     add(4, "VAELoader", [1060, 260], [380, 58], [MODELS["vae"][0]], [("VAE", "VAE")], props=mp("vae"))
-    add(12, "LoraLoaderModelOnly", [1060, 360], [380, 82], [MODELS["skin"][0], 0.5], [("MODEL", "MODEL")],
-        title="Skin detail LoRA", props=mp("skin"))
-    add(13, "LoraLoaderModelOnly", [1060, 480], [380, 82], [MODELS["raw"][0], 0.75], [("MODEL", "MODEL")],
-        title="RawGirl V2 LoRA (phone-photo realism)", props=mp("raw"))
     add(14, "ModelSamplingAuraFlow", [1060, 600], [380, 58], [6], [("MODEL", "MODEL")])
     add(6, "CLIPTextEncode", [1060, 700], [380, 120], [""], [("CONDITIONING", "CONDITIONING")], title="Prompt (from Grok)")
     add(15, "BasicGuider", [1060, 860], [240, 46], [], [("GUIDER", "GUIDER")])
@@ -145,10 +138,8 @@ def build():
         [-0.05, 1.05, 0.98, 1.09, -0.04, 0.075, 50.0, 0.3, 0.35, 1.9, "ISO 800", 0.5, 1.1, 98, 42, "randomize"],
         [("IMAGE", "IMAGE")], title="Photo Finish (phone look)")
 
-    # model chain: Krea 2 → skin detail → RawGirl → your LoRA → shift 6
-    link(2, 0, 12, "model", "MODEL")
-    link(12, 0, 13, "model", "MODEL")
-    link(13, 0, 5, "model", "MODEL")
+    # model chain: Krea 2 → your LoRA → shift 6
+    link(2, 0, 5, "model", "MODEL")
     link(5, 0, 14, "model", "MODEL")
     # prompt: reference photo → Grok → text encoder
     link(20, 0, 21, "image", "IMAGE")
